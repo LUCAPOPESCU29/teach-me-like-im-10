@@ -469,6 +469,7 @@ function extractFacts(
   sentences: string[]
 ): ExtractedFact[] {
   const facts: ExtractedFact[] = [];
+  const usedDescriptions = new Set<string>();
 
   for (const term of boldTerms) {
     // Find the sentence that best defines this term
@@ -489,35 +490,77 @@ function extractFacts(
     });
 
     if (defSentence) {
-      // Extract a short description (not the whole sentence)
       const lower = defSentence.toLowerCase();
       const tLower = term.toLowerCase();
       let desc = "";
 
-      // Try to grab the part after "is/are/means"
+      // Try to grab the part after "is/are/means" — just the key phrase
       for (const verb of [" is ", " are ", " means ", " refers to "]) {
         const idx = lower.indexOf(verb);
         if (idx !== -1 && lower.indexOf(tLower) < idx) {
-          desc = defSentence.substring(idx + verb.length).trim();
+          let raw = defSentence.substring(idx + verb.length).trim();
+          // Cut at first comma, semicolon or "which/where/that" to keep it short
+          const cutMatch = raw.match(/^(.+?)\s*[,;]\s*(which|where|that|and|but|so|because|when)/i);
+          if (cutMatch && cutMatch[1].length > 10) {
+            raw = cutMatch[1].trim();
+          } else {
+            // Just cut at first comma or after ~45 chars
+            const commaIdx = raw.indexOf(",");
+            if (commaIdx > 10 && commaIdx < 50) {
+              raw = raw.substring(0, commaIdx).trim();
+            } else if (raw.length > 50) {
+              const spaceIdx = raw.lastIndexOf(" ", 47);
+              raw = raw.substring(0, spaceIdx > 15 ? spaceIdx : 47);
+            }
+          }
+          desc = raw;
           break;
         }
       }
 
-      if (!desc) {
-        // Just use a shortened version
-        desc = defSentence.length > 80
-          ? defSentence.substring(0, 77) + "..."
-          : defSentence;
+      // Fallback: build a short description from context
+      if (!desc || desc.length < 5) {
+        // Try to find what the term does: "[term] ... verb ... object"
+        const verbMatch = defSentence.match(
+          new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s+(?:is|are|was|can|could|will|helps?|allows?|works?|uses?)\\s+(.+)", "i")
+        );
+        if (verbMatch) {
+          let raw = verbMatch[1].trim();
+          const commaIdx = raw.indexOf(",");
+          if (commaIdx > 8 && commaIdx < 50) raw = raw.substring(0, commaIdx);
+          else if (raw.length > 50) {
+            const sp = raw.lastIndexOf(" ", 47);
+            raw = raw.substring(0, sp > 15 ? sp : 47);
+          }
+          // Clean trailing small words
+          raw = raw
+            .replace(/\s+(and|or|the|a|an|of|in|to|for|with|by|from|on|at|is|are|was|that|which|who|it)\s*$/i, "")
+            .replace(/\s+\S{0,3}$/, "")
+            .replace(/[,;:\s]+$/, "")
+            .trim();
+          desc = raw;
+        }
       }
 
-      // Cap at ~60 chars for clean answers
-      if (desc.length > 65) {
-        const cut = desc.lastIndexOf(" ", 62);
-        desc = desc.substring(0, cut > 30 ? cut : 62) + "...";
-      }
+      if (!desc || desc.length < 8) continue;
 
-      // Capitalize first letter
+      // Remove trailing partial words, conjunctions, prepositions, articles
+      desc = desc
+        .replace(/\s+(and|or|the|a|an|of|in|to|for|with|by|from|on|at|is|are|was|that|which|who|it)\s*$/i, "")
+        .replace(/\s+\S{0,3}$/, "")
+        .replace(/[,;:\s]+$/, "")
+        .trim();
+
+      // If still too short after cleanup, skip
+      if (desc.length < 8) continue;
+
+      // Capitalize first letter, ensure no trailing period
       desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+      desc = desc.replace(/\.+$/, "");
+
+      // Skip duplicates
+      if (usedDescriptions.has(desc.toLowerCase())) continue;
+      usedDescriptions.add(desc.toLowerCase());
 
       facts.push({ term, description: desc, context: defSentence });
     }
@@ -606,36 +649,40 @@ function generateQuizFromContent(
     if (usedTerms.has(fact.term)) continue;
     usedTerms.add(fact.term);
 
-    // Get other terms' descriptions as wrong answers
+    // Get other terms' descriptions as wrong answers (must be unique)
     const otherFacts = facts.filter(
-      (f) => f.term !== fact.term && !usedTerms.has(f.term)
+      (f) =>
+        f.term !== fact.term &&
+        f.description.toLowerCase() !== fact.description.toLowerCase()
     );
 
-    let wrongAnswers: string[] = [];
+    const genericWrongs = [
+      `A type of chemical reaction`,
+      `A unit of measurement`,
+      `A mathematical formula`,
+      `A physical law of nature`,
+      `An outdated scientific theory`,
+      `A method of energy storage`,
+      `A form of electromagnetic radiation`,
+      `A classification system`,
+      `A biological process in cells`,
+      `A property of sound waves`,
+      `A type of molecular bond`,
+      `A method of data compression`,
+    ];
 
-    // Use descriptions of OTHER terms as plausible wrong answers
-    if (otherFacts.length >= 3) {
-      wrongAnswers = pickRandom(otherFacts, 3).map((f) => f.description);
-    } else {
-      // Generate generic plausible wrong answers
-      wrongAnswers = pickRandom(
-        [
-          `A type of chemical reaction`,
-          `A unit of measurement`,
-          `A mathematical formula`,
-          `A physical law of nature`,
-          `An outdated scientific theory`,
-          `A method of energy storage`,
-          `A form of electromagnetic radiation`,
-          `A classification system`,
-          `A programming algorithm`,
-          `A biological process in cells`,
-          `A property of sound waves`,
-          `A type of molecular bond`,
-        ],
-        3
-      );
+    // Build unique wrong answers: prefer other facts, fill with generics
+    const wrongSet = new Set<string>();
+    for (const f of shuffle(otherFacts)) {
+      if (wrongSet.size >= 3) break;
+      if (!wrongSet.has(f.description)) wrongSet.add(f.description);
     }
+    for (const g of shuffle(genericWrongs)) {
+      if (wrongSet.size >= 3) break;
+      if (!wrongSet.has(g)) wrongSet.add(g);
+    }
+    const wrongAnswers = Array.from(wrongSet).slice(0, 3);
+    if (wrongAnswers.length < 3) continue;
 
     const options = shuffle([fact.description, ...wrongAnswers]);
     questions.push({
