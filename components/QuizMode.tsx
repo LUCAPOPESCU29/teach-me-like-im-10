@@ -437,216 +437,310 @@ export default function QuizMode({ topic, levels, onClose }: QuizModeProps) {
 
 // ---- Local Quiz Generator ----
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom<T>(arr: T[], n: number): T[] {
+  return shuffle(arr).slice(0, n);
+}
+
+interface ExtractedFact {
+  term: string;
+  description: string; // short summary of what it is/does
+  context: string; // the original sentence for explanation
+}
+
+interface NumberFact {
+  question: string;
+  correct: string;
+  wrongs: string[];
+  explanation: string;
+}
+
+function extractFacts(
+  allContent: string,
+  boldTerms: string[],
+  sentences: string[]
+): ExtractedFact[] {
+  const facts: ExtractedFact[] = [];
+
+  for (const term of boldTerms) {
+    // Find the sentence that best defines this term
+    const defSentence = sentences.find((s) => {
+      const lower = s.toLowerCase();
+      const tLower = term.toLowerCase();
+      return (
+        lower.includes(tLower) &&
+        (lower.includes(" is ") ||
+          lower.includes(" are ") ||
+          lower.includes(" means ") ||
+          lower.includes(" refers to ") ||
+          lower.includes(" called ") ||
+          lower.includes(" allows ") ||
+          lower.includes(" uses ") ||
+          lower.includes(" works "))
+      );
+    });
+
+    if (defSentence) {
+      // Extract a short description (not the whole sentence)
+      const lower = defSentence.toLowerCase();
+      const tLower = term.toLowerCase();
+      let desc = "";
+
+      // Try to grab the part after "is/are/means"
+      for (const verb of [" is ", " are ", " means ", " refers to "]) {
+        const idx = lower.indexOf(verb);
+        if (idx !== -1 && lower.indexOf(tLower) < idx) {
+          desc = defSentence.substring(idx + verb.length).trim();
+          break;
+        }
+      }
+
+      if (!desc) {
+        // Just use a shortened version
+        desc = defSentence.length > 80
+          ? defSentence.substring(0, 77) + "..."
+          : defSentence;
+      }
+
+      // Cap at ~60 chars for clean answers
+      if (desc.length > 65) {
+        const cut = desc.lastIndexOf(" ", 62);
+        desc = desc.substring(0, cut > 30 ? cut : 62) + "...";
+      }
+
+      // Capitalize first letter
+      desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+
+      facts.push({ term, description: desc, context: defSentence });
+    }
+  }
+
+  return facts;
+}
+
+function extractNumbers(sentences: string[], topic: string): NumberFact[] {
+  const numberFacts: NumberFact[] = [];
+  const numRegex = /(\d[\d,.]*)\s*(percent|%|ghz|mhz|hz|km|miles|meters|degrees|years|billion|million|thousand|watts|volts|mph|m\/s|bits|bytes|gb|mb|kb)/i;
+
+  for (const sent of sentences) {
+    const match = sent.match(numRegex);
+    if (!match) continue;
+
+    const value = match[1];
+    const unit = match[2].toLowerCase();
+    const num = parseFloat(value.replace(/,/g, ""));
+    if (isNaN(num)) continue;
+
+    // Generate plausible wrong numbers
+    const wrongs: string[] = [];
+    const multipliers = [0.1, 0.5, 2, 5, 10, 0.01];
+    for (const m of shuffle(multipliers)) {
+      const wrong = num * m;
+      const wrongStr =
+        wrong >= 1000
+          ? wrong.toLocaleString()
+          : wrong % 1 === 0
+            ? wrong.toString()
+            : wrong.toFixed(1);
+      if (wrongStr !== value && !wrongs.includes(wrongStr)) {
+        wrongs.push(wrongStr + " " + unit);
+      }
+      if (wrongs.length >= 3) break;
+    }
+
+    if (wrongs.length >= 3) {
+      // Build a clean question from the sentence
+      const cleanSent = sent.replace(/\*\*/g, "").replace(/[#*_`]/g, "").trim();
+      numberFacts.push({
+        question: cleanSent,
+        correct: value + " " + unit,
+        wrongs: wrongs.slice(0, 3),
+        explanation: cleanSent,
+      });
+    }
+  }
+
+  return numberFacts;
+}
+
 function generateQuizFromContent(
   topic: string,
   levels: { level: number; content: string }[]
 ): QuizQuestion[] {
   const allContent = levels.map((l) => l.content).join("\n\n");
 
-  // Extract bold terms (between ** or within <strong> from markdown)
+  // Extract bold terms
   const boldTerms: string[] = [];
   const boldRegex = /\*\*([^*]+)\*\*/g;
   let match;
   while ((match = boldRegex.exec(allContent)) !== null) {
     const term = match[1].trim();
-    if (term.length > 2 && term.length < 60 && !boldTerms.includes(term)) {
+    if (term.length > 2 && term.length < 50 && !boldTerms.includes(term)) {
       boldTerms.push(term);
     }
   }
 
-  // Extract sentences that contain key information
+  // Extract clean sentences
   const sentences = allContent
-    .replace(/\*\*/g, "")
-    .replace(/[#*_`]/g, "")
     .split(/[.!?]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 30 && s.length < 200);
-
-  // Shuffle helper
-  const shuffle = <T,>(arr: T[]): T[] => {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  };
+    .map((s) => s.replace(/\*\*/g, "").replace(/[#*_`\n]/g, " ").replace(/\s+/g, " ").trim())
+    .filter((s) => s.length > 25 && s.length < 200);
 
   const questions: QuizQuestion[] = [];
-  const usedSentences = new Set<number>();
+  const usedTerms = new Set<string>();
 
-  // --- Strategy 1: "What is [bold term]?" definition questions ---
-  const definitionSentences = sentences.filter((s) =>
-    boldTerms.some(
-      (t) =>
-        s.toLowerCase().includes(t.toLowerCase()) &&
-        (s.toLowerCase().includes(" is ") ||
-          s.toLowerCase().includes(" are ") ||
-          s.toLowerCase().includes(" means ") ||
-          s.toLowerCase().includes(" refers to ") ||
-          s.toLowerCase().includes(" called "))
-    )
-  );
+  // --- Extract structured facts from content ---
+  const facts = extractFacts(allContent, boldTerms, sentences);
+  const numberFacts = extractNumbers(sentences, topic);
 
-  for (const sent of shuffle(definitionSentences).slice(0, 2)) {
-    const term = boldTerms.find((t) =>
-      sent.toLowerCase().includes(t.toLowerCase())
+  // === STRATEGY 1: "What is [term]?" with SHORT original answers ===
+  for (const fact of shuffle(facts).slice(0, 3)) {
+    if (usedTerms.has(fact.term)) continue;
+    usedTerms.add(fact.term);
+
+    // Get other terms' descriptions as wrong answers
+    const otherFacts = facts.filter(
+      (f) => f.term !== fact.term && !usedTerms.has(f.term)
     );
-    if (!term) continue;
 
-    const idx = sentences.indexOf(sent);
-    if (usedSentences.has(idx)) continue;
-    usedSentences.add(idx);
+    let wrongAnswers: string[] = [];
 
-    // Build plausible wrong answers
-    const wrongOptions = generateWrongOptions(sent, topic, sentences, 3);
-    const correctOption = trimToOption(sent);
-    if (!correctOption || wrongOptions.length < 3) continue;
+    // Use descriptions of OTHER terms as plausible wrong answers
+    if (otherFacts.length >= 3) {
+      wrongAnswers = pickRandom(otherFacts, 3).map((f) => f.description);
+    } else {
+      // Generate generic plausible wrong answers
+      wrongAnswers = pickRandom(
+        [
+          `A type of chemical reaction`,
+          `A unit of measurement`,
+          `A mathematical formula`,
+          `A physical law of nature`,
+          `An outdated scientific theory`,
+          `A method of energy storage`,
+          `A form of electromagnetic radiation`,
+          `A classification system`,
+          `A programming algorithm`,
+          `A biological process in cells`,
+          `A property of sound waves`,
+          `A type of molecular bond`,
+        ],
+        3
+      );
+    }
 
-    const options = shuffle([correctOption, ...wrongOptions]);
+    const options = shuffle([fact.description, ...wrongAnswers]);
     questions.push({
-      question: `Based on what you learned, which statement about "${term}" is correct?`,
+      question: `What is "${fact.term}"?`,
       options,
-      correct: options.indexOf(correctOption),
-      explanation: sent,
+      correct: options.indexOf(fact.description),
+      explanation: `${fact.term} — ${fact.description.toLowerCase()}`,
       difficulty: "easy",
     });
   }
 
-  // --- Strategy 2: True/False style (which is true about [topic]) ---
-  const factSentences = shuffle(
-    sentences.filter((s, i) => !usedSentences.has(i) && s.length > 40)
-  );
-
-  for (const sent of factSentences.slice(0, 2)) {
-    const idx = sentences.indexOf(sent);
-    if (usedSentences.has(idx)) continue;
-    usedSentences.add(idx);
-
-    const correctOption = trimToOption(sent);
-    const wrongOptions = generateWrongOptions(sent, topic, sentences, 3);
-    if (!correctOption || wrongOptions.length < 3) continue;
-
-    const options = shuffle([correctOption, ...wrongOptions]);
+  // === STRATEGY 2: Number/value recall ===
+  for (const nf of shuffle(numberFacts).slice(0, 1)) {
+    // Build a short question about the number
+    const options = shuffle([nf.correct, ...nf.wrongs]);
     questions.push({
-      question: `Which of the following is true about ${topic.toLowerCase()}?`,
+      question: `According to the lesson, what is the correct value?`,
       options,
-      correct: options.indexOf(correctOption),
-      explanation: sent,
+      correct: options.indexOf(nf.correct),
+      explanation: nf.explanation,
       difficulty: "medium",
     });
   }
 
-  // --- Strategy 3: Fill-in-the-blank (harder) ---
-  const longerSentences = shuffle(
-    sentences.filter(
-      (s, i) =>
-        !usedSentences.has(i) &&
-        s.length > 50 &&
-        boldTerms.some((t) => s.toLowerCase().includes(t.toLowerCase()))
-    )
-  );
+  // === STRATEGY 3: Fill in the blank (term name) ===
+  const unusedTermFacts = facts.filter((f) => !usedTerms.has(f.term));
+  for (const fact of shuffle(unusedTermFacts).slice(0, 2)) {
+    usedTerms.add(fact.term);
 
-  for (const sent of longerSentences.slice(0, 1)) {
-    const term = boldTerms.find((t) =>
-      sent.toLowerCase().includes(t.toLowerCase())
+    // Get other bold terms as wrong answers
+    const otherTerms = boldTerms.filter(
+      (t) => t.toLowerCase() !== fact.term.toLowerCase()
     );
-    if (!term) continue;
 
-    const blanked = sent.replace(new RegExp(term, "i"), "______");
-    const wrongTerms = shuffle(
-      boldTerms.filter((t) => t.toLowerCase() !== term.toLowerCase())
-    ).slice(0, 3);
+    let wrongTerms = pickRandom(otherTerms, 3);
 
+    // Pad with generic terms if needed
     if (wrongTerms.length < 3) {
-      wrongTerms.push(
-        ...["entropy", "fusion", "wavelength", "catalyst"].slice(
-          0,
-          3 - wrongTerms.length
-        )
-      );
+      const generics = [
+        "Photon", "Entropy", "Catalyst", "Inertia", "Amplitude",
+        "Frequency", "Resonance", "Diffusion", "Kinetics", "Polarity",
+      ].filter((g) => !boldTerms.some((b) => b.toLowerCase() === g.toLowerCase()));
+      wrongTerms = [
+        ...wrongTerms,
+        ...pickRandom(generics, 3 - wrongTerms.length),
+      ];
     }
 
-    const options = shuffle([term, ...wrongTerms.slice(0, 3)]);
+    const options = shuffle([fact.term, ...wrongTerms.slice(0, 3)]);
     questions.push({
-      question: `Fill in the blank: "${blanked}"`,
+      question: `Which term matches this description: "${fact.description}"?`,
       options,
-      correct: options.indexOf(term),
-      explanation: sent,
-      difficulty: "hard",
+      correct: options.indexOf(fact.term),
+      explanation: `The answer is "${fact.term}"`,
+      difficulty: "medium",
     });
   }
 
-  // Ensure we have at least 3 questions, pad with topic-level questions
-  if (questions.length < 3) {
-    const remaining = sentences.filter((_, i) => !usedSentences.has(i));
-    for (const sent of shuffle(remaining).slice(0, 5 - questions.length)) {
-      const correctOption = trimToOption(sent);
-      const wrongOptions = generateWrongOptions(sent, topic, sentences, 3);
-      if (!correctOption || wrongOptions.length < 3) continue;
+  // === STRATEGY 4: True or False ===
+  if (facts.length > 0 && questions.length < 5) {
+    const fact = shuffle(facts)[0];
+    const correctStatement = `${fact.term} — ${fact.description.charAt(0).toLowerCase()}${fact.description.slice(1)}`;
 
-      const options = shuffle([correctOption, ...wrongOptions]);
-      questions.push({
-        question: `Which statement about ${topic.toLowerCase()} is accurate?`,
-        options,
-        correct: options.indexOf(correctOption),
-        explanation: sent,
-        difficulty: questions.length < 3 ? "easy" : "medium",
-      });
-    }
+    // Create a false statement by swapping with another term
+    const otherFact = facts.find((f) => f.term !== fact.term);
+    const falseStatement = otherFact
+      ? `${fact.term} — ${otherFact.description.charAt(0).toLowerCase()}${otherFact.description.slice(1)}`
+      : `${fact.term} — an obsolete concept no longer used`;
+
+    const options = shuffle([
+      "True",
+      "False",
+      "Partially true",
+      "Not mentioned in the lesson",
+    ]);
+
+    questions.push({
+      question: `True or False: "${correctStatement}"`,
+      options,
+      correct: options.indexOf("True"),
+      explanation: `This is correct — ${fact.term} is described this way in the lesson.`,
+      difficulty: "easy",
+    });
+  }
+
+  // Ensure minimum 3 questions with fallback
+  if (questions.length < 3 && boldTerms.length >= 2) {
+    const term = shuffle(boldTerms.filter((t) => !usedTerms.has(t)))[0] || boldTerms[0];
+    const others = boldTerms.filter((t) => t !== term);
+    const wrongTerms = [
+      ...pickRandom(others, Math.min(others.length, 3)),
+      ...pickRandom(["Fusion", "Quantum", "Entropy", "Vector"], 3),
+    ].slice(0, 3);
+
+    const options = shuffle([term, ...wrongTerms]);
+    questions.push({
+      question: `Which of these is a key concept discussed in the lesson about ${topic}?`,
+      options,
+      correct: options.indexOf(term),
+      explanation: `"${term}" is one of the key concepts covered in the lesson.`,
+      difficulty: "easy",
+    });
   }
 
   return shuffle(questions).slice(0, 5);
-}
-
-function trimToOption(sentence: string): string {
-  let s = sentence.trim();
-  if (s.length > 120) {
-    s = s.substring(0, 117) + "...";
-  }
-  return s;
-}
-
-function generateWrongOptions(
-  correctSentence: string,
-  topic: string,
-  allSentences: string[],
-  count: number
-): string[] {
-  const wrong: string[] = [];
-  const correctLower = correctSentence.toLowerCase();
-
-  // Find sentences that are different enough from the correct one
-  const candidates = allSentences
-    .filter((s) => {
-      const sLower = s.toLowerCase();
-      // Must be different enough
-      const overlap = sLower.split(" ").filter((w) => correctLower.includes(w)).length;
-      const ratio = overlap / sLower.split(" ").length;
-      return ratio < 0.5 && s !== correctSentence && s.length > 20;
-    })
-    .map((s) => trimToOption(s));
-
-  // Add real sentences as plausible distractors
-  for (const c of candidates) {
-    if (wrong.length >= count) break;
-    if (!wrong.includes(c)) wrong.push(c);
-  }
-
-  // If we still need more, generate negated/twisted versions
-  const fillers = [
-    `${topic} is not affected by external forces or interactions`,
-    `This concept was disproven in recent scientific studies`,
-    `${topic} only exists in theoretical models, not in reality`,
-    `The opposite effect occurs under normal conditions`,
-  ];
-
-  for (const f of fillers) {
-    if (wrong.length >= count) break;
-    if (!wrong.includes(f)) wrong.push(f);
-  }
-
-  return wrong.slice(0, count);
 }
 
 // ---- Sub-components ----
