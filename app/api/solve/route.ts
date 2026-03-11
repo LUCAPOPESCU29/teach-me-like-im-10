@@ -1,30 +1,35 @@
 import { groqChat } from "@/lib/anthropic";
-import { buildExplainPrompt, buildMathExplainPrompt, buildCodeExplainPrompt } from "@/lib/prompts";
+import { buildMathSolvePrompt } from "@/lib/prompts";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { topic, level, previousLevels, lang, mode } = await request.json();
+    const { problem, lang } = await request.json();
 
-    if (!topic || !level) {
-      return new Response("Missing topic or level", { status: 400 });
+    if (!problem || typeof problem !== "string" || !problem.trim()) {
+      return new Response(JSON.stringify({ error: "Please enter a math problem" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    const systemPrompt =
-      mode === "math"
-        ? buildMathExplainPrompt(topic, level, previousLevels || [], lang)
-        : mode === "code"
-          ? buildCodeExplainPrompt(topic, level, previousLevels || [], lang)
-          : buildExplainPrompt(topic, level, previousLevels || [], lang);
+    if (problem.length > 500) {
+      return new Response(JSON.stringify({ error: "Problem is too long" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const systemPrompt = buildMathSolvePrompt(problem, lang);
 
     const res = await groqChat(
       [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Please explain "${topic}" at level ${level}.` },
+        { role: "user", content: problem.trim() },
       ],
-      { stream: true, max_tokens: 2048 }
+      { stream: true, max_tokens: 4096 }
     );
 
     if (!res.body) {
@@ -88,7 +93,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Internal server error";
-    console.error("Explain API error:", message);
+    console.error("Solve API error:", message);
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

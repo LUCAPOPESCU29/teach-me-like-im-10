@@ -1,52 +1,72 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { unslugify, LEVEL_META } from "@/lib/utils";
+import type { LangCode } from "@/lib/utils";
 import DepthMeter from "@/components/DepthMeter";
 import LevelCard from "@/components/LevelCard";
 import GoDeeper from "@/components/GoDeeper";
 import TopicSuggestions from "@/components/TopicSuggestions";
 import QuizMode from "@/components/QuizMode";
-
-interface LevelData {
-  level: number;
-  content: string;
-  complete: boolean;
-}
-
-const STORAGE_PREFIX = "tmi10_";
-
-function getCachedLevels(slug: string): LevelData[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const cached = localStorage.getItem(`${STORAGE_PREFIX}${slug}`);
-    return cached ? JSON.parse(cached) : [];
-  } catch {
-    return [];
-  }
-}
-
-function setCachedLevels(slug: string, levels: LevelData[]) {
-  try {
-    localStorage.setItem(`${STORAGE_PREFIX}${slug}`, JSON.stringify(levels));
-  } catch {
-    // Storage full or unavailable
-  }
-}
+import TeachBack from "@/components/TeachBack";
+import LanguagePicker from "@/components/LanguagePicker";
+import XPBadge from "@/components/XPBadge";
+import FlashcardButton from "@/components/FlashcardButton";
+import ShareButton from "@/components/ShareButton";
+import BookmarkButton from "@/components/BookmarkButton";
+import TopicRating from "@/components/TopicRating";
+import { LEVEL_XP } from "@/lib/xp";
+import { useAuth } from "@/components/AuthProvider";
+import type { LevelData } from "@/lib/data";
 
 export default function LearnPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
   const topic = unslugify(slug);
+
+  const { data: dataLayer } = useAuth();
+
+  const mode = searchParams.get("mode");
+  const isMathMode = mode === "math";
+  const isCodeMode = mode === "code";
+
+  // Language: URL param > data layer > "en"
+  const urlLang = searchParams.get("lang") as LangCode | null;
+  const [lang, setLang] = useState<LangCode>(() => {
+    if (urlLang) return urlLang;
+    return dataLayer.getLang() as LangCode;
+  });
+
+  function handleLangChange(code: LangCode) {
+    setLang(code);
+    dataLayer.setLang(code);
+    // Reset levels when language changes
+    setLevels([]);
+    initialized.current = false;
+    // Re-fetch level 1 in the new language
+    setTimeout(async () => {
+      initialized.current = true;
+      const cached = await dataLayer.getTopicLevels(slug, code);
+      if (cached.length > 0) {
+        setLevels(cached);
+      } else {
+        fetchLevel(1, [], code);
+      }
+    }, 0);
+  }
 
   const [levels, setLevels] = useState<LevelData[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingLevel, setStreamingLevel] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showTeachBack, setShowTeachBack] = useState(false);
+  const [lastXPGain, setLastXPGain] = useState<number | null>(null);
+  const [topicRating, setTopicRating] = useState<{ userRating: number | null; avgRating: number | null; totalRatings: number }>({ userRating: null, avgRating: null, totalRatings: 0 });
   const abortRef = useRef<AbortController | null>(null);
   const initialized = useRef(false);
 
@@ -55,17 +75,19 @@ export default function LearnPage() {
     if (initialized.current) return;
     initialized.current = true;
 
-    const cached = getCachedLevels(slug);
-    if (cached.length > 0) {
-      setLevels(cached);
-    } else {
-      fetchLevel(1, []);
-    }
+    dataLayer.getTopicLevels(slug, lang).then((cached) => {
+      if (cached.length > 0) {
+        setLevels(cached);
+      } else {
+        fetchLevel(1, [], lang);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const fetchLevel = useCallback(
-    async (level: number, previousLevels: LevelData[]) => {
+    async (level: number, previousLevels: LevelData[], fetchLang?: string) => {
+      const activeLang = fetchLang || lang;
       setIsStreaming(true);
       setStreamingLevel(level);
       setError(null);
@@ -91,6 +113,8 @@ export default function LearnPage() {
           body: JSON.stringify({
             topic,
             level,
+            lang: activeLang,
+            mode: isMathMode ? "math" : isCodeMode ? "code" : undefined,
             previousLevels: previousLevels
               .filter((l) => l.complete)
               .map((l) => ({ level: l.level, content: l.content })),
@@ -141,16 +165,22 @@ export default function LearnPage() {
           }
         }
 
-        // Mark as complete
+        // Mark as complete and award XP
+        let finalLevels: LevelData[] = [];
         setLevels((prev) => {
-          const final = prev.map((l) =>
+          finalLevels = prev.map((l) =>
             l.level === level
               ? { ...l, content: accumulated, complete: true }
               : l
           );
-          setCachedLevels(slug, final);
-          return final;
+          return finalLevels;
         });
+
+        dataLayer.saveTopicLevels(slug, activeLang, finalLevels, topic);
+
+        const xpAmount = LEVEL_XP[level] || 10;
+        const result = await dataLayer.addXP(xpAmount);
+        setLastXPGain(result.xpGained);
       } catch (e) {
         if (e instanceof DOMException && e.name === "AbortError") return;
         setError(
@@ -161,19 +191,19 @@ export default function LearnPage() {
         setStreamingLevel(null);
       }
     },
-    [topic, slug]
+    [topic, slug, lang]
   );
 
   const handleGoDeeper = useCallback(() => {
     const nextLevel = levels.length + 1;
     if (nextLevel > 5 || isStreaming) return;
-    fetchLevel(nextLevel, levels);
-  }, [levels, isStreaming, fetchLevel]);
+    fetchLevel(nextLevel, levels, lang);
+  }, [levels, isStreaming, fetchLevel, lang]);
 
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (showQuiz) return;
+      if (showQuiz || showTeachBack) return;
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -189,6 +219,12 @@ export default function LearnPage() {
           setShowQuiz(true);
         }
       }
+      if (e.key === "t" || e.key === "T") {
+        const completedLevels = levels.filter((l) => l.complete);
+        if (completedLevels.length >= 2) {
+          setShowTeachBack(true);
+        }
+      }
       if (e.key === "Escape") {
         router.push("/");
       }
@@ -196,7 +232,7 @@ export default function LearnPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleGoDeeper, router, levels, showQuiz]);
+  }, [handleGoDeeper, router, levels, showQuiz, showTeachBack]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -212,6 +248,42 @@ export default function LearnPage() {
   const completedLevels = levels.filter((l) => l.complete);
   const canQuiz = completedLevels.length >= 2 && !isStreaming;
 
+  // Fetch topic ratings when all 5 levels are complete
+  useEffect(() => {
+    if (currentLevel < 5 || !lastLevel?.complete) return;
+    fetch(`/api/topics/rating?slug=${encodeURIComponent(slug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setTopicRating({
+            userRating: data.userRating,
+            avgRating: data.avgRating,
+            totalRatings: data.totalRatings,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [currentLevel, lastLevel?.complete, slug]);
+
+  async function handleRate(rating: number) {
+    setTopicRating((prev) => ({ ...prev, userRating: rating }));
+    try {
+      const res = await fetch("/api/topics/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, rating }),
+      });
+      const data = await res.json();
+      if (!data.error) {
+        setTopicRating({
+          userRating: data.userRating,
+          avgRating: data.avgRating,
+          totalRatings: data.totalRatings,
+        });
+      }
+    } catch {}
+  }
+
   // Dynamic background gradient based on depth
   const bgGradient = currentLevel > 0 ? LEVEL_META[Math.min(currentLevel - 1, 4)].color : LEVEL_META[0].color;
 
@@ -223,9 +295,9 @@ export default function LearnPage() {
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         animate={{
-          background: `radial-gradient(ellipse at 50% 0%, ${bgGradient}08 0%, transparent 60%)`,
+          background: `radial-gradient(ellipse 80% 50% at 50% 0%, ${bgGradient}06 0%, transparent 50%), radial-gradient(ellipse 50% 80% at 80% 100%, ${bgGradient}03 0%, transparent 60%)`,
         }}
-        transition={{ duration: 1.5 }}
+        transition={{ duration: 2 }}
       />
 
       <main className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 lg:ml-52">
@@ -236,19 +308,40 @@ export default function LearnPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <button
-            onClick={() => router.push("/")}
-            className="text-sm text-white/30 hover:text-white/60 transition-colors font-sans mb-4 inline-block"
-          >
-            ← New topic
-          </button>
-          <h1 className="font-display text-3xl sm:text-4xl text-white leading-snug">
-            {topic}
-          </h1>
-          <p className="text-white/30 text-sm font-sans mt-2">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push(isMathMode ? "/math" : isCodeMode ? "/code" : "/")}
+                className="text-sm text-white/30 hover:text-white/60 transition-colors font-sans inline-block"
+              >
+                {isMathMode ? "\u2190 Math Edition" : isCodeMode ? "\u2190 Code Edition" : "\u2190 New topic"}
+              </button>
+              {isMathMode && (
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-[10px] font-mono tracking-wider uppercase">
+                  Math Mode
+                </span>
+              )}
+              {isCodeMode && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono tracking-wider uppercase">
+                  Code Mode
+                </span>
+              )}
+              <XPBadge xpGain={lastXPGain} />
+            </div>
+            <LanguagePicker value={lang} onChange={handleLangChange} />
+          </div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-3xl sm:text-4xl text-white leading-snug flex-1">
+              {topic}
+            </h1>
+            <BookmarkButton slug={slug} topicName={topic} lang={lang} />
+          </div>
+          <p className="text-white/30 text-sm font-sans mt-2 hidden sm:block">
             Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[11px]">D</kbd> to go deeper
             {" · "}
             <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[11px]">Q</kbd> to quiz
+            {" · "}
+            <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[11px]">T</kbd> to teach
             {" · "}
             <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[11px]">Esc</kbd> to go home
           </p>
@@ -265,6 +358,8 @@ export default function LearnPage() {
               isLoading={
                 streamingLevel === level.level && level.content.length === 0
               }
+              topic={topic}
+              lang={lang}
             />
           ))}
         </div>
@@ -303,33 +398,69 @@ export default function LearnPage() {
               isLoading={isStreaming}
             />
             {canQuiz && (
-              <motion.button
-                onClick={() => setShowQuiz(true)}
-                className="group relative px-6 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="absolute inset-0 border border-cyan-500/30 rounded-xl" />
-                <div className="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors" />
-                <motion.div
-                  className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
-                  animate={{
-                    boxShadow: [
-                      "0 0 15px rgba(6,182,212,0.1)",
-                      "0 0 25px rgba(6,182,212,0.2)",
-                      "0 0 15px rgba(6,182,212,0.1)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
+              <div className="flex gap-3 flex-wrap justify-center">
+                <motion.button
+                  onClick={() => setShowQuiz(true)}
+                  className="group relative px-4 sm:px-6 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="absolute inset-0 border border-cyan-500/30 rounded-xl" />
+                  <div className="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors" />
+                  <motion.div
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                    animate={{
+                      boxShadow: [
+                        "0 0 15px rgba(6,182,212,0.1)",
+                        "0 0 25px rgba(6,182,212,0.2)",
+                        "0 0 15px rgba(6,182,212,0.1)",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <span className="relative z-10 text-cyan-400 flex items-center gap-2">
+                    <span className="text-lg">🧠</span>
+                    QUIZ ME
+                  </span>
+                </motion.button>
+                <motion.button
+                  onClick={() => setShowTeachBack(true)}
+                  className="group relative px-4 sm:px-6 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="absolute inset-0 border border-purple-500/30 rounded-xl" />
+                  <div className="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors" />
+                  <motion.div
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                    animate={{
+                      boxShadow: [
+                        "0 0 15px rgba(168,85,247,0.1)",
+                        "0 0 25px rgba(168,85,247,0.2)",
+                        "0 0 15px rgba(168,85,247,0.1)",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <span className="relative z-10 text-purple-400 flex items-center gap-2">
+                    <span className="text-lg">📝</span>
+                    TEACH IT BACK
+                  </span>
+                </motion.button>
+                <FlashcardButton
+                  topic={topic}
+                  topicSlug={slug}
+                  levels={completedLevels.map((l) => ({ level: l.level, content: l.content }))}
+                  lang={lang}
                 />
-                <span className="relative z-10 text-cyan-400 flex items-center gap-2">
-                  <span className="text-lg">🧠</span>
-                  QUIZ ME
-                </span>
-              </motion.button>
+                <ShareButton topic={topic} slug={slug} level={currentLevel} />
+              </div>
             )}
           </div>
         )}
@@ -371,6 +502,26 @@ export default function LearnPage() {
                   TEST YOUR KNOWLEDGE
                 </span>
               </motion.button>
+              <motion.button
+                onClick={() => setShowTeachBack(true)}
+                className="group relative px-8 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute inset-0 border border-purple-500/40 rounded-xl" />
+                <div className="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors" />
+                <span className="relative z-10 text-purple-300 flex items-center gap-2">
+                  <span className="text-lg">📝</span>
+                  TEACH IT BACK
+                </span>
+              </motion.button>
+              <FlashcardButton
+                topic={topic}
+                topicSlug={slug}
+                levels={completedLevels.map((l) => ({ level: l.level, content: l.content }))}
+                lang={lang}
+              />
+              <ShareButton topic={topic} slug={slug} level={currentLevel} />
               <button
                 onClick={() => router.push("/")}
                 className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-white/60 hover:text-white/90 transition-all duration-200 font-sans text-sm"
@@ -378,12 +529,21 @@ export default function LearnPage() {
                 Try another topic
               </button>
             </div>
+
+            {/* Topic Rating */}
+            <TopicRating
+              slug={slug}
+              userRating={topicRating.userRating}
+              avgRating={topicRating.avgRating}
+              totalRatings={topicRating.totalRatings}
+              onRate={handleRate}
+            />
           </motion.div>
         )}
 
         {/* Suggested topics — show after level 1 is complete */}
         {currentLevel >= 1 && levels[0]?.complete && (
-          <TopicSuggestions topic={topic} />
+          <TopicSuggestions topic={topic} lang={lang} />
         )}
       </main>
 
@@ -396,7 +556,23 @@ export default function LearnPage() {
               level: l.level,
               content: l.content,
             }))}
+            lang={lang}
             onClose={() => setShowQuiz(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Teach It Back modal */}
+      <AnimatePresence>
+        {showTeachBack && (
+          <TeachBack
+            topic={topic}
+            levels={completedLevels.map((l) => ({
+              level: l.level,
+              content: l.content,
+            }))}
+            lang={lang}
+            onClose={() => setShowTeachBack(false)}
           />
         )}
       </AnimatePresence>

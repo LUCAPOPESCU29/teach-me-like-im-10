@@ -1,31 +1,34 @@
 import { groqChat } from "@/lib/anthropic";
-import { buildExplainPrompt, buildMathExplainPrompt, buildCodeExplainPrompt } from "@/lib/prompts";
+import { buildMathChatSystemPrompt } from "@/lib/prompts";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { topic, level, previousLevels, lang, mode } = await request.json();
+    const { messages, lang } = await request.json();
 
-    if (!topic || !level) {
-      return new Response("Missing topic or level", { status: 400 });
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    const systemPrompt =
-      mode === "math"
-        ? buildMathExplainPrompt(topic, level, previousLevels || [], lang)
-        : mode === "code"
-          ? buildCodeExplainPrompt(topic, level, previousLevels || [], lang)
-          : buildExplainPrompt(topic, level, previousLevels || [], lang);
+    const systemPrompt = buildMathChatSystemPrompt(lang);
 
-    const res = await groqChat(
-      [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `Please explain "${topic}" at level ${level}.` },
-      ],
-      { stream: true, max_tokens: 2048 }
-    );
+    const apiMessages = [
+      { role: "system", content: systemPrompt },
+      ...messages.slice(-20).map((m: { role: string; content: string }) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ];
+
+    const res = await groqChat(apiMessages, {
+      stream: true,
+      max_tokens: 2048,
+    });
 
     if (!res.body) {
       throw new Error("No response body from Groq");
@@ -88,7 +91,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Internal server error";
-    console.error("Explain API error:", message);
+    console.error("Chat API error:", message);
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
