@@ -323,7 +323,7 @@ export default function Home() {
         <ExampleTopics />
       </motion.div>
 
-      <footer className="fixed bottom-0 left-0 right-0 py-4 text-center bg-gradient-to-t from-[#070b14] via-[#070b14]/80 to-transparent pointer-events-none">
+      <footer className="hidden sm:block fixed bottom-0 left-0 right-0 py-4 text-center bg-gradient-to-t from-[#070b14] via-[#070b14]/80 to-transparent pointer-events-none">
         <p className="text-white/10 text-xs font-sans pointer-events-auto">
           Teach Me Like I&apos;m 10
           {isGuest && (

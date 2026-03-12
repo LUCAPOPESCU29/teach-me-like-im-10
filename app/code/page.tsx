@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { CODE_CATEGORIES, getDailyCodeTopic } from "@/lib/code-topics";
 import { useAuth } from "@/components/AuthProvider";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function CodePage() {
   const router = useRouter();
@@ -16,20 +17,25 @@ export default function CodePage() {
   const [completedSlugs, setCompletedSlugs] = useState<Set<string>>(new Set());
   const [codeInput, setCodeInput] = useState("");
   const [codeInputFocused, setCodeInputFocused] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const refreshData = useCallback(async () => {
+    const history = await dataLayer.getTopicHistory();
+    setCompletedSlugs(new Set(history.map((t) => t.slug)));
+    setLoading(false);
+  }, [dataLayer]);
 
   useEffect(() => {
-    dataLayer.getTopicHistory().then((history) => {
-      const slugs = new Set(history.map((t) => t.slug));
-      setCompletedSlugs(slugs);
-    });
-  }, [dataLayer]);
+    refreshData();
+  }, [refreshData]);
 
   function goToTopic(topicName: string) {
     router.push(`/learn/${slugify(topicName)}?mode=code`);
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-16 relative overflow-hidden">
+    <PullToRefresh onRefresh={refreshData}>
+    <main className="min-h-screen flex flex-col items-center px-4 py-16 pb-24 relative overflow-hidden">
       {/* Ambient glow — green/cyan */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.05] blur-[120px] pointer-events-none" />
       <div className="absolute top-1/4 left-1/3 w-[300px] h-[300px] rounded-full bg-cyan-500/[0.04] blur-[100px] pointer-events-none" />
@@ -173,47 +179,98 @@ export default function CodePage() {
       </motion.div>
 
       {/* Category Grid */}
-      <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {CODE_CATEGORIES.map((cat, catIdx) => (
-          <motion.div
-            key={cat.id}
-            className="p-5 rounded-2xl border bg-white/[0.02] backdrop-blur-sm"
-            style={{ borderColor: `${cat.color}15` }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 + catIdx * 0.08 }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">{cat.icon}</span>
-              <h2 className="font-display text-lg" style={{ color: cat.color }}>
-                {cat.title}
-              </h2>
-            </div>
-            <p className="text-white/30 text-sm font-sans mb-3">{cat.description}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {cat.topics.map((topicName) => {
-                const topicSlug = slugify(topicName);
-                const isCompleted = completedSlugs.has(topicSlug);
-                return (
-                  <button
-                    key={topicName}
-                    onClick={() => goToTopic(topicName)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-sans transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+      {loading ? (
+        <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-5 rounded-2xl border border-emerald-500/10 bg-white/[0.02]"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div
+                  className="w-7 h-7 rounded animate-shimmer"
+                  style={{
+                    backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%)",
+                    backgroundSize: "200% auto",
+                  }}
+                />
+                <div
+                  className="h-5 w-28 rounded animate-shimmer"
+                  style={{
+                    backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%)",
+                    backgroundSize: "200% auto",
+                    animationDelay: "0.1s",
+                  }}
+                />
+              </div>
+              <div
+                className="h-3 w-3/4 rounded animate-shimmer mb-3"
+                style={{
+                  backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%)",
+                  backgroundSize: "200% auto",
+                  animationDelay: "0.2s",
+                }}
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {Array.from({ length: 4 }).map((_, j) => (
+                  <div
+                    key={j}
+                    className="h-6 rounded-lg animate-shimmer"
                     style={{
-                      backgroundColor: `${cat.color}10`,
-                      border: `1px solid ${cat.color}20`,
-                      color: `${cat.color}cc`,
+                      width: `${[60, 72, 56, 68][j]}px`,
+                      backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 100%)",
+                      backgroundSize: "200% auto",
+                      animationDelay: `${j * 0.1}s`,
                     }}
-                  >
-                    {isCompleted && <span className="mr-1 opacity-60">{"\u2713"}</span>}
-                    {topicName}
-                  </button>
-                );
-              })}
+                  />
+                ))}
+              </div>
             </div>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {CODE_CATEGORIES.map((cat, catIdx) => (
+            <motion.div
+              key={cat.id}
+              className="p-5 rounded-2xl border bg-white/[0.02] backdrop-blur-sm"
+              style={{ borderColor: `${cat.color}15` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + catIdx * 0.06 }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{cat.icon}</span>
+                <h2 className="font-display text-lg" style={{ color: cat.color }}>
+                  {cat.title}
+                </h2>
+              </div>
+              <p className="text-white/30 text-sm font-sans mb-3">{cat.description}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {cat.topics.map((topicName) => {
+                  const topicSlug = slugify(topicName);
+                  const isCompleted = completedSlugs.has(topicSlug);
+                  return (
+                    <button
+                      key={topicName}
+                      onClick={() => goToTopic(topicName)}
+                      className="px-2.5 py-1 rounded-lg text-xs font-sans transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                      style={{
+                        backgroundColor: `${cat.color}10`,
+                        border: `1px solid ${cat.color}20`,
+                        color: `${cat.color}cc`,
+                      }}
+                    >
+                      {isCompleted && <span className="mr-1 opacity-60">{"\u2713"}</span>}
+                      {topicName}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Back link */}
       <motion.button
@@ -226,5 +283,6 @@ export default function CodePage() {
         Back to all topics
       </motion.button>
     </main>
+    </PullToRefresh>
   );
 }
