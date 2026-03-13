@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { slugify } from "@/lib/utils";
 import type { LangCode } from "@/lib/utils";
+import StarBorder from "./StarBorder";
 
 export default function TopicInput({ lang }: { lang?: LangCode }) {
   const [topic, setTopic] = useState("");
@@ -69,13 +70,16 @@ export default function TopicInput({ lang }: { lang?: LangCode }) {
             }`}
             autoFocus
           />
-          <button
-            type="submit"
-            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 px-3 sm:px-5 py-2 sm:py-2.5 bg-emerald-500/90 hover:bg-emerald-500 text-white text-sm sm:text-base rounded-xl font-medium transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-emerald-500/20"
-            disabled={!topic.trim()}
-          >
-            Explore
-          </button>
+          <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2">
+            <StarBorder
+              type="submit"
+              color="#34d399"
+              speed="6s"
+              disabled={!topic.trim()}
+            >
+              Explore
+            </StarBorder>
+          </div>
         </div>
       </div>
 

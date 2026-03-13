@@ -10,6 +10,7 @@ import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
 import MathSolver from "@/components/MathSolver";
 import PullToRefresh from "@/components/PullToRefresh";
+import StarBorder from "@/components/StarBorder";
 
 export default function MathPage() {
   const router = useRouter();
@@ -127,13 +128,16 @@ export default function MathPage() {
                   : "bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
               }`}
             />
-            <button
-              type="submit"
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 px-3 sm:px-5 py-2 sm:py-2.5 bg-indigo-500/90 hover:bg-indigo-500 text-white text-sm sm:text-base rounded-xl font-medium transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-indigo-500/20"
-              disabled={!mathInput.trim()}
-            >
-              Explore
-            </button>
+            <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2">
+              <StarBorder
+                type="submit"
+                color="#818cf8"
+                speed="6s"
+                disabled={!mathInput.trim()}
+              >
+                Explore
+              </StarBorder>
+            </div>
           </div>
         </div>
         <motion.div
