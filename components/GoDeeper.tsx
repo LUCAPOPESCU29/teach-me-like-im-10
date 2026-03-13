@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { LEVEL_META } from "@/lib/utils";
+import { useCelebration } from "@/components/CelebrationProvider";
 
 interface GoDeeperProps {
   nextLevel: number;
@@ -14,6 +15,7 @@ export default function GoDeeper({
   onClick,
   isLoading,
 }: GoDeeperProps) {
+  const { playSound } = useCelebration();
   if (nextLevel > 5) return null;
 
   const meta = LEVEL_META[nextLevel - 1];
@@ -27,7 +29,7 @@ export default function GoDeeper({
       transition={{ duration: 0.4, delay: 0.3 }}
     >
       <button
-        onClick={onClick}
+        onClick={() => { playSound("whoosh"); onClick(); }}
         disabled={isLoading}
         className="group relative px-8 py-4 rounded-2xl font-display font-semibold text-lg text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
         style={{

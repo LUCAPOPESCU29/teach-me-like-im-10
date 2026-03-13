@@ -1,3 +1,17 @@
+export const LANGUAGES = [
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "ro", label: "Română", flag: "🇷🇴" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+] as const;
+
+export type LangCode = (typeof LANGUAGES)[number]["code"];
+
+export function getLanguageLabel(code: string): string {
+  return LANGUAGES.find((l) => l.code === code)?.label ?? "English";
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

@@ -4,6 +4,7 @@ import { PostHogProvider } from "@/components/PostHogProvider";
 import { PostHogPageView } from "@/components/PostHogPageView";
 import PageTransition from "@/components/PageTransition";
 import BottomNav from "@/components/BottomNav";
+import CelebrationProvider from "@/components/CelebrationProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -55,8 +56,10 @@ export default function RootLayout({
         <PostHogProvider>
           <PostHogPageView />
           <AuthProvider>
-            <PageTransition>{children}</PageTransition>
-            <BottomNav />
+            <CelebrationProvider>
+              <PageTransition>{children}</PageTransition>
+              <BottomNav />
+            </CelebrationProvider>
           </AuthProvider>
         </PostHogProvider>
       </body>

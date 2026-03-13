@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useCelebration } from "@/components/CelebrationProvider";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", emoji: "\u{1F3E0}" },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { playSound } = useCelebration();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -31,7 +33,7 @@ export default function BottomNav() {
             return (
               <button
                 key={item.href}
-                onClick={() => router.push(item.href)}
+                onClick={() => { playSound("pop"); router.push(item.href); }}
                 className="relative flex flex-col items-center justify-center w-16 h-full gap-0.5 transition-colors"
               >
                 {active && (

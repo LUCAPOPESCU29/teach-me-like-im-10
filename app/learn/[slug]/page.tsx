@@ -19,6 +19,7 @@ import BookmarkButton from "@/components/BookmarkButton";
 import TopicRating from "@/components/TopicRating";
 import { LEVEL_XP } from "@/lib/xp";
 import { useAuth } from "@/components/AuthProvider";
+import { useCelebration } from "@/components/CelebrationProvider";
 import type { LevelData } from "@/lib/data";
 
 export default function LearnPage() {
@@ -29,6 +30,7 @@ export default function LearnPage() {
   const topic = unslugify(slug);
 
   const { data: dataLayer } = useAuth();
+  const { celebrate } = useCelebration();
 
   const mode = searchParams.get("mode");
   const isMathMode = mode === "math";
@@ -181,6 +183,11 @@ export default function LearnPage() {
         const xpAmount = LEVEL_XP[level] || 10;
         const result = await dataLayer.addXP(xpAmount);
         setLastXPGain(result.xpGained);
+        celebrate({
+          xp: result.xpGained,
+          confetti: level >= 3,
+          sound: level >= 3 ? "levelUp" : "chime",
+        });
       } catch (e) {
         if (e instanceof DOMException && e.name === "AbortError") return;
         setError(

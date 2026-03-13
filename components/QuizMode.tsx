@@ -2,8 +2,14 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/components/AuthProvider";
+import { useCelebration } from "@/components/CelebrationProvider";
+import { getQuizXP } from "@/lib/data";
+import ChallengeCreateModal from "@/components/ChallengeCreateModal";
+import { useRouter } from "next/navigation";
+import { slugify } from "@/lib/utils";
 
-interface QuizQuestion {
+export interface QuizQuestion {
   question: string;
   options: string[];
   correct: number;
@@ -14,12 +20,17 @@ interface QuizQuestion {
 interface QuizModeProps {
   topic: string;
   levels: { level: number; content: string }[];
+  lang?: string;
   onClose: () => void;
+  preloadedQuestions?: QuizQuestion[];
+  onComplete?: (score: number, total: number, questions: QuizQuestion[]) => void;
+  bonusLabel?: string;
 }
 
 type QuizState = "loading" | "intro" | "question" | "result" | "complete";
 
-export default function QuizMode({ topic, levels, onClose }: QuizModeProps) {
+export default function QuizMode({ topic, levels, lang, onClose, preloadedQuestions, onComplete, bonusLabel }: QuizModeProps) {
+  const { data: dataLayer } = useAuth();
   const [quizState, setQuizState] = useState<QuizState>("loading");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -28,24 +39,67 @@ export default function QuizMode({ topic, levels, onClose }: QuizModeProps) {
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [xpEarned, setXpEarned] = useState(0);
   const audioRef = useRef<AudioContext | null>(null);
+  const { celebrate } = useCelebration();
+  const [showChallenge, setShowChallenge] = useState(false);
+  const [relatedTopics, setRelatedTopics] = useState<string[]>([]);
+  const quizRouter = useRouter();
 
-  // Generate quiz questions locally from content
+  // Generate quiz questions — use preloaded if provided, else locally for English, via API for other languages
   useEffect(() => {
-    try {
-      const generated = generateQuizFromContent(topic, levels);
-      if (generated.length > 0) {
-        setQuestions(generated);
-        setAnswers(new Array(generated.length).fill(null));
-        // Small delay for the loading animation
-        setTimeout(() => setQuizState("intro"), 2000);
-      } else {
-        setError("Could not generate questions from content");
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Quiz generation failed");
+    if (preloadedQuestions && preloadedQuestions.length > 0) {
+      setQuestions(preloadedQuestions);
+      setAnswers(new Array(preloadedQuestions.length).fill(null));
+      setTimeout(() => setQuizState("intro"), 1500);
+      return;
     }
-  }, [topic, levels]);
+    if (lang && lang !== "en") {
+      // Use API for non-English quizzes so questions are in the right language
+      async function fetchQuiz() {
+        try {
+          const res = await fetch("/api/quiz", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic, levels, lang }),
+          });
+          if (!res.ok) throw new Error("Quiz API failed");
+          const data = await res.json();
+          if (data.questions && data.questions.length > 0) {
+            setQuestions(data.questions);
+            setAnswers(new Array(data.questions.length).fill(null));
+            setTimeout(() => setQuizState("intro"), 2000);
+          } else {
+            throw new Error("No questions returned");
+          }
+        } catch (e) {
+          // Fallback to local generation
+          const generated = generateQuizFromContent(topic, levels);
+          if (generated.length > 0) {
+            setQuestions(generated);
+            setAnswers(new Array(generated.length).fill(null));
+            setTimeout(() => setQuizState("intro"), 2000);
+          } else {
+            setError(e instanceof Error ? e.message : "Quiz generation failed");
+          }
+        }
+      }
+      fetchQuiz();
+    } else {
+      try {
+        const generated = generateQuizFromContent(topic, levels);
+        if (generated.length > 0) {
+          setQuestions(generated);
+          setAnswers(new Array(generated.length).fill(null));
+          setTimeout(() => setQuizState("intro"), 2000);
+        } else {
+          setError("Could not generate questions from content");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Quiz generation failed");
+      }
+    }
+  }, [topic, levels, lang]);
 
   // Synth beep sound
   const playBeep = useCallback((freq: number, duration: number) => {
@@ -103,14 +157,45 @@ export default function QuizMode({ topic, levels, onClose }: QuizModeProps) {
       playBeep(500, 0.08);
     } else {
       setQuizState("complete");
+      const finalScore = score + (selected === questions[currentQ]?.correct ? 1 : 0);
+      if (onComplete) {
+        onComplete(finalScore, questions.length, questions);
+      } else {
+        const xpAmount = getQuizXP(finalScore, questions.length);
+        dataLayer.addXP(xpAmount).then((result) => {
+          setXpEarned(result.xpGained);
+          celebrate({
+            xp: result.xpGained,
+            confetti: true,
+            sound: "complete",
+          });
+        });
+      }
       playBeep(1200, 0.5);
     }
-  }, [currentQ, questions.length, playBeep]);
+  }, [currentQ, questions.length, playBeep, score, selected, onComplete, dataLayer]);
 
   const startQuiz = useCallback(() => {
     setQuizState("question");
     playBeep(700, 0.15);
   }, [playBeep]);
+
+  // Fetch related topics when quiz completes
+  useEffect(() => {
+    if (quizState !== "complete" || onComplete) return;
+    fetch("/api/suggest-topics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ topic, lang }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.suggestions)) {
+          setRelatedTopics(data.suggestions.slice(0, 3));
+        }
+      })
+      .catch(() => {});
+  }, [quizState, topic, lang, onComplete]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -420,14 +505,70 @@ export default function QuizMode({ topic, levels, onClose }: QuizModeProps) {
               })}
             </div>
 
-            <div className="mt-8 flex justify-center gap-4">
+            {(xpEarned > 0 || bonusLabel) && (
+              <motion.div
+                className="mt-6 text-emerald-400 font-mono text-sm"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.8 }}
+              >
+                {bonusLabel || `+${xpEarned} XP earned`}
+              </motion.div>
+            )}
+
+            <div className="mt-8 flex justify-center gap-3 sm:gap-4 flex-wrap">
               <button
                 onClick={onClose}
-                className="px-8 py-3 font-mono text-sm tracking-wider rounded-lg border border-white/10 text-white/40 hover:text-white/60 hover:bg-white/5 transition-all"
+                className="px-5 sm:px-8 py-3 font-mono text-sm tracking-wider rounded-lg border border-white/10 text-white/40 hover:text-white/60 hover:bg-white/5 transition-all"
               >
                 RETURN
               </button>
+              {!onComplete && (
+                <button
+                  onClick={() => setShowChallenge(true)}
+                  className="px-5 sm:px-8 py-3 font-mono text-sm tracking-wider rounded-lg border border-amber-500/30 text-amber-400/70 hover:text-amber-300 hover:bg-amber-500/5 transition-all"
+                >
+                  CHALLENGE A FRIEND
+                </button>
+              )}
             </div>
+
+            {/* Related topics */}
+            {relatedTopics.length > 0 && (
+              <motion.div
+                className="mt-8 pt-6 border-t border-white/5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.2 }}
+              >
+                <p className="text-white/20 font-mono text-[10px] tracking-[0.2em] uppercase mb-3">
+                  Keep learning
+                </p>
+                <div className="flex flex-col gap-2">
+                  {relatedTopics.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => quizRouter.push(`/learn/${slugify(t)}`)}
+                      className="text-left px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/10 hover:border-white/20 hover:bg-white/[0.06] transition-all text-white/50 hover:text-white/80 text-sm font-serif"
+                    >
+                      {t} &rarr;
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {showChallenge && (
+              <ChallengeCreateModal
+                topic={topic}
+                slug={topic.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}
+                questions={questions}
+                score={score}
+                total={questions.length}
+                lang={lang}
+                onClose={() => setShowChallenge(false)}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,11 +5,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { topic, levels } = await request.json();
+    const { topic, levels, lang } = await request.json();
 
     if (!topic || !levels || levels.length === 0) {
       return new Response("Missing topic or levels", { status: 400 });
     }
+
+    const langName = lang && lang !== "en" ? (() => { const names: Record<string, string> = { ro: "Romanian", fr: "French", es: "Spanish", de: "German" }; return names[lang]; })() : null;
 
     const levelsContext = levels
       .map((l: { level: number; content: string }) => `Level ${l.level}: ${l.content}`)
@@ -27,7 +29,7 @@ RULES:
 - Mix difficulty: 2 easy, 2 medium, 1 hard
 - Questions should test genuine understanding, not just memorization
 - Make wrong answers plausible but clearly wrong to someone who understood the material
-- Keep questions concise and clear
+- Keep questions concise and clear${langName ? `\n- IMPORTANT: Write ALL questions, options, and explanations in ${langName}.` : ""}
 
 Return ONLY valid JSON in this exact format, nothing else:
 {

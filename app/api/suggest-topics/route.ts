@@ -6,14 +6,14 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { topic } = await request.json();
+    const { topic, lang } = await request.json();
 
     if (!topic) {
       return new Response("Missing topic", { status: 400 });
     }
 
     const res = await groqChat(
-      [{ role: "user", content: buildSuggestPrompt(topic) }],
+      [{ role: "user", content: buildSuggestPrompt(topic, lang) }],
       { max_tokens: 256 }
     );
 

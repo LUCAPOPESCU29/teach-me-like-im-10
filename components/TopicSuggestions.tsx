@@ -7,9 +7,10 @@ import { slugify } from "@/lib/utils";
 
 interface TopicSuggestionsProps {
   topic: string;
+  lang?: string;
 }
 
-export default function TopicSuggestions({ topic }: TopicSuggestionsProps) {
+export default function TopicSuggestions({ topic, lang }: TopicSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function TopicSuggestions({ topic }: TopicSuggestionsProps) {
         const res = await fetch("/api/suggest-topics", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic }),
+          body: JSON.stringify({ topic, lang }),
         });
         if (!res.ok) return;
         const data = await res.json();
