@@ -143,22 +143,22 @@ const CONFETTI_COLORS = [
 function spawnParticles(): Particle[] {
   const particles: Particle[] = [];
   const cx = window.innerWidth / 2;
-  const cy = window.innerHeight * 0.35;
+  const cy = 60;
 
-  for (let i = 0; i < 80; i++) {
-    const angle = (Math.random() * Math.PI * 2);
-    const speed = 4 + Math.random() * 8;
+  for (let i = 0; i < 40; i++) {
+    const angle = Math.random() * Math.PI * 0.8 + Math.PI * 0.1;
+    const speed = 2 + Math.random() * 5;
     particles.push({
-      x: cx + (Math.random() - 0.5) * 60,
-      y: cy + (Math.random() - 0.5) * 30,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 4,
+      x: cx + (Math.random() - 0.5) * 100,
+      y: cy + (Math.random() - 0.5) * 15,
+      vx: Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1),
+      vy: Math.sin(angle) * speed * 0.5,
       color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      size: 4 + Math.random() * 6,
+      size: 3 + Math.random() * 4,
       rotation: Math.random() * 360,
-      rotationSpeed: (Math.random() - 0.5) * 15,
+      rotationSpeed: (Math.random() - 0.5) * 12,
       life: 0,
-      maxLife: 60 + Math.random() * 40,
+      maxLife: 40 + Math.random() * 30,
       shape: Math.random() > 0.5 ? "rect" : "circle",
     });
   }
@@ -298,27 +298,23 @@ export default function CelebrationProvider({ children }: { children: ReactNode 
       {children}
 
       {/* ─── XP Toast overlay ─── */}
-      <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
+      <div className="fixed top-4 left-0 right-0 pointer-events-none z-[100] flex justify-center">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              className="absolute flex flex-col items-center"
-              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0a1020]/80 backdrop-blur-lg border border-emerald-500/20"
+              initial={{ opacity: 0, scale: 0.8, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -60 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
             >
-              {/* Glow background */}
-              <div className="absolute w-32 h-32 rounded-full bg-emerald-400/20 blur-3xl" />
-              <div className="relative">
-                <span className="text-5xl sm:text-6xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-300 via-emerald-400 to-cyan-400 drop-shadow-[0_0_30px_rgba(52,211,153,0.4)]">
-                  +{toast.amount}
-                </span>
-                <span className="block text-center text-emerald-300/80 text-sm font-mono tracking-widest mt-1">
-                  {toast.label || "XP"}
-                </span>
-              </div>
+              <span className="text-2xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-400">
+                +{toast.amount}
+              </span>
+              <span className="text-emerald-300/70 text-xs font-mono tracking-widest">
+                {toast.label || "XP"}
+              </span>
             </motion.div>
           ))}
         </AnimatePresence>
