@@ -1,0 +1,143 @@
+/* ─── Carousel Container ─── */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 16px;
+  --outer-r: 24px;
+  --p-distance: 12px;
+}
+
+/* ─── Track ─── */
+.carousel-track {
+  display: flex;
+}
+
+/* ─── Card Items ─── */
+.carousel-item {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--outer-r) - var(--p-distance));
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  cursor: grab;
+}
+
+.carousel-item:active {
+  cursor: grabbing;
+}
+
+/* ─── Card Header ─── */
+.carousel-item-header {
+  margin-bottom: 16px;
+  padding: 20px;
+  padding-top: 20px;
+}
+
+.carousel-icon-container {
+  display: flex;
+  height: 36px;
+  width: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(56, 189, 248, 0.1));
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.carousel-icon {
+  height: 18px;
+  width: 18px;
+  color: rgba(52, 211, 153, 0.9);
+}
+
+/* ─── Card Content ─── */
+.carousel-item-content {
+  padding: 0 20px 20px;
+}
+
+.carousel-item-title {
+  margin-bottom: 6px;
+  font-weight: 700;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: "Instrument Serif", serif;
+  letter-spacing: -0.01em;
+}
+
+.carousel-item-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: "Inter", sans-serif;
+}
+
+/* ─── Dot Indicators ─── */
+.carousel-indicators-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.carousel-indicators {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  padding: 0 32px;
+}
+
+.carousel-indicator {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.carousel-indicator.active {
+  background-color: rgba(52, 211, 153, 0.9);
+}
+
+.carousel-indicator.inactive {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.carousel-indicator:hover {
+  transform: scale(1.3);
+}
+
+/* ─── Round variant (unused but kept for API compat) ─── */
+.carousel-container.round {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.carousel-item.round {
+  background: rgba(255, 255, 255, 0.03);
+  position: relative;
+  bottom: 0.1em;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.carousel-item-header.round {
+  padding: 0;
+  margin: 0;
+}
+
+.carousel-indicators-container.round {
+  position: absolute;
+  z-index: 2;
+  bottom: 3em;
+  left: 50%;
+  transform: translateX(-50%);
+}

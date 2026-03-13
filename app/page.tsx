@@ -9,6 +9,7 @@ import DailyChallenge from "@/components/DailyChallenge";
 import LanguagePicker from "@/components/LanguagePicker";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import FooterShowcase from "@/components/FooterShowcase";
 import { useAuth } from "@/components/AuthProvider";
 import type { LangCode } from "@/lib/utils";
 
@@ -46,7 +47,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center px-4 pt-24 sm:pt-32 pb-4 relative overflow-hidden">
       {/* Ambient hero glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.04] blur-[120px] pointer-events-none" />
       <div className="absolute top-1/4 left-1/3 w-[300px] h-[300px] rounded-full bg-purple-500/[0.03] blur-[100px] pointer-events-none" />
@@ -323,8 +324,12 @@ export default function Home() {
         <ExampleTopics />
       </motion.div>
 
-      <footer className="hidden sm:block fixed bottom-0 left-0 right-0 py-4 text-center bg-gradient-to-t from-[#070b14] via-[#070b14]/80 to-transparent pointer-events-none">
-        <p className="text-white/10 text-xs font-sans pointer-events-auto">
+      {/* Feature showcase carousel */}
+      <FooterShowcase />
+
+      {/* Brand footer */}
+      <footer className="w-full py-6 sm:py-4 text-center pb-20 sm:pb-6">
+        <p className="text-white/10 text-xs font-sans">
           Teach Me Like I&apos;m 10
           {isGuest && (
             <>
