@@ -208,3 +208,29 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Shared topics: "Teach a Friend" shareable topic links
+create table public.shared_topics (
+  id uuid primary key default gen_random_uuid(),
+  share_code text not null unique,
+  sharer_user_id uuid references public.profiles(id) on delete set null,
+  sharer_name text not null default 'A friend',
+  topic_slug text not null,
+  topic_name text not null,
+  lang text not null default 'en',
+  levels jsonb not null default '[]',
+  max_level integer not null default 0,
+  personal_message text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.shared_topics enable row level security;
+
+create policy "Shared topics are viewable by everyone"
+  on public.shared_topics for select using (true);
+
+create policy "Anyone can create shared topics"
+  on public.shared_topics for insert with check (true);
+
+create index idx_shared_topics_code on public.shared_topics(share_code);
+create index idx_shared_topics_user on public.shared_topics(sharer_user_id);

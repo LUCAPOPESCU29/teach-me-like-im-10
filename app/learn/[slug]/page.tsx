@@ -17,6 +17,7 @@ import FlashcardButton from "@/components/FlashcardButton";
 import ShareButton from "@/components/ShareButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import TopicRating from "@/components/TopicRating";
+import TeachAFriendModal from "@/components/TeachAFriendModal";
 import { LEVEL_XP } from "@/lib/xp";
 import { useAuth } from "@/components/AuthProvider";
 import { useCelebration } from "@/components/CelebrationProvider";
@@ -67,6 +68,7 @@ export default function LearnPage() {
   const [error, setError] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showTeachBack, setShowTeachBack] = useState(false);
+  const [showTeachFriend, setShowTeachFriend] = useState(false);
   const [lastXPGain, setLastXPGain] = useState<number | null>(null);
   const [topicRating, setTopicRating] = useState<{ userRating: number | null; avgRating: number | null; totalRatings: number }>({ userRating: null, avgRating: null, totalRatings: 0 });
   const abortRef = useRef<AbortController | null>(null);
@@ -467,6 +469,22 @@ export default function LearnPage() {
                   lang={lang}
                 />
                 <ShareButton topic={topic} slug={slug} level={currentLevel} />
+                <motion.button
+                  onClick={() => setShowTeachFriend(true)}
+                  className="group relative px-4 sm:px-6 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="absolute inset-0 border border-amber-500/30 rounded-xl" />
+                  <div className="absolute inset-0 bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors" />
+                  <span className="relative z-10 text-amber-400 flex items-center gap-2">
+                    <span className="text-lg">🎓</span>
+                    TEACH A FRIEND
+                  </span>
+                </motion.button>
               </div>
             )}
           </div>
@@ -529,6 +547,19 @@ export default function LearnPage() {
                 lang={lang}
               />
               <ShareButton topic={topic} slug={slug} level={currentLevel} />
+              <motion.button
+                onClick={() => setShowTeachFriend(true)}
+                className="group relative px-8 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute inset-0 border border-amber-500/30 rounded-xl" />
+                <div className="absolute inset-0 bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors" />
+                <span className="relative z-10 text-amber-400 flex items-center gap-2">
+                  <span className="text-lg">🎓</span>
+                  TEACH A FRIEND
+                </span>
+              </motion.button>
               <button
                 onClick={() => router.push("/")}
                 className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-white/60 hover:text-white/90 transition-all duration-200 font-sans text-sm"
@@ -580,6 +611,19 @@ export default function LearnPage() {
             }))}
             lang={lang}
             onClose={() => setShowTeachBack(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Teach a Friend modal */}
+      <AnimatePresence>
+        {showTeachFriend && (
+          <TeachAFriendModal
+            topic={topic}
+            slug={slug}
+            lang={lang}
+            levels={levels}
+            onClose={() => setShowTeachFriend(false)}
           />
         )}
       </AnimatePresence>
