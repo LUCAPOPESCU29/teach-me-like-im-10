@@ -24,6 +24,25 @@ interface LevelCardProps {
   lang?: string;
 }
 
+// Strip markdown to plain text for TTS
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/`{1,3}[^`]*`{1,3}/g, "")
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+    .replace(/[>-]\s+/g, "")
+    .replace(/\$\$?[^$]+\$\$?/g, "")
+    .replace(/\n{2,}/g, ". ")
+    .replace(/\n/g, " ")
+    .trim();
+}
+
+const SPEECH_LANG: Record<string, string> = {
+  en: "en-US", ro: "ro-RO", fr: "fr-FR", es: "es-ES", de: "de-DE",
+};
+
 export default function LevelCard({
   level,
   content,
@@ -37,6 +56,9 @@ export default function LevelCard({
   const [clarification, setClarification] = useState<string | null>(null);
   const [clarifyLoading, setClarifyLoading] = useState(false);
 
+  // Audio state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   // Analogy state
   const [showAnalogyPicker, setShowAnalogyPicker] = useState(false);
   const [activeCategory, setActiveCategory] = useState<AnalogyCategory | null>(null);
@@ -48,8 +70,35 @@ export default function LevelCard({
   useEffect(() => {
     return () => {
       analogyAbortRef.current?.abort();
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
+
+  const handleToggleAudio = useCallback(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const plainText = stripMarkdown(content);
+    if (!plainText) return;
+
+    const utterance = new SpeechSynthesisUtterance(plainText);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.lang = SPEECH_LANG[lang || "en"] || "en-US";
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
+  }, [content, lang, isSpeaking]);
 
   const handleParagraphClick = useCallback(
     async (text: string, index: number) => {
@@ -184,11 +233,43 @@ export default function LevelCard({
             <span className="text-2xl">{meta.emoji}</span>
           )}
           <h2
-            className="text-lg font-display font-semibold"
+            className="text-lg font-display font-semibold flex-1"
             style={{ color: meta.color }}
           >
             Level {level}: {meta.label}
           </h2>
+          {/* Audio listen button */}
+          {!isStreaming && content && (
+            <motion.button
+              onClick={handleToggleAudio}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-200"
+              style={{
+                backgroundColor: isSpeaking ? `${meta.color}20` : `${meta.color}08`,
+                border: `1px solid ${isSpeaking ? `${meta.color}40` : `${meta.color}15`}`,
+                color: `${meta.color}cc`,
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              title={isSpeaking ? "Stop listening" : "Listen to this level"}
+            >
+              {isSpeaking ? (
+                <>
+                  <motion.span
+                    animate={{ opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    🔊
+                  </motion.span>
+                  STOP
+                </>
+              ) : (
+                <>🔊 LISTEN</>
+              )}
+            </motion.button>
+          )}
         </div>
 
         {/* Content */}
