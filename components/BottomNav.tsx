@@ -7,6 +7,7 @@ import { useCelebration } from "@/components/CelebrationProvider";
 const NAV_ITEMS = [
   { href: "/", label: "Home", emoji: "\u{1F3E0}" },
   { href: "/math", label: "Math", emoji: "\u{1F9EE}" },
+  { href: "/battle", label: "Battle", emoji: "\u2694\uFE0F" },
   { href: "/code", label: "Code", emoji: "\u{1F4BB}" },
   { href: "/progress", label: "Progress", emoji: "\u{1FA90}" },
 ] as const;

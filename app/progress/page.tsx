@@ -13,6 +13,7 @@ import type { Badge } from "@/lib/badges";
 import type { ActivityDay, XPEvent, TopicHistoryItem } from "@/lib/data";
 import { XP_LEVELS } from "@/lib/xp";
 import SolarSystem from "@/components/SolarSystem";
+import ConceptMap from "@/components/ConceptMap";
 
 const Galaxy = dynamic(() => import("@/components/Galaxy"), { ssr: false });
 
@@ -189,6 +190,24 @@ export default function ProgressPage() {
           totalXP={stats.totalXP}
         />
       </motion.div>
+
+      {/* Concept Map */}
+      {topicHistory.length >= 2 && (
+        <motion.div
+          className="p-5 rounded-2xl border border-white/10 bg-white/[0.02] mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.19 }}
+        >
+          <h2 className="text-white font-display text-lg mb-4">
+            Concept Map
+            <span className="text-white/30 text-sm font-sans ml-2">
+              how your topics connect
+            </span>
+          </h2>
+          <ConceptMap topics={topicHistory} />
+        </motion.div>
+      )}
 
       {/* Activity calendar */}
       {!isGuest && (
