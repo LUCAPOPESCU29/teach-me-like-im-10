@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Safari } from "@/components/ui/safari";
+import { Iphone } from "@/components/ui/iphone";
 import Aurora from "@/components/Aurora";
 
 const STEPS = [
@@ -257,9 +258,9 @@ export default function HowItWorksPage() {
         ))}
       </motion.div>
 
-      {/* Safari browser with step content */}
+      {/* Safari browser (desktop) */}
       <motion.div
-        className="w-full max-w-4xl relative z-10"
+        className="hidden sm:block w-full max-w-4xl relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -279,6 +280,28 @@ export default function HowItWorksPage() {
             >
               {step.screen}
             </Safari>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+
+      {/* iPhone (mobile) */}
+      <motion.div
+        className="sm:hidden w-full max-w-[280px] relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeStep}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Iphone className="shadow-2xl shadow-black/40">
+              {step.screen}
+            </Iphone>
           </motion.div>
         </AnimatePresence>
       </motion.div>
