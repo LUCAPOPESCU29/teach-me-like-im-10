@@ -12,6 +12,10 @@ import UserMenu from "@/components/UserMenu";
 import FooterShowcase from "@/components/FooterShowcase";
 import { useAuth } from "@/components/AuthProvider";
 import type { LangCode } from "@/lib/utils";
+import TiltCard from "@/components/TiltCard";
+import SplitText from "@/components/SplitText";
+import Aurora from "@/components/Aurora";
+import MagneticButton from "@/components/MagneticButton";
 
 export default function Home() {
   const { data, isGuest } = useAuth();
@@ -48,9 +52,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center px-4 pt-24 sm:pt-32 pb-4 relative overflow-hidden">
-      {/* Ambient hero glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.04] blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/4 left-1/3 w-[300px] h-[300px] rounded-full bg-purple-500/[0.03] blur-[100px] pointer-events-none" />
+      {/* Aurora animated background */}
+      <Aurora />
 
       {/* Top bar */}
       <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
@@ -126,36 +129,36 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-          <button
+          <MagneticButton
             onClick={() => router.push("/battle")}
             className="px-3 py-1.5 rounded-lg bg-rose-500/[0.06] border border-rose-500/15 text-rose-400/60 hover:text-rose-400/90 hover:bg-rose-500/[0.12] hover:border-rose-500/30 font-sans text-xs transition-all duration-300"
           >
             Quiz Battle
-          </button>
-          <button
+          </MagneticButton>
+          <MagneticButton
             onClick={() => router.push("/math")}
             className="px-3 py-1.5 rounded-lg bg-indigo-500/[0.06] border border-indigo-500/15 text-indigo-400/60 hover:text-indigo-400/90 hover:bg-indigo-500/[0.12] hover:border-indigo-500/30 font-sans text-xs transition-all duration-300"
           >
             Math Edition
-          </button>
-          <button
+          </MagneticButton>
+          <MagneticButton
             onClick={() => router.push("/code")}
             className="px-3 py-1.5 rounded-lg bg-emerald-500/[0.06] border border-emerald-500/15 text-emerald-400/60 hover:text-emerald-400/90 hover:bg-emerald-500/[0.12] hover:border-emerald-500/30 font-sans text-xs transition-all duration-300"
           >
             Code Edition
-          </button>
-          <button
+          </MagneticButton>
+          <MagneticButton
             onClick={() => router.push("/paths")}
             className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06] hover:border-white/10 font-sans text-xs transition-all duration-300"
           >
             Paths
-          </button>
-          <button
+          </MagneticButton>
+          <MagneticButton
             onClick={() => router.push("/leaderboard")}
             className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06] hover:border-white/10 font-sans text-xs transition-all duration-300"
           >
             Leaderboard
-          </button>
+          </MagneticButton>
         </div>
 
         <LanguagePicker value={lang} onChange={handleLangChange} />
@@ -311,11 +314,11 @@ export default function Home() {
           ))}
         </motion.div>
 
-        <h1 className="font-display text-5xl sm:text-7xl text-white mb-5 leading-tight">
-          Teach Me
+        <h1 className="font-display text-5xl sm:text-7xl text-white mb-5 leading-tight" style={{ perspective: 600 }}>
+          <SplitText text="Teach Me" delay={0.2} stagger={0.04} />
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300">
-            Like I&apos;m 10
+            <SplitText text="Like I'm 10" delay={0.5} stagger={0.04} />
           </span>
         </h1>
         <p className="text-white/35 text-lg sm:text-xl max-w-lg mx-auto font-serif leading-relaxed">
@@ -323,7 +326,9 @@ export default function Home() {
         </p>
       </motion.div>
 
-      <DailyChallenge />
+      <TiltCard className="w-full max-w-xl" glareColor="rgba(52, 211, 153, 0.06)">
+        <DailyChallenge />
+      </TiltCard>
 
       <TopicInput lang={lang} />
 
