@@ -126,6 +126,103 @@ html:not(.dark) .glass-card {
 /* Light mode KaTeX */
 html:not(.dark) .katex-display > .katex { color: rgba(0, 0, 0, 0.85); }
 
+/* ── Light mode: global color overrides ── */
+/* Swap white text → dark text throughout */
+html:not(.dark) {
+  /* Make all white-based text dark */
+  --tw-text-opacity: 1;
+  color-scheme: light;
+}
+
+/* Main content text: swap white→dark globally */
+html:not(.dark) main,
+html:not(.dark) nav,
+html:not(.dark) footer,
+html:not(.dark) header {
+  color: #1e293b;
+}
+
+/* Borders: swap white borders → subtle dark borders */
+html:not(.dark) [class*="border-white"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Backgrounds: swap dark translucent bg → light translucent bg */
+html:not(.dark) [class*="bg-white/[0.0"] {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+html:not(.dark) [class*="bg-white/5"] {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Cards and containers with dark backgrounds */
+html:not(.dark) [class*="bg-[#070b14]"],
+html:not(.dark) [class*="bg-[#0a"] {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Nav bar background */
+html:not(.dark) [class*="bg-[#070b14]/"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Text opacity classes: make them darker in light mode */
+html:not(.dark) [class*="text-white/"] {
+  color: rgba(0, 0, 0, 0.55) !important;
+}
+html:not(.dark) [class*="text-white"] {
+  color: #1e293b !important;
+}
+
+/* Keep colored text as-is (emerald, rose, amber etc) but darken slightly */
+html:not(.dark) [class*="text-emerald"] {
+  color: revert !important;
+}
+html:not(.dark) [class*="text-rose"],
+html:not(.dark) [class*="text-amber"],
+html:not(.dark) [class*="text-indigo"],
+html:not(.dark) [class*="text-blue"],
+html:not(.dark) [class*="text-orange"],
+html:not(.dark) [class*="text-purple"],
+html:not(.dark) [class*="text-red"] {
+  color: revert !important;
+}
+
+/* Fix placeholder text */
+html:not(.dark) [class*="placeholder:text-white"] {
+  --tw-placeholder-opacity: 1;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix the gradient fade above bottom nav */
+html:not(.dark) [class*="from-[#070b14]"] {
+  --tw-gradient-from: rgba(248, 250, 251, 1) !important;
+}
+
+/* Fix fill colors in SVGs */
+html:not(.dark) [class*="fill-[#"] {
+  fill: currentColor;
+}
+
+/* Light mode: brighten Aurora blobs */
+html:not(.dark) [class*="fixed inset-0 -z-10"] {
+  opacity: 0.4;
+}
+
+/* Light mode math solver */
+html:not(.dark) .math-solution h3 {
+  background: rgba(99, 102, 241, 0.06);
+  border-left-color: rgba(99, 102, 241, 0.4);
+  color: rgba(79, 70, 229, 0.85);
+}
+html:not(.dark) .math-solution .katex-display {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 /* Glow pulse keyframe for reuse */
 @keyframes glow-pulse {
   0%, 100% { opacity: 0.4; }
