@@ -6,6 +6,8 @@ import { useMemo } from "react";
 interface SplitTextProps {
   text: string;
   className?: string;
+  /** Applied to each individual character/word span */
+  charClassName?: string;
   delay?: number;
   stagger?: number;
   /** "chars" splits every character; "words" splits by word */
@@ -15,6 +17,7 @@ interface SplitTextProps {
 export default function SplitText({
   text,
   className = "",
+  charClassName = "",
   delay = 0,
   stagger = 0.03,
   splitBy = "chars",
@@ -29,7 +32,7 @@ export default function SplitText({
       {pieces.map((piece, i) => (
         <motion.span
           key={`${piece}-${i}`}
-          className="inline-block"
+          className={`inline-block ${charClassName}`}
           style={{ transformStyle: "preserve-3d" }}
           initial={{
             opacity: 0,

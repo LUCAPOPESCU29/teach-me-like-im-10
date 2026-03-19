@@ -320,9 +320,12 @@ export default function Home() {
         <h1 className="font-display text-5xl sm:text-7xl text-white mb-5 leading-tight" style={{ perspective: 600 }}>
           <SplitText text="Teach Me" delay={0.2} stagger={0.04} />
           <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300">
-            <SplitText text="Like I'm 10" delay={0.5} stagger={0.04} />
-          </span>
+          <SplitText
+            text="Like I'm 10"
+            delay={0.5}
+            stagger={0.04}
+            charClassName="text-emerald-400"
+          />
         </h1>
         <p className="text-white/35 text-lg sm:text-xl max-w-lg mx-auto font-serif leading-relaxed">
           Pick any topic. Start simple. Go as deep as you want.
