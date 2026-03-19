@@ -127,6 +127,12 @@ export default function Home() {
             )}
           </AnimatePresence>
           <button
+            onClick={() => router.push("/battle")}
+            className="px-3 py-1.5 rounded-lg bg-rose-500/[0.06] border border-rose-500/15 text-rose-400/60 hover:text-rose-400/90 hover:bg-rose-500/[0.12] hover:border-rose-500/30 font-sans text-xs transition-all duration-300"
+          >
+            Quiz Battle
+          </button>
+          <button
             onClick={() => router.push("/math")}
             className="px-3 py-1.5 rounded-lg bg-indigo-500/[0.06] border border-indigo-500/15 text-indigo-400/60 hover:text-indigo-400/90 hover:bg-indigo-500/[0.12] hover:border-indigo-500/30 font-sans text-xs transition-all duration-300"
           >
@@ -186,6 +192,12 @@ export default function Home() {
               exit={{ opacity: 0, y: -8, scale: 0.95 }}
               transition={{ duration: 0.15 }}
             >
+              <button
+                onClick={() => { router.push("/battle"); setMobileMenuOpen(false); }}
+                className="w-full text-left px-3 py-2.5 rounded-lg text-rose-400/60 hover:text-rose-400/90 hover:bg-rose-500/[0.05] text-sm font-sans transition-colors"
+              >
+                Quiz Battle
+              </button>
               <button
                 onClick={() => { router.push("/math"); setMobileMenuOpen(false); }}
                 className="w-full text-left px-3 py-2.5 rounded-lg text-indigo-400/60 hover:text-indigo-400/90 hover:bg-indigo-500/[0.05] text-sm font-sans transition-colors"
