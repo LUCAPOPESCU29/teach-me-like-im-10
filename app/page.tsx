@@ -16,6 +16,7 @@ import TiltCard from "@/components/TiltCard";
 import SplitText from "@/components/SplitText";
 import Aurora from "@/components/Aurora";
 import MagneticButton from "@/components/MagneticButton";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export default function Home() {
   const { data, isGuest } = useAuth();
@@ -162,6 +163,8 @@ export default function Home() {
         </div>
 
         <LanguagePicker value={lang} onChange={handleLangChange} />
+
+        <AnimatedThemeToggler className="bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]" />
 
         {/* Mobile hamburger button */}
         <button
