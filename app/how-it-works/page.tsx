@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Safari } from "@/components/ui/safari";
 import { Iphone } from "@/components/ui/iphone";
 import Aurora from "@/components/Aurora";
+
+function useTheme() {
+  const [isDark, setIsDark] = useState(true);
+  useEffect(() => {
+    const update = () => setIsDark(document.documentElement.classList.contains("dark"));
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+  return isDark;
+}
 
 const STEPS = [
   {
@@ -198,6 +210,15 @@ export default function HowItWorksPage() {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const step = STEPS[activeStep];
+  const isDark = useTheme();
+
+  // Theme-aware colors for page UI (not the mockup screens inside Safari/iPhone)
+  const inactiveText = isDark ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.45)";
+  const inactiveBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(15,23,42,0.10)";
+  const inactiveBg = isDark ? "rgba(255,255,255,0.02)" : "rgba(15,23,42,0.03)";
+  const inactiveCircleBg = isDark ? "rgba(255,255,255,0.05)" : "rgba(15,23,42,0.06)";
+  const inactiveCircleText = isDark ? "rgba(255,255,255,0.3)" : "rgba(15,23,42,0.4)";
+  const dotInactive = isDark ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.12)";
 
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-8 sm:py-16 relative overflow-hidden">
@@ -239,16 +260,16 @@ export default function HowItWorksPage() {
             onClick={() => setActiveStep(i)}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl border text-sm font-sans transition-all duration-300"
             style={{
-              borderColor: activeStep === i ? s.color + "40" : "rgba(255,255,255,0.06)",
-              backgroundColor: activeStep === i ? s.color + "10" : "rgba(255,255,255,0.02)",
-              color: activeStep === i ? s.color : "rgba(255,255,255,0.35)",
+              borderColor: activeStep === i ? s.color + "40" : inactiveBorder,
+              backgroundColor: activeStep === i ? s.color + "10" : inactiveBg,
+              color: activeStep === i ? s.color : inactiveText,
             }}
           >
             <span
               className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold"
               style={{
-                backgroundColor: activeStep === i ? s.color + "25" : "rgba(255,255,255,0.05)",
-                color: activeStep === i ? s.color : "rgba(255,255,255,0.3)",
+                backgroundColor: activeStep === i ? s.color + "25" : inactiveCircleBg,
+                color: activeStep === i ? s.color : inactiveCircleText,
               }}
             >
               {s.id}
@@ -276,7 +297,7 @@ export default function HowItWorksPage() {
             <Safari
               url="teachmelikeim10.xyz"
               mode="default"
-              className="rounded-xl shadow-2xl shadow-black/40"
+              className={`rounded-xl shadow-2xl ${isDark ? "shadow-black/40" : "shadow-black/15"}`}
             >
               {step.screen}
             </Safari>
@@ -299,7 +320,7 @@ export default function HowItWorksPage() {
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.3 }}
           >
-            <Iphone className="shadow-2xl shadow-black/40">
+            <Iphone className={`shadow-2xl ${isDark ? "shadow-black/40" : "shadow-black/15"}`}>
               {step.screen}
             </Iphone>
           </motion.div>
@@ -340,7 +361,7 @@ export default function HowItWorksPage() {
               key={i}
               className="w-2 h-2 rounded-full transition-all duration-300 cursor-pointer"
               style={{
-                backgroundColor: activeStep === i ? s.color : "rgba(255,255,255,0.1)",
+                backgroundColor: activeStep === i ? s.color : dotInactive,
                 transform: activeStep === i ? "scale(1.3)" : "scale(1)",
               }}
               onClick={() => setActiveStep(i)}

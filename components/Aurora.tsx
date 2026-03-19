@@ -1,58 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const BLOBS = [
-  {
-    color: "rgba(52, 211, 153, 0.08)",
-    size: 500,
-    x: "20%",
-    y: "25%",
-    duration: 18,
-    delay: 0,
-  },
-  {
-    color: "rgba(139, 92, 246, 0.06)",
-    size: 450,
-    x: "70%",
-    y: "35%",
-    duration: 22,
-    delay: 2,
-  },
-  {
-    color: "rgba(59, 130, 246, 0.05)",
-    size: 400,
-    x: "45%",
-    y: "60%",
-    duration: 20,
-    delay: 4,
-  },
-  {
-    color: "rgba(244, 63, 94, 0.04)",
-    size: 350,
-    x: "80%",
-    y: "70%",
-    duration: 25,
-    delay: 1,
-  },
-  {
-    color: "rgba(251, 191, 36, 0.03)",
-    size: 300,
-    x: "15%",
-    y: "75%",
-    duration: 19,
-    delay: 3,
-  },
+const DARK_BLOBS = [
+  { color: "rgba(52, 211, 153, 0.08)", size: 500, x: "20%", y: "25%", duration: 18, delay: 0 },
+  { color: "rgba(139, 92, 246, 0.06)", size: 450, x: "70%", y: "35%", duration: 22, delay: 2 },
+  { color: "rgba(59, 130, 246, 0.05)", size: 400, x: "45%", y: "60%", duration: 20, delay: 4 },
+  { color: "rgba(244, 63, 94, 0.04)", size: 350, x: "80%", y: "70%", duration: 25, delay: 1 },
+  { color: "rgba(251, 191, 36, 0.03)", size: 300, x: "15%", y: "75%", duration: 19, delay: 3 },
+];
+
+const LIGHT_BLOBS = [
+  { color: "rgba(52, 211, 153, 0.12)", size: 500, x: "20%", y: "25%", duration: 18, delay: 0 },
+  { color: "rgba(139, 92, 246, 0.10)", size: 450, x: "70%", y: "35%", duration: 22, delay: 2 },
+  { color: "rgba(59, 130, 246, 0.08)", size: 400, x: "45%", y: "60%", duration: 20, delay: 4 },
+  { color: "rgba(244, 63, 94, 0.06)", size: 350, x: "80%", y: "70%", duration: 25, delay: 1 },
+  { color: "rgba(251, 191, 36, 0.06)", size: 300, x: "15%", y: "75%", duration: 19, delay: 3 },
 ];
 
 export default function Aurora() {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const update = () => setIsDark(document.documentElement.classList.contains("dark"));
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  const blobs = isDark ? DARK_BLOBS : LIGHT_BLOBS;
+
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050810] via-[#070b14] to-[#0a0f1a]" />
+      <div
+        className="absolute inset-0 transition-colors duration-500"
+        style={{
+          background: isDark
+            ? "linear-gradient(to bottom, #050810, #070b14, #0a0f1a)"
+            : "linear-gradient(to bottom, #f0f4f8, #f8fafb, #eef2f7)",
+        }}
+      />
 
       {/* Animated blobs */}
-      {BLOBS.map((blob, i) => (
+      {blobs.map((blob, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
@@ -62,7 +55,7 @@ export default function Aurora() {
             left: blob.x,
             top: blob.y,
             background: `radial-gradient(circle, ${blob.color} 0%, transparent 70%)`,
-            filter: "blur(80px)",
+            filter: isDark ? "blur(80px)" : "blur(100px)",
             transform: "translate(-50%, -50%)",
           }}
           animate={{
@@ -81,8 +74,9 @@ export default function Aurora() {
 
       {/* Grain overlay */}
       <div
-        className="absolute inset-0 opacity-[0.015]"
+        className="absolute inset-0"
         style={{
+          opacity: isDark ? 0.015 : 0.03,
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
           backgroundRepeat: "repeat",
           backgroundSize: "128px 128px",

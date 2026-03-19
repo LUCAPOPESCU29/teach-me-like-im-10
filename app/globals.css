@@ -119,114 +119,365 @@ html:not(.dark) ::selection {
 
 /* Light mode glass card */
 html:not(.dark) .glass-card {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Light mode KaTeX */
 html:not(.dark) .katex-display > .katex { color: rgba(0, 0, 0, 0.85); }
 
-/* ── Light mode: global color overrides ── */
-/* Swap white text → dark text throughout */
+/* ═══════════════════════════════════════════════════
+   LIGHT MODE — comprehensive overrides
+   ═══════════════════════════════════════════════════ */
+
 html:not(.dark) {
-  /* Make all white-based text dark */
-  --tw-text-opacity: 1;
   color-scheme: light;
 }
 
-/* Main content text: swap white→dark globally */
-html:not(.dark) main,
-html:not(.dark) nav,
-html:not(.dark) footer,
-html:not(.dark) header {
-  color: #1e293b;
-}
+/* ── 1. TEXT COLORS ── */
 
-/* Borders: swap white borders → subtle dark borders */
-html:not(.dark) [class*="border-white"] {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Backgrounds: swap dark translucent bg → light translucent bg */
-html:not(.dark) [class*="bg-white/[0.0"] {
-  background-color: rgba(255, 255, 255, 0.5) !important;
-}
-html:not(.dark) [class*="bg-white/5"] {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-}
-
-/* Cards and containers with dark backgrounds */
-html:not(.dark) [class*="bg-[#070b14]"],
-html:not(.dark) [class*="bg-[#0a"] {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* Nav bar background */
-html:not(.dark) [class*="bg-[#070b14]/"] {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-
-/* Text opacity classes: make them darker in light mode */
-html:not(.dark) [class*="text-white/"] {
-  color: rgba(0, 0, 0, 0.55) !important;
-}
+/* White text → dark slate */
 html:not(.dark) [class*="text-white"] {
   color: #1e293b !important;
 }
 
-/* Keep colored text as-is (emerald, rose, amber etc) but darken slightly */
-html:not(.dark) [class*="text-emerald"] {
-  color: revert !important;
+/* White text with opacity → proportional dark opacity */
+html:not(.dark) [class*="text-white/10"],
+html:not(.dark) [class*="text-white/[0.1"] {
+  color: rgba(15, 23, 42, 0.10) !important;
 }
-html:not(.dark) [class*="text-rose"],
-html:not(.dark) [class*="text-amber"],
-html:not(.dark) [class*="text-indigo"],
-html:not(.dark) [class*="text-blue"],
-html:not(.dark) [class*="text-orange"],
-html:not(.dark) [class*="text-purple"],
-html:not(.dark) [class*="text-red"] {
-  color: revert !important;
+html:not(.dark) [class*="text-white/20"],
+html:not(.dark) [class*="text-white/[0.2"] {
+  color: rgba(15, 23, 42, 0.22) !important;
+}
+html:not(.dark) [class*="text-white/30"],
+html:not(.dark) [class*="text-white/[0.3"] {
+  color: rgba(15, 23, 42, 0.38) !important;
+}
+html:not(.dark) [class*="text-white/35"] {
+  color: rgba(15, 23, 42, 0.45) !important;
+}
+html:not(.dark) [class*="text-white/40"],
+html:not(.dark) [class*="text-white/[0.4"] {
+  color: rgba(15, 23, 42, 0.50) !important;
+}
+html:not(.dark) [class*="text-white/50"],
+html:not(.dark) [class*="text-white/[0.5"] {
+  color: rgba(15, 23, 42, 0.55) !important;
+}
+html:not(.dark) [class*="text-white/60"],
+html:not(.dark) [class*="text-white/[0.6"] {
+  color: rgba(15, 23, 42, 0.65) !important;
+}
+html:not(.dark) [class*="text-white/70"],
+html:not(.dark) [class*="text-white/[0.7"] {
+  color: rgba(15, 23, 42, 0.72) !important;
+}
+html:not(.dark) [class*="text-white/80"],
+html:not(.dark) [class*="text-white/[0.8"] {
+  color: rgba(15, 23, 42, 0.82) !important;
+}
+html:not(.dark) [class*="text-white/90"],
+html:not(.dark) [class*="text-white/[0.9"] {
+  color: rgba(15, 23, 42, 0.90) !important;
 }
 
-/* Fix placeholder text */
-html:not(.dark) [class*="placeholder:text-white"] {
-  --tw-placeholder-opacity: 1;
+/* Preserve colored text — re-apply after the blanket text-white override */
+html:not(.dark) [class*="text-emerald-"] { color: revert !important; }
+html:not(.dark) [class*="text-green-"] { color: revert !important; }
+html:not(.dark) [class*="text-rose-"] { color: revert !important; }
+html:not(.dark) [class*="text-red-"] { color: revert !important; }
+html:not(.dark) [class*="text-amber-"] { color: revert !important; }
+html:not(.dark) [class*="text-yellow-"] { color: revert !important; }
+html:not(.dark) [class*="text-orange-"] { color: revert !important; }
+html:not(.dark) [class*="text-indigo-"] { color: revert !important; }
+html:not(.dark) [class*="text-blue-"] { color: revert !important; }
+html:not(.dark) [class*="text-purple-"] { color: revert !important; }
+html:not(.dark) [class*="text-violet-"] { color: revert !important; }
+html:not(.dark) [class*="text-pink-"] { color: revert !important; }
+html:not(.dark) [class*="text-cyan-"] { color: revert !important; }
+html:not(.dark) [class*="text-teal-"] { color: revert !important; }
+html:not(.dark) [class*="text-transparent"] { color: revert !important; }
+
+/* Deepen colored text slightly for better contrast on light bg */
+html:not(.dark) [class*="text-emerald-400"] { color: #059669 !important; }
+html:not(.dark) [class*="text-emerald-300"] { color: #10b981 !important; }
+html:not(.dark) [class*="text-rose-400"] { color: #e11d48 !important; }
+html:not(.dark) [class*="text-amber-400"] { color: #d97706 !important; }
+html:not(.dark) [class*="text-indigo-400"] { color: #4f46e5 !important; }
+html:not(.dark) [class*="text-blue-400"] { color: #2563eb !important; }
+html:not(.dark) [class*="text-orange-400"] { color: #ea580c !important; }
+html:not(.dark) [class*="text-purple-400"] { color: #7c3aed !important; }
+
+/* ── 2. BORDERS ── */
+
+html:not(.dark) [class*="border-white/"] {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+html:not(.dark) [class*="border-white/10"],
+html:not(.dark) [class*="border-white/[0.1"] {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+html:not(.dark) [class*="border-white/15"],
+html:not(.dark) [class*="border-white/20"] {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+html:not(.dark) [class*="border-white/30"] {
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+/* Preserve colored borders */
+html:not(.dark) [class*="border-emerald"] { border-color: revert !important; }
+html:not(.dark) [class*="border-rose"] { border-color: revert !important; }
+html:not(.dark) [class*="border-amber"] { border-color: revert !important; }
+html:not(.dark) [class*="border-indigo"] { border-color: revert !important; }
+html:not(.dark) [class*="border-blue"] { border-color: revert !important; }
+html:not(.dark) [class*="border-orange"] { border-color: revert !important; }
+html:not(.dark) [class*="border-purple"] { border-color: revert !important; }
+html:not(.dark) [class*="border-red"] { border-color: revert !important; }
+
+/* ── 3. BACKGROUNDS ── */
+
+/* In dark mode, bg-white/X creates subtle highlights on dark.
+   In light mode, invert: use subtle dark tints on light background. */
+html:not(.dark) [class*="bg-white/[0.0"] {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+html:not(.dark) [class*="bg-white/5"],
+html:not(.dark) [class*="bg-white/[0.05"] {
+  background-color: rgba(0, 0, 0, 0.035) !important;
+}
+html:not(.dark) [class*="bg-white/10"],
+html:not(.dark) [class*="bg-white/[0.1"] {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+html:not(.dark) [class*="bg-white/20"],
+html:not(.dark) [class*="bg-white/[0.2"] {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Hardcoded dark backgrounds → white/light */
+html:not(.dark) [class*="bg-[#070b14]"] {
+  background-color: #ffffff !important;
+}
+html:not(.dark) [class*="bg-[#070b14]/"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+html:not(.dark) [class*="bg-[#0a"] {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+}
+html:not(.dark) [class*="bg-[#050"] {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+}
+
+/* Colored bg with very low opacity → stronger on light */
+html:not(.dark) [class*="bg-emerald-500/5"],
+html:not(.dark) [class*="bg-emerald-500/[0.0"] {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+html:not(.dark) [class*="bg-emerald-500/10"] {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+html:not(.dark) [class*="bg-emerald-500/15"],
+html:not(.dark) [class*="bg-emerald-500/20"] {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+html:not(.dark) [class*="bg-rose-500/[0.0"],
+html:not(.dark) [class*="bg-rose-500/5"] {
+  background-color: rgba(225, 29, 72, 0.07) !important;
+}
+html:not(.dark) [class*="bg-rose-500/10"] {
+  background-color: rgba(225, 29, 72, 0.10) !important;
+}
+html:not(.dark) [class*="bg-indigo-500/[0.0"],
+html:not(.dark) [class*="bg-indigo-500/5"] {
+  background-color: rgba(79, 70, 229, 0.07) !important;
+}
+html:not(.dark) [class*="bg-indigo-500/10"] {
+  background-color: rgba(79, 70, 229, 0.10) !important;
+}
+html:not(.dark) [class*="bg-amber-500/[0.0"],
+html:not(.dark) [class*="bg-amber-500/5"] {
+  background-color: rgba(245, 158, 11, 0.07) !important;
+}
+html:not(.dark) [class*="bg-amber-500/10"] {
+  background-color: rgba(245, 158, 11, 0.10) !important;
+}
+html:not(.dark) [class*="bg-cyan-500/5"],
+html:not(.dark) [class*="bg-cyan-500/[0.0"] {
+  background-color: rgba(6, 182, 212, 0.07) !important;
+}
+html:not(.dark) [class*="bg-cyan-500/10"] {
+  background-color: rgba(6, 182, 212, 0.10) !important;
+}
+html:not(.dark) [class*="bg-purple-500/[0.0"],
+html:not(.dark) [class*="bg-purple-500/5"] {
+  background-color: rgba(168, 85, 247, 0.07) !important;
+}
+html:not(.dark) [class*="bg-blue-500/[0.0"],
+html:not(.dark) [class*="bg-blue-500/5"] {
+  background-color: rgba(59, 130, 246, 0.07) !important;
+}
+html:not(.dark) [class*="bg-orange-500/[0.0"],
+html:not(.dark) [class*="bg-orange-500/5"] {
+  background-color: rgba(249, 115, 22, 0.07) !important;
+}
+html:not(.dark) [class*="bg-red-500/10"] {
+  background-color: rgba(239, 68, 68, 0.10) !important;
+}
+
+/* ── 4. SHADOWS ── */
+html:not(.dark) [class*="shadow-black/"] {
+  --tw-shadow-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── 5. GRADIENTS ── */
+
+/* Dark gradient stops → light */
+html:not(.dark) [class*="from-[#070b14]"] {
+  --tw-gradient-from: #f8fafb !important;
+}
+html:not(.dark) [class*="to-transparent"] {
+  --tw-gradient-to: transparent !important;
+}
+
+/* ── 6. SPECIFIC COMPONENTS ── */
+
+/* Bottom nav */
+html:not(.dark) nav[class*="fixed bottom-0"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+}
+
+/* Top nav / header areas with backdrop blur */
+html:not(.dark) [class*="backdrop-blur"][class*="fixed top-"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Input fields */
+html:not(.dark) input,
+html:not(.dark) textarea {
+  color: #1e293b !important;
 }
 html:not(.dark) input::placeholder,
 html:not(.dark) textarea::placeholder {
-  color: rgba(0, 0, 0, 0.3) !important;
+  color: rgba(15, 23, 42, 0.35) !important;
 }
 
-/* Fix the gradient fade above bottom nav */
-html:not(.dark) [class*="from-[#070b14]"] {
-  --tw-gradient-from: rgba(248, 250, 251, 1) !important;
+/* Modals / overlays */
+html:not(.dark) [class*="backdrop-blur"] {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
 }
 
-/* Fix fill colors in SVGs */
-html:not(.dark) [class*="fill-[#"] {
-  fill: currentColor;
+/* Aurora background — soften blobs for light mode (component handles its own colors) */
+html:not(.dark) [class*="fixed inset-0"][class*="-z-10"] {
+  opacity: 0.6;
 }
 
-/* Light mode: brighten Aurora blobs */
-html:not(.dark) [class*="fixed inset-0 -z-10"] {
-  opacity: 0.4;
+/* Galaxy WebGL background — very faint in light mode */
+html:not(.dark) [class*="fixed inset-0"][class*="-z-10"] canvas {
+  opacity: 0.08;
 }
 
-/* Light mode math solver */
+/* Cards with rounded borders — only divs, not buttons */
+html:not(.dark) div[class*="rounded-2xl"][class*="border"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(15, 23, 42, 0.10) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+/* Rounded-xl card divs */
+html:not(.dark) div[class*="rounded-xl"][class*="border"] {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(15, 23, 42, 0.10) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Rounded-lg divs with borders */
+html:not(.dark) div[class*="rounded-lg"][class*="border"] {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* SVG fills — don't break colored fills */
+html:not(.dark) [class*="fill-white"] {
+  fill: #1e293b !important;
+}
+
+/* Preserve colored fills */
+html:not(.dark) [class*="fill-emerald"],
+html:not(.dark) [class*="fill-rose"],
+html:not(.dark) [class*="fill-amber"],
+html:not(.dark) [class*="fill-blue"],
+html:not(.dark) [class*="fill-indigo"],
+html:not(.dark) [class*="fill-purple"] {
+  fill: revert !important;
+}
+
+/* ── 7. HOVER STATES ── */
+
+html:not(.dark) [class*="hover:text-white"]:hover {
+  color: #0f172a !important;
+}
+html:not(.dark) [class*="hover:bg-white"]:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+html:not(.dark) [class*="hover:bg-white/[0.0"]:hover,
+html:not(.dark) [class*="hover:bg-white/5"]:hover,
+html:not(.dark) [class*="hover:bg-white/10"]:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+html:not(.dark) [class*="hover:border-white"]:hover {
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+/* ── 8. MATH SOLVER ── */
+
 html:not(.dark) .math-solution h3 {
-  background: rgba(99, 102, 241, 0.06);
-  border-left-color: rgba(99, 102, 241, 0.4);
-  color: rgba(79, 70, 229, 0.85);
+  background: rgba(79, 70, 229, 0.06);
+  border-left-color: rgba(79, 70, 229, 0.4);
+  color: #4338ca;
 }
 html:not(.dark) .math-solution .katex-display {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.015);
   border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ── 9. STREAKS, BADGES, CHARTS ── */
+
+/* Gradient backgrounds on buttons should be fully visible */
+/* Only reduce opacity on decorative absolute glow blurs */
+
+/* ── 10. FOOTER ── */
+
+html:not(.dark) footer {
+  color: rgba(15, 23, 42, 0.4);
+}
+
+/* ── 11. ANIMATIONS — soften decorative glow elements only ── */
+
+/* Target only absolute-positioned decorative blur elements, not functional ones */
+html:not(.dark) [class*="absolute"][class*="blur-"][class*="rounded-full"] {
+  opacity: 0.4;
 }
 
 /* Glow pulse keyframe for reuse */
 @keyframes glow-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out both;
 }
 
 @keyframes float {
