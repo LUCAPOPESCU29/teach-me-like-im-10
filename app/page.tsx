@@ -324,6 +324,17 @@ export default function Home() {
         <p className="text-white/35 text-lg sm:text-xl max-w-lg mx-auto font-serif leading-relaxed">
           Pick any topic. Start simple. Go as deep as you want.
         </p>
+        <motion.button
+          onClick={() => router.push("/how-it-works")}
+          className="mt-5 px-5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/70 hover:bg-white/[0.08] hover:border-white/[0.15] font-sans text-sm transition-all duration-300 inline-flex items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <span className="text-base">&#x1F4BB;</span> How does it work?
+        </motion.button>
       </motion.div>
 
       <TiltCard className="w-full max-w-xl" glareColor="rgba(52, 211, 153, 0.06)">
