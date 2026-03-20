@@ -109,6 +109,9 @@ export default function Navbar() {
 
   const isActive = (href: string) => pathname === href;
 
+  // Hide navbar on learn/topic pages
+  if (pathname.startsWith("/learn/")) return null;
+
   return (
     <>
       <nav
