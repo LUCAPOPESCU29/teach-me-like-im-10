@@ -4,6 +4,7 @@ import { PostHogProvider } from "@/components/PostHogProvider";
 import { PostHogPageView } from "@/components/PostHogPageView";
 import PageTransition from "@/components/PageTransition";
 import BottomNav from "@/components/BottomNav";
+import Navbar from "@/components/Navbar";
 import CelebrationProvider from "@/components/CelebrationProvider";
 import "./globals.css";
 
@@ -62,6 +63,7 @@ export default function RootLayout({
           <PostHogPageView />
           <AuthProvider>
             <CelebrationProvider>
+              <Navbar />
               <PageTransition>{children}</PageTransition>
               <BottomNav />
             </CelebrationProvider>
