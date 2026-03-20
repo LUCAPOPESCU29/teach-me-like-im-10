@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Safari } from "@/components/ui/safari";
 import { Iphone } from "@/components/ui/iphone";
 import Aurora from "@/components/Aurora";
+import { SparklesText } from "@/components/ui/sparkles-text";
 
 function useTheme() {
   const [isDark, setIsDark] = useState(true);
@@ -241,7 +242,13 @@ export default function HowItWorksPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="font-display text-4xl sm:text-5xl text-white mb-4">How It Works</h1>
+        <SparklesText
+          className="font-display text-4xl sm:text-5xl text-white mb-4"
+          colors={{ first: "#4ade80", second: "#a855f7" }}
+          sparklesCount={8}
+        >
+          How It Works
+        </SparklesText>
         <p className="text-white/35 text-lg max-w-lg mx-auto font-serif">
           Learn anything in 5 minutes. Here&apos;s how.
         </p>
