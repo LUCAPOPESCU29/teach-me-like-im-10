@@ -24,7 +24,7 @@ export default function Home() {
   }, [data]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 pt-24 sm:pt-32 pb-4 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center px-4 pt-12 sm:pt-16 pb-4 relative overflow-hidden">
       {/* Aurora animated background */}
       <Aurora />
 

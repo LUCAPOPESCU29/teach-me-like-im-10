@@ -112,7 +112,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        className={`relative w-full z-50 transition-colors duration-300 ${
           isDark
             ? "bg-[#070b14]/80 border-b border-white/[0.06]"
             : "bg-white/70 border-b border-black/[0.06]"
@@ -344,7 +344,7 @@ export default function Navbar() {
       <AnimatePresence>
         {showJoinInput && (
           <motion.div
-            className="fixed top-16 left-4 right-4 z-50 lg:hidden"
+            className="absolute top-16 left-4 right-4 z-50 lg:hidden"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
