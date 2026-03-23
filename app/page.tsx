@@ -12,6 +12,9 @@ import type { LangCode } from "@/lib/utils";
 import TiltCard from "@/components/TiltCard";
 import SplitText from "@/components/SplitText";
 import Aurora from "@/components/Aurora";
+import StreakBanner from "@/components/StreakBanner";
+import RecentTopics from "@/components/RecentTopics";
+import OnboardingTour from "@/components/OnboardingTour";
 
 export default function Home() {
   const { data, isGuest } = useAuth();
@@ -79,7 +82,9 @@ export default function Home() {
         </motion.button>
       </motion.div>
 
-      <TiltCard className="w-full max-w-xl" glareColor="rgba(52, 211, 153, 0.06)">
+      <StreakBanner />
+
+      <TiltCard className="w-full max-w-xl mt-4" glareColor="rgba(52, 211, 153, 0.06)">
         <DailyChallenge />
       </TiltCard>
 
@@ -94,8 +99,12 @@ export default function Home() {
         <ExampleTopics />
       </motion.div>
 
+      <RecentTopics />
+
       {/* Feature showcase carousel */}
       <FooterShowcase />
+
+      <OnboardingTour />
 
       {/* Brand footer */}
       <footer className="w-full py-6 sm:py-4 text-center pb-20 sm:pb-6">

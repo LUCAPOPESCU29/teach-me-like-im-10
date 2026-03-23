@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useMemo } from "react";
+import useIsMobile from "@/hooks/useIsMobile";
 
 interface SplitTextProps {
   text: string;
@@ -22,10 +23,25 @@ export default function SplitText({
   stagger = 0.03,
   splitBy = "chars",
 }: SplitTextProps) {
+  const isMobile = useIsMobile();
   const pieces = useMemo(() => {
     if (splitBy === "words") return text.split(" ");
     return text.split("");
   }, [text, splitBy]);
+
+  // On mobile: simple fade-in for the whole text, no per-character animation
+  if (isMobile) {
+    return (
+      <motion.span
+        className={`${className} ${charClassName}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay, ease: "easeOut" }}
+      >
+        {text}
+      </motion.span>
+    );
+  }
 
   return (
     <span className={className} aria-label={text}>

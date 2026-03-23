@@ -571,3 +571,66 @@ html:not(.dark) [class*="absolute"][class*="blur-"][class*="rounded-full"] {
 .math-solution li {
   margin-bottom: 0.35rem;
 }
+
+/* ═══════════════════════════════════════════════════
+   MOBILE PERFORMANCE — reduce GPU load
+   ═══════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Kill ALL animations and transitions on mobile */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  /* Kill heavy pseudo-element backgrounds on mobile */
+  body::before {
+    background: none !important;
+  }
+  body::after {
+    display: none !important;
+  }
+
+  /* Disable backdrop-blur on mobile (expensive compositing) */
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md,
+  [class*="backdrop-blur"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Reduce blur on decorative elements */
+  [class*="absolute"][class*="blur-"][class*="rounded-full"] {
+    filter: blur(30px) !important;
+    opacity: 0.2 !important;
+  }
+
+  /* Disable view transitions on mobile */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    display: none;
+  }
+
+  /* Force GPU layer promotion only where needed */
+  * {
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Smoother scrolling */
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

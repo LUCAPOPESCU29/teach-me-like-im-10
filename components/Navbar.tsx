@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
+import { slugify } from "@/lib/utils";
 import LanguagePicker from "@/components/LanguagePicker";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
 import MagneticButton from "@/components/MagneticButton";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useAuth } from "@/components/AuthProvider";
 import type { LangCode } from "@/lib/utils";
 
@@ -44,8 +44,11 @@ export default function Navbar() {
   const [joinCode, setJoinCode] = useState("");
   const [showJoinInput, setShowJoinInput] = useState(false);
   const joinInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [lang, setLang] = useState<LangCode>("en");
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const saved = data.getLang() as LangCode;
@@ -241,14 +244,97 @@ export default function Navbar() {
               <div className="sm:hidden">
                 <XPBadge />
               </div>
+
+              {/* Search */}
+              <AnimatePresence mode="wait">
+                {!showSearch ? (
+                  <motion.button
+                    key="search-icon"
+                    onClick={() => {
+                      setShowSearch(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 100);
+                    }}
+                    className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300 ${
+                      isDark
+                        ? "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]"
+                        : "bg-black/[0.03] border-black/[0.06] text-black/40 hover:text-black/70 hover:bg-black/[0.06]"
+                    }`}
+                    aria-label="Search topics"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.12 }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <circle cx="6.5" cy="6.5" r="5" />
+                      <path d="M10.5 10.5L15 15" />
+                    </svg>
+                  </motion.button>
+                ) : (
+                  <motion.form
+                    key="search-input"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const q = searchQuery.trim();
+                      if (q) {
+                        router.push(`/learn/${slugify(q)}`);
+                        setShowSearch(false);
+                        setSearchQuery("");
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${
+                      isDark
+                        ? "bg-[#070b14]/90 border-emerald-500/20"
+                        : "bg-white border-emerald-500/25 shadow-sm"
+                    }`}
+                    initial={{ opacity: 0, scale: 0.95, width: 0 }}
+                    animate={{ opacity: 1, scale: 1, width: "auto" }}
+                    exit={{ opacity: 0, scale: 0.95, width: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} strokeWidth="2" strokeLinecap="round">
+                      <circle cx="6.5" cy="6.5" r="5" />
+                      <path d="M10.5 10.5L15 15" />
+                    </svg>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          setShowSearch(false);
+                          setSearchQuery("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (!searchQuery.trim()) {
+                          setShowSearch(false);
+                          setSearchQuery("");
+                        }
+                      }}
+                      placeholder="Search any topic..."
+                      className={`w-32 sm:w-40 px-1 py-0.5 bg-transparent text-xs font-sans focus:outline-none placeholder:opacity-40 ${
+                        isDark ? "text-white placeholder:text-white" : "text-slate-900 placeholder:text-slate-500"
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSearch(false);
+                        setSearchQuery("");
+                      }}
+                      className={`text-xs transition-colors px-0.5 ${
+                        isDark ? "text-white/20 hover:text-white/50" : "text-black/20 hover:text-black/50"
+                      }`}
+                    >
+                      ✕
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+
               <LanguagePicker value={lang} onChange={handleLangChange} />
-              <AnimatedThemeToggler
-                className={`${
-                  isDark
-                    ? "bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]"
-                    : "bg-black/[0.03] border border-black/[0.06] text-black/40 hover:text-black/70 hover:bg-black/[0.06]"
-                }`}
-              />
               <UserMenu />
 
               {/* Mobile hamburger */}

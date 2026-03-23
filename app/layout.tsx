@@ -5,7 +5,11 @@ import { PostHogPageView } from "@/components/PostHogPageView";
 import PageTransition from "@/components/PageTransition";
 import BottomNav from "@/components/BottomNav";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import CelebrationProvider from "@/components/CelebrationProvider";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import MobileMotionConfig from "@/components/MobileMotionConfig";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,11 +41,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){}})()`,
-          }}
-        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -62,11 +61,16 @@ export default function RootLayout({
         <PostHogProvider>
           <PostHogPageView />
           <AuthProvider>
-            <CelebrationProvider>
-              <Navbar />
-              <PageTransition>{children}</PageTransition>
-              <BottomNav />
-            </CelebrationProvider>
+            <MobileMotionConfig>
+              <CelebrationProvider>
+                <Navbar />
+                <PageTransition>{children}</PageTransition>
+                <Footer />
+                <ScrollToTop />
+                <BottomNav />
+                <ServiceWorkerRegister />
+              </CelebrationProvider>
+            </MobileMotionConfig>
           </AuthProvider>
         </PostHogProvider>
       </body>

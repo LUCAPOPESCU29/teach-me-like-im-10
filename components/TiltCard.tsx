@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode, type MouseEvent } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import useIsMobile from "@/hooks/useIsMobile";
 
 interface TiltCardProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ export default function TiltCard({
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
+  const isMobile = useIsMobile();
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -29,7 +31,7 @@ export default function TiltCard({
   const springRotateY = useSpring(rotateY, springConfig);
 
   function handleMouse(e: MouseEvent<HTMLDivElement>) {
-    if (!ref.current) return;
+    if (isMobile || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width;
     const py = (e.clientY - rect.top) / rect.height;
@@ -43,6 +45,11 @@ export default function TiltCard({
     setHovering(false);
     rotateX.set(0);
     rotateY.set(0);
+  }
+
+  // On mobile: just render children without any tilt/spring overhead
+  if (isMobile) {
+    return <div className={`relative ${className}`}>{children}</div>;
   }
 
   return (

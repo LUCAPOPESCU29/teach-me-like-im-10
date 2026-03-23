@@ -2,6 +2,7 @@
 
 import { useRef, type ReactNode, type MouseEvent } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import useIsMobile from "@/hooks/useIsMobile";
 
 interface MagneticButtonProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ export default function MagneticButton({
   onClick,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
+  const isMobile = useIsMobile();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -25,7 +27,7 @@ export default function MagneticButton({
   const springY = useSpring(y, springConfig);
 
   function handleMouse(e: MouseEvent<HTMLButtonElement>) {
-    if (!ref.current) return;
+    if (isMobile || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -36,6 +38,15 @@ export default function MagneticButton({
   function handleLeave() {
     x.set(0);
     y.set(0);
+  }
+
+  // On mobile: plain button, no spring transforms
+  if (isMobile) {
+    return (
+      <button ref={ref} onClick={onClick} className={className}>
+        {children}
+      </button>
+    );
   }
 
   return (
