@@ -23,7 +23,7 @@
   --muted:rgba(255,255,255,0.38);
   --ease-out:cubic-bezier(0.23,1,0.32,1);
 }
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 body{
   background:var(--bg);color:var(--text);
   font-family:'Plus Jakarta Sans',sans-serif;
@@ -284,7 +284,15 @@ p.sec-sub{font-size:17px;color:var(--muted);max-width:480px;line-height:1.72}
   opacity:0;transition:opacity 1.2s ease;
   border-radius:0;
 }
-@media(max-width:960px){.deco-canvas{display:none}}
+@media(max-width:960px){
+  .deco-canvas{display:none}
+  #depth-journey{min-height:auto;padding:80px 0}
+  .dj-inner{min-height:auto!important;padding:48px 24px!important}
+  .dj-scroll-hint{display:none}
+  .dj-bg-num{display:none}
+  #sec-dots{display:none}
+  .orbit-label{display:none}
+}
 
 /* ── STATS ── */
 #stats{padding:64px 0}
@@ -1676,6 +1684,8 @@ footer{
    GSAP ANIMATIONS
 ═══════════════════════════════════════════════════ */
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.normalizeScroll(true);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /* ── Scroll Progress Bar ── */
 ScrollTrigger.create({
@@ -2171,11 +2181,23 @@ ScrollTrigger.create({
   }
   steps.forEach((s,i)=>s.addEventListener('click',()=>updateDJ(i)));
   updateDJ(0);
-  ScrollTrigger.create({
-    trigger:'#depth-journey', start:'top top', end:'+=400%',
-    pin:true, scrub:0.9,
-    onUpdate(self){ updateDJ(Math.min(4,Math.floor(self.progress*5))); }
-  });
+
+  const isMobile = window.matchMedia('(max-width:960px)').matches;
+  if (!isMobile) {
+    ScrollTrigger.create({
+      trigger:'#depth-journey', start:'top top', end:'+=400%',
+      pin:true, scrub:0.9,
+      onUpdate(self){ updateDJ(Math.min(4,Math.floor(self.progress*5))); }
+    });
+  } else {
+    ScrollTrigger.create({
+      trigger:'#depth-journey', start:'top 60%', once:true,
+      onEnter(){
+        let lvl=0;
+        setInterval(()=>{ lvl=(lvl+1)%5; updateDJ(lvl); }, 2800);
+      }
+    });
+  }
 })();
 
 /* ═══════════════════════════════════════════════════
