@@ -1,128 +1,432 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import TopicInput from "@/components/TopicInput";
 import ExampleTopics from "@/components/ExampleTopics";
 import DailyChallenge from "@/components/DailyChallenge";
-import FooterShowcase from "@/components/FooterShowcase";
 import { useAuth } from "@/components/AuthProvider";
 import type { LangCode } from "@/lib/utils";
 import TiltCard from "@/components/TiltCard";
 import SplitText from "@/components/SplitText";
 import Aurora from "@/components/Aurora";
 import StreakBanner from "@/components/StreakBanner";
+import StreakRiskWarning from "@/components/StreakRiskWarning";
 import RecentTopics from "@/components/RecentTopics";
 import OnboardingTour from "@/components/OnboardingTour";
+import DailyLoginReward from "@/components/DailyLoginReward";
+import DailySpinWheel from "@/components/DailySpinWheel";
+import WeeklyGoals from "@/components/WeeklyGoals";
+import TimeSpentWidget from "@/components/TimeSpentWidget";
+import ShakeDetector, { ShakeHint } from "@/components/ShakeDetector";
+import { NewDot } from "@/components/NewBadge";
+import PullToRefresh from "@/components/PullToRefresh";
+import SessionSummary from "@/components/SessionSummary";
+import { hasPerk as checkPerk, PERK as PERK_IDS } from "@/lib/perks";
+import { getTopicsRemaining, getMinutesUntilSlotFrees, FREE_LIMITS, isPro } from "@/lib/limits";
+
+function getGreeting(): { text: string; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return { text: "Good morning", emoji: "\u2600\uFE0F" };
+  if (hour >= 12 && hour < 17) return { text: "Good afternoon", emoji: "\uD83C\uDF24\uFE0F" };
+  if (hour >= 17 && hour < 21) return { text: "Good evening", emoji: "\uD83C\uDF05" };
+  if (hour >= 21) return { text: "Late night studying?", emoji: "\uD83C\uDF19" };
+  return { text: "Burning the midnight oil?", emoji: "\uD83E\uDD89" };
+}
+
+const ALL_FEATURES = [
+  { href: "/battle", label: "Battle", desc: "Quiz battles", icon: "⚔️", cat: "play" },
+  { href: "/speedrun", label: "Speed Run", desc: "Race to Level 5", icon: "⚡", cat: "play" },
+  { href: "/wrong-on-purpose", label: "Spot Errors", desc: "Find mistakes", icon: "🔍", cat: "play" },
+  { href: "/debate", label: "Debates", desc: "Argue & learn", icon: "🗣️", cat: "play" },
+  { href: "/time-machine", label: "Time Machine", desc: "Explain to the past", icon: "🕰️", cat: "play" },
+  { href: "/playground", label: "Playground", desc: "Interactive formulas", icon: "🧪", cat: "play" },
+  { href: "/blackjack", label: "Blackjack", desc: "Bet your XP", icon: "🃏", cat: "play" },
+  { href: "/explore", label: "Explore", desc: "Rabbit hole", icon: "🧭", cat: "learn" },
+  { href: "/paths", label: "Paths", desc: "Guided journeys", icon: "🛤️", cat: "learn" },
+  { href: "/flashcards", label: "Flashcards", desc: "Quick review", icon: "🃏", cat: "learn" },
+  { href: "/math", label: "Math", desc: "Interactive math", icon: "🔢", cat: "learn" },
+  { href: "/code", label: "Code", desc: "Learn to program", icon: "💻", cat: "learn" },
+  { href: "/library", label: "Library", desc: "Saved topics", icon: "📖", cat: "learn" },
+  { href: "/notes", label: "Notes", desc: "Your notes", icon: "📝", cat: "learn" },
+  { href: "/dna", label: "My DNA", desc: "Your fingerprint", icon: "🧬", cat: "you" },
+  { href: "/progress", label: "Progress", desc: "Stats & streaks", icon: "📊", cat: "you" },
+  { href: "/journal", label: "Journal", desc: "Daily diary", icon: "📓", cat: "you" },
+  { href: "/titles", label: "Titles", desc: "Earn flair", icon: "🏅", cat: "you" },
+  { href: "/study", label: "Study Timer", desc: "Pomodoro focus", icon: "⏱️", cat: "you" },
+  { href: "/leaderboard", label: "Leaderboard", desc: "Global ranks", icon: "🏆", cat: "you" },
+  { href: "/friends", label: "Friends", desc: "Find & follow", icon: "👋", cat: "social" },
+  { href: "/study-room", label: "Study Rooms", desc: "Learn together", icon: "🏠", cat: "social" },
+  { href: "/shop", label: "XP Shop", desc: "Spend your XP", icon: "🛒", cat: "you" },
+  { href: "/pro", label: "Pro", desc: "Unlock everything", icon: "✦", cat: "you" },
+  { href: "/settings", label: "Settings", desc: "Customize", icon: "⚙️", cat: "social" },
+  { href: "/compare", label: "Compare", desc: "X vs Y", icon: "⚖️", cat: "learn" },
+  { href: "/how-it-works", label: "How It Works", desc: "See the magic", icon: "✨", cat: "learn" },
+];
+
+const DISCOVER_TABS = [
+  { id: "play", label: "Play", icon: "🎮" },
+  { id: "learn", label: "Learn", icon: "📚" },
+  { id: "you", label: "You", icon: "🧬" },
+  { id: "social", label: "Social", icon: "👥" },
+] as const;
+
+function hasTimeData(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem("tmi10_learning_time");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    return (data.sessions || []).length > 0;
+  } catch {
+    return false;
+  }
+}
 
 export default function Home() {
-  const { data, isGuest } = useAuth();
+  const { data, isGuest, user, isLoading } = useAuth();
   const router = useRouter();
   const [lang, setLang] = useState<LangCode>("en");
+  const [greeting, setGreeting] = useState<{ text: string; emoji: string } | null>(null);
+
+  // Unauthenticated visitors see the landing page, not the app
+  useEffect(() => {
+    if (!isLoading && isGuest) {
+      router.replace("/landing");
+    }
+  }, [isLoading, isGuest, router]);
+  const [discoverTab, setDiscoverTab] = useState<string>("play");
+  const [showDiscover, setShowDiscover] = useState(false);
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+    // XP Generator perk: +5 XP per hour passively
+    try {
+      if (checkPerk(PERK_IDS.XP_GENERATOR)) {
+        const key = "tmi10_xp_gen_last";
+        const now = Date.now();
+        const last = parseInt(localStorage.getItem(key) || "0", 10);
+        if (last === 0) {
+          localStorage.setItem(key, String(now));
+        } else {
+          const hours = Math.floor((now - last) / (1000 * 60 * 60));
+          if (hours > 0) {
+            const earned = hours * 5;
+            data.addXP(earned, "xp_generator");
+            localStorage.setItem(key, String(now));
+          }
+        }
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const saved = data.getLang() as LangCode;
     if (saved) setLang(saved);
   }, [data]);
 
+  const filteredFeatures = ALL_FEATURES.filter((f) => f.cat === discoverTab);
+
+  // Show nothing while auth resolves or while redirecting guests to /landing
+  if (isLoading || isGuest) return null;
+
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 pt-12 sm:pt-16 pb-4 relative overflow-hidden">
-      {/* Aurora animated background */}
+    <PullToRefresh>
+      <main className="min-h-screen flex flex-col items-center px-4 pt-10 sm:pt-24 pb-10 relative overflow-hidden">
+      <ShakeDetector />
       <Aurora />
 
-      {/* Hero section */}
+      {/* Compact hero */}
       <motion.div
-        className="text-center mb-12 relative z-10"
-        initial={{ opacity: 0, y: -20 }}
+        className="text-center mb-10 sm:mb-16 relative z-10"
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
       >
-        {/* Level dots decoration */}
+        {/* Greeting + eyebrow */}
         <motion.div
-          className="flex items-center justify-center gap-2 mb-6"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
+          className="flex flex-col items-center gap-3 mb-6 sm:mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.05 }}
         >
-          {["#4ade80", "#fbbf24", "#f97316", "#f43f5e", "#a855f7"].map((color, i) => (
-            <motion.div
-              key={color}
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: color, opacity: 0.6 }}
-              animate={{ opacity: [0.3, 0.7, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-            />
-          ))}
+          {greeting && (
+            <p className="text-white/25 text-sm font-sans">
+              {greeting.emoji}{" "}
+              {greeting.text}
+              {!isGuest && user?.user_metadata?.display_name
+                ? `, ${user.user_metadata.display_name}`
+                : ", learner"}
+            </p>
+          )}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.05]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ boxShadow: "0 0 7px rgba(52,211,153,0.9)" }} />
+            <span className="text-emerald-400/75 text-[10px] font-sans font-semibold tracking-[0.16em] uppercase">
+              AI-Powered Learning
+            </span>
+          </div>
         </motion.div>
 
-        <h1 className="font-display text-5xl sm:text-7xl text-white mb-5 leading-tight" style={{ perspective: 600 }}>
+        <h1 className="font-display text-5xl sm:text-[5.5rem] text-white mb-5 sm:mb-7" style={{ perspective: 600, lineHeight: 1.04 }}>
           <SplitText text="Teach Me" delay={0.2} stagger={0.04} />
           <br />
           <SplitText
             text="Like I'm 10"
             delay={0.5}
             stagger={0.04}
-            charClassName="text-emerald-400"
+            charClassName="text-accent"
           />
         </h1>
-        <p className="text-white/35 text-lg sm:text-xl max-w-lg mx-auto font-serif leading-relaxed">
+        <motion.p
+          className="text-white/30 text-base sm:text-lg max-w-sm mx-auto font-serif leading-relaxed"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.6 }}
+        >
           Pick any topic. Start simple. Go as deep as you want.
-        </p>
+        </motion.p>
         <motion.button
           onClick={() => router.push("/how-it-works")}
-          className="mt-5 px-5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/70 hover:bg-white/[0.08] hover:border-white/[0.15] font-sans text-sm transition-all duration-300 inline-flex items-center gap-2"
+          className="mt-6 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/75 hover:bg-white/[0.07] hover:border-white/[0.14] font-sans text-sm inline-flex items-center gap-2 group"
+          style={{ transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileTap={{ scale: 0.97 }}
         >
-          <span className="text-base">&#x1F4BB;</span> How does it work?
+          <span className="group-hover:rotate-12 transition-transform duration-500" style={{ display: "inline-block" }}>✨</span>
+          How does it work?
         </motion.button>
+        <ShakeHint />
       </motion.div>
 
       <StreakBanner />
+      <StreakRiskWarning />
 
-      <TiltCard className="w-full max-w-xl mt-4" glareColor="rgba(52, 211, 153, 0.06)">
-        <DailyChallenge />
-      </TiltCard>
-
+      {/* Topic input — FIRST, most important action */}
       <TopicInput lang={lang} />
 
+      {/* Rate-limit pill — shows when at least 1 topic used in current window */}
+      {typeof window !== "undefined" && !isPro() && (() => {
+        const remaining = getTopicsRemaining();
+        if (remaining >= FREE_LIMITS.topicsPerWindow) return null;
+        const minsLeft = getMinutesUntilSlotFrees();
+        return (
+          <motion.div
+            className="mt-3 flex items-center justify-center gap-2"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans"
+              style={{
+                borderColor: remaining === 0 ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.08)",
+                backgroundColor: remaining === 0 ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.03)",
+                color: remaining === 0 ? "#f87171" : "rgba(255,255,255,0.35)",
+              }}
+            >
+              <span>{remaining === 0 ? "🔒" : "⚡"}</span>
+              <span>
+                {remaining === 0
+                  ? `Limit reached · frees in ${minsLeft}m`
+                  : `${remaining} of ${FREE_LIMITS.topicsPerWindow} topics left · resets in ${minsLeft}m`}
+              </span>
+              <button
+                onClick={() => router.push("/pro")}
+                className="underline font-medium"
+                style={{ color: "#34d399" }}
+              >
+                Go Pro
+              </button>
+            </div>
+          </motion.div>
+        );
+      })()}
+
       <motion.div
-        className="mt-10"
+        className="mt-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.6 }}
       >
         <ExampleTopics />
       </motion.div>
 
+      {/* Continue learning (only shows if you have history) */}
       <RecentTopics />
 
-      {/* Feature showcase carousel */}
-      <FooterShowcase />
+      {/* Session summary — shows after 2+ topics and 5+ minutes */}
+      <SessionSummary />
+
+      {/* Daily Challenge + Stats row — side by side on desktop, stacked on mobile */}
+      <div className="w-full max-w-xl mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <TiltCard glareColor="rgba(52, 211, 153, 0.06)">
+          <DailyChallenge />
+        </TiltCard>
+        <div className="space-y-3">
+          <WeeklyGoals />
+          <TimeSpentWidget />
+        </div>
+      </div>
+
+      <DailyLoginReward />
+      <DailySpinWheel />
+
+      {/* Discover section — tabbed to reduce clutter */}
+      <motion.div
+        className="w-full max-w-xl mt-8"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
+        {/* Section header with expand toggle */}
+        <button
+          onClick={() => setShowDiscover((p) => !p)}
+          className="flex items-center gap-3 mb-4 px-1 group w-full"
+        >
+          <h2 className="text-white/30 text-[10px] font-sans font-semibold tracking-[0.16em] uppercase shrink-0">
+            Discover
+          </h2>
+          <div className="flex-1 h-px bg-white/[0.05]" />
+          <motion.div
+            className="w-5 h-5 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.09] transition-colors duration-300"
+            animate={{ rotate: showDiscover ? 180 : 0 }}
+            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+              <path d="M1.5 3L4 5.5L6.5 3" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {showDiscover && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              {/* Tab bar */}
+              <div className="flex gap-1 mb-5 bg-white/[0.04] rounded-full p-1 w-fit border border-white/[0.06]">
+                {DISCOVER_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setDiscoverTab(tab.id)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans"
+                    style={{
+                      backgroundColor: discoverTab === tab.id ? "var(--accent)" : "transparent",
+                      color: discoverTab === tab.id ? "#000" : "rgba(255,255,255,0.38)",
+                      fontWeight: discoverTab === tab.id ? 600 : 400,
+                      transition: "all 0.4s cubic-bezier(0.32,0.72,0,1)",
+                    }}
+                  >
+                    <span className="text-sm">{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Feature grid */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={discoverTab}
+                  className="grid grid-cols-3 gap-2"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {filteredFeatures.map((item) => (
+                    <button
+                      key={item.href}
+                      onClick={() => router.push(item.href)}
+                      className="relative flex flex-col gap-3 p-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.14] text-left group"
+                      style={{ transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)" }}
+                    >
+                      <NewDot path={item.href} />
+                      <div
+                        className="w-9 h-9 rounded-xl bg-white/[0.06] group-hover:bg-white/[0.11] flex items-center justify-center text-lg"
+                        style={{ transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)" }}
+                      >
+                        {item.icon}
+                      </div>
+                      <div>
+                        <span className="text-white/70 text-sm font-sans font-medium block group-hover:text-white/95 transition-colors duration-300">{item.label}</span>
+                        <span className="text-white/20 text-[10px] font-sans block mt-0.5">{item.desc}</span>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Quick links when collapsed — ALL features visible */}
+        {!showDiscover && (
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { href: "/battle", icon: "⚔️", label: "Battle" },
+              { href: "/explore", icon: "🧭", label: "Explore" },
+              { href: "/math", icon: "🔢", label: "Math" },
+              { href: "/code", icon: "💻", label: "Code" },
+              { href: "/playground", icon: "🧪", label: "Playground" },
+              { href: "/time-machine", icon: "🕰️", label: "Time Machine" },
+              { href: "/debate", icon: "🗣️", label: "Debates" },
+              { href: "/speedrun", icon: "⚡", label: "Speed Run" },
+              { href: "/wrong-on-purpose", icon: "🔍", label: "Spot Errors" },
+              { href: "/paths", icon: "🛤️", label: "Paths" },
+              { href: "/flashcards", icon: "🃏", label: "Flashcards" },
+              { href: "/journal", icon: "📓", label: "Journal" },
+              { href: "/progress", icon: "📊", label: "Progress" },
+              { href: "/leaderboard", icon: "🏆", label: "Ranks" },
+              { href: "/titles", icon: "🏅", label: "Titles" },
+              { href: "/friends", icon: "👋", label: "Friends" },
+              { href: "/blackjack", icon: "🃏", label: "Blackjack" },
+              { href: "/compare", icon: "⚖️", label: "Compare" },
+              { href: "/shop", icon: "🛒", label: "XP Shop" },
+              { href: "/pro", icon: "✦", label: "Pro" },
+              { href: "/settings", icon: "⚙️", label: "Settings" },
+            ].map((item) => (
+              <button
+                key={item.href}
+                onClick={() => router.push(item.href)}
+                className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.16] text-xs font-sans text-white/45 hover:text-white/80"
+                style={{ transition: "all 0.45s cubic-bezier(0.32,0.72,0,1)" }}
+              >
+                <NewDot path={item.href} />
+                <span>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </motion.div>
 
       <OnboardingTour />
 
-      {/* Brand footer */}
-      <footer className="w-full py-6 sm:py-4 text-center pb-20 sm:pb-6">
-        <p className="text-white/10 text-xs font-sans">
-          Teach Me Like I&apos;m 10
-          {isGuest && (
-            <>
-              {" · "}
-              <button
-                onClick={() => router.push("/auth/login")}
-                className="text-white/20 hover:text-white/40 transition-colors underline"
-              >
-                Sign in to save progress
-              </button>
-            </>
-          )}
-        </p>
+      {/* Minimal footer */}
+      <footer className="w-full py-6 sm:py-4 text-center pb-24 sm:pb-8 mt-10">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <div className="h-px w-12 bg-white/[0.06]" />
+          <p className="text-white/[0.12] text-xs font-sans tracking-wide">Teach Me Like I&apos;m 10</p>
+          <div className="h-px w-12 bg-white/[0.06]" />
+        </div>
+        {isGuest && (
+          <button
+            onClick={() => router.push("/auth/login")}
+            className="text-white/[0.18] hover:text-white/40 transition-colors text-xs font-sans underline"
+            style={{ transition: "color 0.4s cubic-bezier(0.32,0.72,0,1)" }}
+          >
+            Sign in to save progress
+          </button>
+        )}
       </footer>
-    </main>
+      </main>
+    </PullToRefresh>
   );
 }
