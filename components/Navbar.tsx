@@ -4,42 +4,75 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { slugify } from "@/lib/utils";
+import { NewDot } from "@/components/NewBadge";
 import LanguagePicker from "@/components/LanguagePicker";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
-import MagneticButton from "@/components/MagneticButton";
 import { useAuth } from "@/components/AuthProvider";
 import type { LangCode } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/battle", label: "Quiz Battle", color: "rose" },
-  { href: "/math", label: "Math", color: "indigo" },
-  { href: "/code", label: "Code", color: "emerald" },
-  { href: "/paths", label: "Paths", color: "default" },
-  { href: "/leaderboard", label: "Leaderboard", color: "default" },
+  { href: "/battle", label: "Battle", color: "#fb7185", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/>
+      <path d="M14.5 6.5L18 3h3v3l-3.5 3.5"/><path d="M5 14l4 4"/><path d="M7 17l-3 3"/>
+    </svg>
+  )},
+  { href: "/speedrun", label: "Speed Run", color: "#fbbf24", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  )},
+  { href: "/explore", label: "Explore", color: "#c084fc", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </svg>
+  )},
+  { href: "/dna", label: "My DNA", color: "#34d399", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="M17 6l-2.5-2.5"/><path d="M14 8l-1-1"/><path d="M7 18l2.5 2.5"/><path d="M3.5 14.5l.5.5"/><path d="M20 9l.5.5"/><path d="M6.5 12.5l1 1"/><path d="M16.5 10.5l1 1"/>
+    </svg>
+  )},
+  { href: "/leaderboard", label: "Ranks", color: "#38bdf8", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+  )},
+  { href: "/playground", label: "Playground", color: "#06b6d4", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2v6.292a4 4 0 0 1-1.17 2.829L4 16h16l-4.83-4.879A4 4 0 0 1 14 8.292V2"/><path d="M8.5 2h7"/><path d="M7 16l-1.5 6h13L17 16"/><path d="M9 6.5h6"/>
+    </svg>
+  )},
 ];
 
-function useTheme() {
-  const [isDark, setIsDark] = useState(true);
-  useEffect(() => {
-    const update = () =>
-      setIsDark(document.documentElement.classList.contains("dark"));
-    update();
-    const obs = new MutationObserver(update);
-    obs.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => obs.disconnect();
-  }, []);
-  return isDark;
-}
+// Extra items only shown in the mobile hamburger "More" section
+const MOBILE_EXTRA_ITEMS = [
+  { href: "/debate", label: "Debates", color: "#f43f5e", icon: "🗣️" },
+  { href: "/time-machine", label: "Time Machine", color: "#67e8f9", icon: "🕰️" },
+  { href: "/wrong-on-purpose", label: "Spot Errors", color: "#f59e0b", icon: "🔍" },
+  { href: "/study-room", label: "Study Rooms", color: "#4ade80", icon: "🏠" },
+  { href: "/flashcards", label: "Flashcards", color: "#fbbf24", icon: "🃏" },
+  { href: "/library", label: "Library", color: "#34d399", icon: "📖" },
+  { href: "/notes", label: "Notes", color: "#f0abfc", icon: "📝" },
+  { href: "/friends", label: "Friends", color: "#60a5fa", icon: "👋" },
+  { href: "/paths", label: "Paths", color: "#a78bfa", icon: "🛤️" },
+  { href: "/journal", label: "Journal", color: "#a78bfa", icon: "📓" },
+  { href: "/titles", label: "Titles", color: "#ec4899", icon: "🏅" },
+  { href: "/study", label: "Study Timer", color: "#fb923c", icon: "⏱️" },
+  { href: "/math", label: "Math", color: "#60a5fa", icon: "🔢" },
+  { href: "/code", label: "Code", color: "#a78bfa", icon: "💻" },
+  { href: "/progress", label: "Progress", color: "#38bdf8", icon: "📊" },
+  { href: "/compare", label: "Compare", color: "#fbbf24", icon: "⚖️" },
+  { href: "/blackjack", label: "Blackjack", color: "#4ade80", icon: "🃏" },
+  { href: "/shop", label: "XP Shop", color: "#facc15", icon: "🛒" },
+  { href: "/pro", label: "Pro", color: "#34d399", icon: "✦" },
+  { href: "/settings", label: "Settings", color: "#94a3b8", icon: "⚙️" },
+];
 
 export default function Navbar() {
   const { data } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isDark = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [showJoinInput, setShowJoinInput] = useState(false);
@@ -49,11 +82,21 @@ export default function Navbar() {
   const [lang, setLang] = useState<LangCode>("en");
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = data.getLang() as LangCode;
     if (saved) setLang(saved);
   }, [data]);
+
+  useEffect(() => {
+    function handleFocusSearch() {
+      setShowSearch(true);
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+    window.addEventListener("focus-search", handleFocusSearch);
+    return () => window.removeEventListener("focus-search", handleFocusSearch);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -75,357 +118,361 @@ export default function Navbar() {
     data.setLang(code);
   }
 
-  const colorMap: Record<string, { bg: string; border: string; text: string; hoverBg: string; hoverText: string; hoverBorder: string }> = {
-    rose: {
-      bg: "bg-rose-500/[0.06]",
-      border: "border-rose-500/15",
-      text: "text-rose-400/70",
-      hoverBg: "hover:bg-rose-500/[0.12]",
-      hoverText: "hover:text-rose-400",
-      hoverBorder: "hover:border-rose-500/30",
-    },
-    indigo: {
-      bg: "bg-indigo-500/[0.06]",
-      border: "border-indigo-500/15",
-      text: "text-indigo-400/70",
-      hoverBg: "hover:bg-indigo-500/[0.12]",
-      hoverText: "hover:text-indigo-400",
-      hoverBorder: "hover:border-indigo-500/30",
-    },
-    emerald: {
-      bg: "bg-emerald-500/[0.06]",
-      border: "border-emerald-500/15",
-      text: "text-emerald-400/70",
-      hoverBg: "hover:bg-emerald-500/[0.12]",
-      hoverText: "hover:text-emerald-400",
-      hoverBorder: "hover:border-emerald-500/30",
-    },
-    default: {
-      bg: "bg-white/[0.03]",
-      border: "border-white/[0.06]",
-      text: "text-white/50",
-      hoverBg: "hover:bg-white/[0.08]",
-      hoverText: "hover:text-white/80",
-      hoverBorder: "hover:border-white/15",
-    },
-  };
-
   const isActive = (href: string) => pathname === href;
 
-  // Hide navbar on learn/topic pages
   if (pathname.startsWith("/learn/")) return null;
 
   return (
     <>
+      {/* Spacer so page content starts below the floating pill */}
+      <div className="h-[72px] shrink-0" />
+
+      {/* Floating pill nav */}
       <nav
-        className={`relative w-full z-50 transition-colors duration-300 ${
-          isDark
-            ? "bg-[#070b14]/80 border-b border-white/[0.06]"
-            : "bg-white/70 border-b border-black/[0.06]"
-        } backdrop-blur-xl`}
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50
+                   flex items-center gap-2
+                   w-[calc(100%-24px)] max-w-[980px]
+                   pl-4 pr-2 py-1.5
+                   bg-[#030609]/70 backdrop-blur-2xl
+                   border border-white/[0.07]
+                   rounded-full
+                   shadow-[0_8px_40px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.05)]
+                   transition-all duration-300"
+        style={{ WebkitBackdropFilter: "blur(24px) saturate(1.4)", backdropFilter: "blur(24px) saturate(1.4)" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
-            {/* Left: Logo + XP */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push("/")}
-                className="font-display text-lg sm:text-xl text-white hover:opacity-80 transition-opacity flex items-center gap-2"
-              >
-                <span className="text-emerald-400">✦</span>
-                <span className="hidden sm:inline">Teach Me Like I&apos;m 10</span>
-                <span className="sm:hidden">TM10</span>
-              </button>
-              <div className="hidden sm:flex">
-                <XPBadge />
-              </div>
-            </div>
+        {/* Left: Logo */}
+        <button
+          onClick={() => router.push("/")}
+          className="group flex items-center gap-1.5 whitespace-nowrap shrink-0"
+        >
+          <span className="text-emerald-400 text-sm group-hover:rotate-90 transition-transform duration-300">✦</span>
+          <span
+            className="text-[13px] font-extrabold text-emerald-400 tracking-[-0.02em] group-hover:opacity-80 transition-opacity"
+            style={{ fontFamily: "Syne, sans-serif" }}
+          >
+            TMI10
+          </span>
+        </button>
 
-            {/* Center: Desktop nav links */}
-            <div className="hidden lg:flex items-center gap-1.5">
-              {NAV_ITEMS.map((item) => {
-                const c = colorMap[item.color];
-                const active = isActive(item.href);
-                return (
-                  <MagneticButton
-                    key={item.href}
-                    onClick={() => router.push(item.href)}
-                    className={`px-3 py-1.5 rounded-lg border font-sans text-xs transition-all duration-300 ${
-                      active
-                        ? `${c.bg} ${c.border} ${c.text.replace("/70", "").replace("/50", "")} font-medium`
-                        : `${c.bg} ${c.border} ${c.text} ${c.hoverBg} ${c.hoverText} ${c.hoverBorder}`
-                    }`}
-                  >
-                    {item.label}
-                  </MagneticButton>
-                );
-              })}
+        <XPBadge />
 
-              {/* Join Challenge */}
-              <AnimatePresence mode="wait">
-                {!showJoinInput ? (
+        {/* Divider */}
+        <div className="h-5 w-px bg-white/10 mx-1 shrink-0 hidden lg:block" />
+
+        {/* Center: Nav items — desktop only */}
+        <div className="hidden lg:flex items-center gap-0.5 flex-1">
+          <div className="flex items-center gap-0.5 px-1 py-0.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <div key={item.href} className="relative">
+                  <NewDot path={item.href} size="sm" />
                   <motion.button
-                    key="join-btn"
-                    onClick={() => {
-                      setShowJoinInput(true);
-                      setTimeout(() => joinInputRef.current?.focus(), 100);
+                    onClick={() => router.push(item.href)}
+                    onMouseEnter={() => setHoveredItem(item.href)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200"
+                    style={{
+                      color: active ? item.color : "rgba(255,255,255,0.35)",
+                      backgroundColor: active ? `${item.color}12` : "transparent",
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-amber-500/[0.06] border border-amber-500/15 text-amber-400/50 hover:text-amber-400/80 hover:border-amber-500/25 hover:bg-amber-500/[0.1] font-sans text-xs transition-all duration-300"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                    whileHover={{
+                      backgroundColor: `${item.color}15`,
+                      color: item.color,
+                    }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Join Code
+                    {/* Glow effect on active */}
+                    {active && (
+                      <motion.div
+                        className="absolute inset-0 rounded-lg"
+                        style={{
+                          boxShadow: `0 0 12px ${item.color}20, inset 0 0 8px ${item.color}08`,
+                        }}
+                        layoutId="nav-glow"
+                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{item.icon}</span>
+                    <span className="relative z-10 text-[11px] font-sans font-medium tracking-wide">
+                      {item.label}
+                    </span>
                   </motion.button>
-                ) : (
-                  <motion.div
-                    key="join-input"
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${
-                      isDark
-                        ? "bg-[#070b14]/90 border-amber-500/20"
-                        : "bg-white border-amber-500/25 shadow-sm"
-                    }`}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <input
-                      ref={joinInputRef}
-                      type="text"
-                      value={joinCode}
-                      onChange={(e) =>
-                        setJoinCode(
-                          e.target.value
-                            .toUpperCase()
-                            .replace(/[^A-Z0-9]/g, "")
-                            .slice(0, 6)
-                        )
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && joinCode.trim())
-                          router.push(`/challenge/${joinCode.trim()}`);
-                        if (e.key === "Escape") {
-                          setShowJoinInput(false);
-                          setJoinCode("");
-                        }
-                      }}
-                      placeholder="CODE"
-                      maxLength={6}
-                      className="w-16 px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-white font-mono text-xs tracking-[0.15em] text-center placeholder:text-white/20 focus:outline-none focus:border-amber-500/30 transition-colors"
-                    />
-                    <button
-                      onClick={() => {
-                        if (joinCode.trim())
-                          router.push(`/challenge/${joinCode.trim()}`);
-                      }}
-                      disabled={!joinCode.trim()}
-                      className="px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400/70 font-mono text-[10px] tracking-wider hover:bg-amber-500/10 disabled:opacity-20 transition-all"
-                    >
-                      GO
-                    </button>
-                    <button
-                      onClick={() => {
+
+                  {/* Tooltip on hover */}
+                  <AnimatePresence>
+                    {hoveredItem === item.href && !active && (
+                      <motion.div
+                        className="absolute top-full left-1/2 mt-2 px-2 py-1 rounded-md text-[10px] font-sans whitespace-nowrap pointer-events-none"
+                        style={{
+                          backgroundColor: `${item.color}20`,
+                          color: item.color,
+                          border: `1px solid ${item.color}30`,
+                          x: "-50%",
+                        }}
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.12 }}
+                      >
+                        {item.label}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+
+            {/* Divider */}
+            <div className="h-5 w-px bg-white/[0.06] mx-1" />
+
+            {/* Join Code */}
+            <AnimatePresence mode="wait">
+              {!showJoinInput ? (
+                <motion.button
+                  key="join-btn"
+                  onClick={() => {
+                    setShowJoinInput(true);
+                    setTimeout(() => joinInputRef.current?.focus(), 100);
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/25 hover:text-amber-400/70 hover:bg-amber-500/[0.06] transition-all duration-200"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span className="text-[11px] font-sans font-medium tracking-wide">Code</span>
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="join-input"
+                  className="flex items-center gap-1"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <input
+                    ref={joinInputRef}
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) =>
+                      setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && joinCode.trim())
+                        router.push(`/challenge/${joinCode.trim()}`);
+                      if (e.key === "Escape") {
                         setShowJoinInput(false);
                         setJoinCode("");
-                      }}
-                      className="text-white/20 hover:text-white/50 text-xs transition-colors"
-                    >
-                      ✕
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Right: Utils */}
-            <div className="flex items-center gap-2" ref={mobileMenuRef}>
-              <div className="sm:hidden">
-                <XPBadge />
-              </div>
-
-              {/* Search */}
-              <AnimatePresence mode="wait">
-                {!showSearch ? (
-                  <motion.button
-                    key="search-icon"
-                    onClick={() => {
-                      setShowSearch(true);
-                      setTimeout(() => searchInputRef.current?.focus(), 100);
-                    }}
-                    className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300 ${
-                      isDark
-                        ? "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]"
-                        : "bg-black/[0.03] border-black/[0.06] text-black/40 hover:text-black/70 hover:bg-black/[0.06]"
-                    }`}
-                    aria-label="Search topics"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.12 }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <circle cx="6.5" cy="6.5" r="5" />
-                      <path d="M10.5 10.5L15 15" />
-                    </svg>
-                  </motion.button>
-                ) : (
-                  <motion.form
-                    key="search-input"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const q = searchQuery.trim();
-                      if (q) {
-                        router.push(`/learn/${slugify(q)}`);
-                        setShowSearch(false);
-                        setSearchQuery("");
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${
-                      isDark
-                        ? "bg-[#070b14]/90 border-emerald-500/20"
-                        : "bg-white border-emerald-500/25 shadow-sm"
-                    }`}
-                    initial={{ opacity: 0, scale: 0.95, width: 0 }}
-                    animate={{ opacity: 1, scale: 1, width: "auto" }}
-                    exit={{ opacity: 0, scale: 0.95, width: 0 }}
-                    transition={{ duration: 0.15 }}
+                    placeholder="CODE"
+                    maxLength={6}
+                    className="w-[4.5rem] px-2 py-1 rounded-md bg-amber-500/[0.06] border border-amber-500/15 text-amber-300 font-mono text-[11px] tracking-[0.2em] text-center placeholder:text-amber-500/20 focus:outline-none focus:border-amber-500/30 transition-colors"
+                  />
+                  <button
+                    onClick={() => {
+                      if (joinCode.trim()) router.push(`/challenge/${joinCode.trim()}`);
+                    }}
+                    disabled={!joinCode.trim()}
+                    className="px-1.5 py-1 rounded-md bg-amber-500/10 text-amber-400/80 font-mono text-[10px] hover:bg-amber-500/20 disabled:opacity-20 transition-all"
                   >
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} strokeWidth="2" strokeLinecap="round">
-                      <circle cx="6.5" cy="6.5" r="5" />
-                      <path d="M10.5 10.5L15 15" />
-                    </svg>
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") {
-                          setShowSearch(false);
-                          setSearchQuery("");
-                        }
-                      }}
-                      onBlur={() => {
-                        if (!searchQuery.trim()) {
-                          setShowSearch(false);
-                          setSearchQuery("");
-                        }
-                      }}
-                      placeholder="Search any topic..."
-                      className={`w-32 sm:w-40 px-1 py-0.5 bg-transparent text-xs font-sans focus:outline-none placeholder:opacity-40 ${
-                        isDark ? "text-white placeholder:text-white" : "text-slate-900 placeholder:text-slate-500"
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowSearch(false);
-                        setSearchQuery("");
-                      }}
-                      className={`text-xs transition-colors px-0.5 ${
-                        isDark ? "text-white/20 hover:text-white/50" : "text-black/20 hover:text-black/50"
-                      }`}
-                    >
-                      ✕
-                    </button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
-
-              <LanguagePicker value={lang} onChange={handleLangChange} />
-              <UserMenu />
-
-              {/* Mobile hamburger */}
-              <button
-                onClick={() => setMobileMenuOpen((o) => !o)}
-                className={`flex lg:hidden items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300 ${
-                  isDark
-                    ? "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]"
-                    : "bg-black/[0.03] border-black/[0.06] text-black/40 hover:text-black/70 hover:bg-black/[0.06]"
-                }`}
-                aria-label="Menu"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                >
-                  {mobileMenuOpen ? (
-                    <>
-                      <line x1="4" y1="4" x2="12" y2="12" />
-                      <line x1="12" y1="4" x2="4" y2="12" />
-                    </>
-                  ) : (
-                    <>
-                      <line x1="2" y1="4" x2="14" y2="4" />
-                      <line x1="2" y1="8" x2="14" y2="8" />
-                      <line x1="2" y1="12" x2="14" y2="12" />
-                    </>
-                  )}
-                </svg>
-              </button>
-
-              {/* Mobile dropdown */}
-              <AnimatePresence>
-                {mobileMenuOpen && (
-                  <motion.div
-                    className={`absolute top-full right-0 mt-2 w-52 rounded-xl border p-1.5 lg:hidden ${
-                      isDark
-                        ? "border-white/[0.08] bg-[#0a1020]/95 backdrop-blur-xl"
-                        : "border-black/[0.08] bg-white/95 backdrop-blur-xl shadow-lg"
-                    }`}
-                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                    GO
+                  </button>
+                  <button
+                    onClick={() => { setShowJoinInput(false); setJoinCode(""); }}
+                    className="text-white/15 hover:text-white/40 text-[10px] transition-colors px-0.5"
                   >
-                    {NAV_ITEMS.map((item) => {
-                      const active = isActive(item.href);
-                      const mobileColors: Record<string, string> = {
-                        rose: `text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/[0.06] ${active ? "bg-rose-500/[0.06] text-rose-400" : ""}`,
-                        indigo: `text-indigo-400/70 hover:text-indigo-400 hover:bg-indigo-500/[0.06] ${active ? "bg-indigo-500/[0.06] text-indigo-400" : ""}`,
-                        emerald: `text-emerald-400/70 hover:text-emerald-400 hover:bg-emerald-500/[0.06] ${active ? "bg-emerald-500/[0.06] text-emerald-400" : ""}`,
-                        default: `text-white/50 hover:text-white/80 hover:bg-white/[0.05] ${active ? "bg-white/[0.05] text-white/80" : ""}`,
-                      };
-                      return (
-                        <button
-                          key={item.href}
-                          onClick={() => {
-                            router.push(item.href);
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-sans transition-colors ${
-                            mobileColors[item.color]
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      );
-                    })}
-                    <div
-                      className={`my-1 h-px ${isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"}`}
-                    />
-                    <button
-                      onClick={() => {
-                        setShowJoinInput(true);
-                        setMobileMenuOpen(false);
-                        setTimeout(() => joinInputRef.current?.focus(), 100);
-                      }}
-                      className="w-full text-left px-3 py-2.5 rounded-lg text-amber-400/60 hover:text-amber-400/90 hover:bg-amber-500/[0.06] text-sm font-sans transition-colors"
-                    >
-                      Join Challenge
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    ✕
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        </div>
+
+        {/* Right: Utils */}
+        <div className="flex items-center gap-1 ml-auto" ref={mobileMenuRef}>
+          {/* Search */}
+          <AnimatePresence mode="wait">
+            {!showSearch ? (
+              <motion.button
+                key="search-icon"
+                onClick={() => {
+                  setShowSearch(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 100);
+                }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-200"
+                aria-label="Search topics"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="6.5" cy="6.5" r="5" />
+                  <path d="M10.5 10.5L15 15" />
+                </svg>
+              </motion.button>
+            ) : (
+              <motion.form
+                key="search-input"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const q = searchQuery.trim();
+                  if (q) {
+                    router.push(`/learn/${slugify(q)}`);
+                    setShowSearch(false);
+                    setSearchQuery("");
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-emerald-500/15"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="6.5" cy="6.5" r="5" />
+                  <path d="M10.5 10.5L15 15" />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") { setShowSearch(false); setSearchQuery(""); }
+                  }}
+                  onBlur={() => {
+                    if (!searchQuery.trim()) { setShowSearch(false); setSearchQuery(""); }
+                  }}
+                  placeholder="Search topic..."
+                  className="w-28 sm:w-36 bg-transparent text-xs font-sans text-white placeholder:text-white/25 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setShowSearch(false); setSearchQuery(""); }}
+                  className="text-white/15 hover:text-white/40 text-[10px] transition-colors"
+                >
+                  ✕
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+
+          <div className="hidden sm:block">
+            <LanguagePicker value={lang} onChange={handleLangChange} />
+          </div>
+          <UserMenu />
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            className="flex lg:hidden items-center justify-center w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.1] transition-all duration-200"
+            aria-label="Menu"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              {mobileMenuOpen ? (
+                <><line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" /></>
+              ) : (
+                <><line x1="2" y1="4" x2="14" y2="4" /><line x1="4" y1="8" x2="14" y2="8" /><line x1="6" y1="12" x2="14" y2="12" /></>
+              )}
+            </svg>
+          </button>
+
+          {/* Mobile dropdown */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                className="absolute top-full right-3 mt-2 w-56 rounded-2xl border border-white/[0.06] bg-[#0a0f1a]/95 backdrop-blur-2xl p-2 lg:hidden shadow-2xl shadow-black/40"
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+              >
+                {NAV_ITEMS.map((item, i) => {
+                  const active = isActive(item.href);
+                  return (
+                    <motion.button
+                      key={item.href}
+                      onClick={() => { router.push(item.href); setMobileMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans transition-all duration-150"
+                      style={{
+                        color: active ? item.color : "rgba(255,255,255,0.45)",
+                        backgroundColor: active ? `${item.color}10` : "transparent",
+                      }}
+                      whileHover={{ backgroundColor: `${item.color}10`, color: item.color }}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.03 }}
+                    >
+                      <span style={{ color: active ? item.color : "rgba(255,255,255,0.25)" }}>
+                        {item.icon}
+                      </span>
+                      {item.label}
+                      {active && (
+                        <div
+                          className="ml-auto w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+                <div className="my-1.5 h-px bg-white/[0.04]" />
+                <p className="px-3 py-1 text-[10px] font-sans text-white/15 tracking-widest uppercase">More</p>
+                <div className="max-h-48 overflow-y-auto scrollbar-thin">
+                  {MOBILE_EXTRA_ITEMS.map((item, i) => {
+                    const active = isActive(item.href);
+                    return (
+                      <motion.button
+                        key={item.href}
+                        onClick={() => { router.push(item.href); setMobileMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans transition-all duration-150"
+                        style={{
+                          color: active ? item.color : "rgba(255,255,255,0.35)",
+                          backgroundColor: active ? `${item.color}10` : "transparent",
+                        }}
+                        whileHover={{ backgroundColor: `${item.color}10`, color: item.color }}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (NAV_ITEMS.length + i) * 0.02 }}
+                      >
+                        <span className="text-sm w-5 text-center relative">
+                          {item.icon}
+                          <NewDot path={item.href} size="sm" />
+                        </span>
+                        {item.label}
+                        {active && (
+                          <div
+                            className="ml-auto w-1.5 h-1.5 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <div className="my-1.5 h-px bg-white/[0.04]" />
+                <button
+                  onClick={() => {
+                    setShowJoinInput(true);
+                    setMobileMenuOpen(false);
+                    setTimeout(() => joinInputRef.current?.focus(), 100);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-white/25 hover:text-amber-400/70 hover:bg-amber-500/[0.06] transition-all"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  Join Code
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 
@@ -433,59 +480,38 @@ export default function Navbar() {
       <AnimatePresence>
         {showJoinInput && (
           <motion.div
-            className="absolute top-16 left-4 right-4 z-50 lg:hidden"
+            className="fixed top-[72px] left-3 right-3 z-50 lg:hidden"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
           >
-            <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border shadow-lg ${
-                isDark
-                  ? "bg-[#070b14]/95 backdrop-blur-xl border-amber-500/15 shadow-black/20"
-                  : "bg-white/95 backdrop-blur-xl border-amber-500/20 shadow-black/5"
-              }`}
-            >
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#0a0f1a]/95 backdrop-blur-2xl border border-amber-500/10 shadow-2xl shadow-black/30">
               <input
                 ref={joinInputRef}
                 type="text"
                 value={joinCode}
                 onChange={(e) =>
-                  setJoinCode(
-                    e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, "")
-                      .slice(0, 6)
-                  )
+                  setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))
                 }
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && joinCode.trim())
-                    router.push(`/challenge/${joinCode.trim()}`);
-                  if (e.key === "Escape") {
-                    setShowJoinInput(false);
-                    setJoinCode("");
-                  }
+                  if (e.key === "Enter" && joinCode.trim()) router.push(`/challenge/${joinCode.trim()}`);
+                  if (e.key === "Escape") { setShowJoinInput(false); setJoinCode(""); }
                 }}
-                placeholder="Enter challenge code"
+                placeholder="Enter code"
                 maxLength={6}
-                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white font-mono text-sm tracking-[0.15em] text-center placeholder:text-white/20 focus:outline-none focus:border-amber-500/30 transition-colors"
+                className="flex-1 px-3 py-2 rounded-lg bg-amber-500/[0.05] border border-amber-500/10 text-amber-300 font-mono text-sm tracking-[0.15em] text-center placeholder:text-amber-500/15 focus:outline-none focus:border-amber-500/25 transition-colors"
               />
               <button
-                onClick={() => {
-                  if (joinCode.trim())
-                    router.push(`/challenge/${joinCode.trim()}`);
-                }}
+                onClick={() => { if (joinCode.trim()) router.push(`/challenge/${joinCode.trim()}`); }}
                 disabled={!joinCode.trim()}
-                className="px-3 py-2 rounded-lg border border-amber-500/30 text-amber-400/70 font-mono text-xs tracking-wider hover:bg-amber-500/10 disabled:opacity-20 transition-all"
+                className="px-3 py-2 rounded-lg bg-amber-500/10 text-amber-400/80 font-mono text-xs tracking-wider hover:bg-amber-500/20 disabled:opacity-20 transition-all"
               >
                 JOIN
               </button>
               <button
-                onClick={() => {
-                  setShowJoinInput(false);
-                  setJoinCode("");
-                }}
-                className="text-white/20 hover:text-white/50 text-sm transition-colors px-1"
+                onClick={() => { setShowJoinInput(false); setJoinCode(""); }}
+                className="text-white/15 hover:text-white/40 text-sm transition-colors px-1"
               >
                 ✕
               </button>

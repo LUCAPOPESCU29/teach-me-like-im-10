@@ -1,13 +1,50 @@
 @import "tailwindcss";
 
+:root {
+  --accent: #34d399;
+  --reading-font: inherit;
+  --reading-scale: 1;
+}
+
+/* Reading font & scale applied to learn pages */
+.reading-content {
+  font-family: var(--reading-font) !important;
+  font-size: calc(1rem * var(--reading-scale)) !important;
+  line-height: calc(1.7 * var(--reading-scale)) !important;
+}
+
+/* Reduce motion toggle from settings */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.border-accent {
+  border-color: var(--accent);
+}
+
 @theme {
   --font-display: "Instrument Serif", serif;
   --font-serif: "Source Serif 4", serif;
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
-html {
+html, body {
   scroll-behavior: smooth;
+  transform: none !important;
+  -webkit-transform: none !important;
 }
 
 /* View Transitions for theme toggle */
@@ -499,6 +536,20 @@ html:not(.dark) [class*="absolute"][class*="blur-"][class*="rounded-full"] {
   animation: shimmer 3s linear infinite;
 }
 
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.card-hover:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: none;
+  transition-duration: 0.1s;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
@@ -615,10 +666,7 @@ html:not(.dark) [class*="absolute"][class*="blur-"][class*="rounded-full"] {
     display: none;
   }
 
-  /* Force GPU layer promotion only where needed */
-  * {
-    -webkit-transform: translateZ(0);
-  }
+  /* GPU layer promotion - exclude html/body to preserve position:fixed */
 
   /* Smoother scrolling */
   html {
@@ -633,4 +681,41 @@ html:not(.dark) [class*="absolute"][class*="blur-"][class*="rounded-full"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── LANDER DESIGN SYSTEM MATCH ── */
+
+/* Darker bg to match lander */
+body, html.dark body {
+  background-color: #030609;
+}
+
+/* Film grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* Green tinted scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #030609; }
+::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.35); border-radius: 2px; }
+
+/* Scroll progress bar */
+#scroll-prog {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: 600;
+  background: linear-gradient(90deg, #34d399, #6ee7b7, #34d399);
+  transform-origin: left;
+  transform: scaleX(0);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
+  pointer-events: none;
 }

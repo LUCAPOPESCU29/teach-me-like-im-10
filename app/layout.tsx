@@ -9,7 +9,18 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import CelebrationProvider from "@/components/CelebrationProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import MobileMotionConfig from "@/components/MobileMotionConfig";
+import StudyTimerGlobal from "@/components/StudyTimerGlobal";
+import EasterEggs from "@/components/EasterEggs";
+import { ComboProvider, ComboIndicator } from "@/components/ComboTracker";
+import ComboToast from "@/components/ComboToast";
+import SeasonalTheme from "@/components/SeasonalTheme";
+import AccentProvider from "@/components/AccentProvider";
+import ScrollProgress from "@/components/ScrollProgress";
+import { NewBadgeProvider } from "@/components/NewBadge";
+import { ProfileCustomProvider } from "@/components/ProfileCustomization";
+import SettingsInit from "@/components/SettingsInit";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,7 +59,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
         <link
@@ -63,12 +74,29 @@ export default function RootLayout({
           <AuthProvider>
             <MobileMotionConfig>
               <CelebrationProvider>
-                <Navbar />
-                <PageTransition>{children}</PageTransition>
-                <Footer />
-                <ScrollToTop />
-                <BottomNav />
-                <ServiceWorkerRegister />
+                <AccentProvider>
+                  <ProfileCustomProvider>
+                    <NewBadgeProvider>
+                      <SettingsInit />
+                      <ComboProvider>
+                        <SeasonalTheme>
+                          <Navbar />
+                          <ScrollProgress />
+                          <PageTransition>{children}</PageTransition>
+                          <Footer />
+                          <ScrollToTop />
+                          <BottomNav />
+                          <KeyboardShortcuts />
+                          <StudyTimerGlobal />
+                          <ComboIndicator />
+                          <ComboToast />
+                          <EasterEggs />
+                          <ServiceWorkerRegister />
+                        </SeasonalTheme>
+                      </ComboProvider>
+                    </NewBadgeProvider>
+                  </ProfileCustomProvider>
+                </AccentProvider>
               </CelebrationProvider>
             </MobileMotionConfig>
           </AuthProvider>
