@@ -539,9 +539,38 @@ footer{
   opacity:0;z-index:3;
 }
 .scroll-hint span{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+/* desktop mouse */
+.sh-desk{display:flex}
+.sh-mob{display:none}
 .scroll-mouse{
   width:18px;height:28px;border:1.5px solid rgba(255,255,255,.15);
   border-radius:10px;display:flex;justify-content:center;padding-top:5px;
+}
+/* mobile phone + finger */
+.mob-phone{
+  width:20px;height:34px;border:1.5px solid rgba(255,255,255,.2);
+  border-radius:5px;position:relative;overflow:hidden;
+  background:rgba(255,255,255,.04);
+}
+.mob-swipe{
+  width:4px;height:7px;border-radius:2px;background:var(--em);
+  position:absolute;left:50%;transform:translateX(-50%);
+  animation:mobSwipe 1.6s ease-in-out infinite;
+}
+@keyframes mobSwipe{
+  0%{top:22px;opacity:0}
+  15%{opacity:1}
+  85%{opacity:1}
+  100%{top:5px;opacity:0}
+}
+.mob-finger{
+  font-size:18px;
+  animation:fingerBob 1.6s ease-in-out infinite;
+  line-height:1;
+}
+@keyframes fingerBob{
+  0%,100%{transform:translateY(3px)}
+  50%{transform:translateY(-5px)}
 }
 .scroll-wheel{
   width:2px;height:5px;background:var(--em);border-radius:1px;
@@ -680,11 +709,16 @@ footer{
   .tg{grid-template-columns:1fr}
   nav .nav-links{display:none}
   .float-pill{display:none}
+  #sec-dots{display:none}
+  .orbit-label{display:none}
+  .sh-desk{display:none!important}
+  .sh-mob{display:flex!important;align-items:flex-end;gap:6px}
 }
 @media(max-width:580px){
   .lvl-grid{grid-template-columns:repeat(2,1fr)}
   .stats-grid{grid-template-columns:1fr 1fr}
   .hero-right{height:320px}
+  .hero-h1{font-size:clamp(36px,10vw,50px)}
 }
 </style>
 </head>
@@ -781,7 +815,13 @@ footer{
 
   <!-- Scroll hint -->
   <div class="scroll-hint" id="scroll-hint">
-    <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    <div class="sh-desk">
+      <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    </div>
+    <div class="sh-mob">
+      <div class="mob-phone"><div class="mob-swipe"></div></div>
+      <span class="mob-finger">☝️</span>
+    </div>
     <span>Scroll</span>
   </div>
 </section>
@@ -2190,6 +2230,7 @@ ScrollTrigger.create({
       onUpdate(self){ updateDJ(Math.min(4,Math.floor(self.progress*5))); }
     });
   } else {
+    // Mobile: auto-advance levels when section enters view
     ScrollTrigger.create({
       trigger:'#depth-journey', start:'top 60%', once:true,
       onEnter(){
