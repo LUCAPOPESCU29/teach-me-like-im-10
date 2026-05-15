@@ -125,177 +125,164 @@ export default function Navbar() {
   return (
     <>
       {/* Spacer so page content starts below the floating pill */}
-      <div className="h-[72px] shrink-0" />
+      <div className="h-[56px] shrink-0" />
 
       {/* Floating pill nav */}
       <nav
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50
-                   flex items-center gap-2
-                   w-[calc(100%-24px)] max-w-[980px]
-                   pl-4 pr-2 py-1.5
-                   bg-[#030609]/70 backdrop-blur-2xl
-                   border border-white/[0.07]
+        className="fixed top-3 left-1/2 -translate-x-1/2 z-50
+                   flex items-center gap-1.5
+                   w-[calc(100%-24px)] max-w-[860px]
+                   pl-3 pr-1.5 py-1
+                   bg-[#030609]/80 backdrop-blur-2xl
+                   border border-white/[0.06]
                    rounded-full
-                   shadow-[0_8px_40px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.05)]
+                   shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]
                    transition-all duration-300"
-        style={{ WebkitBackdropFilter: "blur(24px) saturate(1.4)", backdropFilter: "blur(24px) saturate(1.4)" }}
+        style={{ WebkitBackdropFilter: "blur(24px) saturate(1.6)", backdropFilter: "blur(24px) saturate(1.6)" }}
       >
         {/* Left: Logo */}
         <button
           onClick={() => router.push("/")}
-          className="group flex items-center gap-1.5 whitespace-nowrap shrink-0"
+          className="group flex items-center gap-1 whitespace-nowrap shrink-0"
         >
-          <span className="text-emerald-400 text-sm group-hover:rotate-90 transition-transform duration-300">✦</span>
+          <span className="text-emerald-400 text-xs group-hover:rotate-90 transition-transform duration-300">✦</span>
           <span
-            className="text-[13px] font-extrabold text-emerald-400 tracking-[-0.02em] group-hover:opacity-80 transition-opacity"
+            className="text-[12px] font-extrabold text-emerald-400 tracking-[-0.02em] group-hover:opacity-70 transition-opacity"
             style={{ fontFamily: "Syne, sans-serif" }}
           >
-            TMI10
+            TM10
           </span>
         </button>
 
         <XPBadge />
 
         {/* Divider */}
-        <div className="h-5 w-px bg-white/10 mx-1 shrink-0 hidden lg:block" />
+        <div className="h-4 w-px bg-white/[0.08] mx-0.5 shrink-0 hidden lg:block" />
 
-        {/* Center: Nav items — desktop only */}
+        {/* Center: Nav items — desktop only, icons only */}
         <div className="hidden lg:flex items-center gap-0.5 flex-1">
-          <div className="flex items-center gap-0.5 px-1 py-0.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <div key={item.href} className="relative">
-                  <NewDot path={item.href} size="sm" />
-                  <motion.button
-                    onClick={() => router.push(item.href)}
-                    onMouseEnter={() => setHoveredItem(item.href)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200"
-                    style={{
-                      color: active ? item.color : "rgba(255,255,255,0.35)",
-                      backgroundColor: active ? `${item.color}12` : "transparent",
-                    }}
-                    whileHover={{
-                      backgroundColor: `${item.color}15`,
-                      color: item.color,
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {/* Glow effect on active */}
-                    {active && (
-                      <motion.div
-                        className="absolute inset-0 rounded-lg"
-                        style={{
-                          boxShadow: `0 0 12px ${item.color}20, inset 0 0 8px ${item.color}08`,
-                        }}
-                        layoutId="nav-glow"
-                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">{item.icon}</span>
-                    <span className="relative z-10 text-[11px] font-sans font-medium tracking-wide">
-                      {item.label}
-                    </span>
-                  </motion.button>
-
-                  {/* Tooltip on hover */}
-                  <AnimatePresence>
-                    {hoveredItem === item.href && !active && (
-                      <motion.div
-                        className="absolute top-full left-1/2 mt-2 px-2 py-1 rounded-md text-[10px] font-sans whitespace-nowrap pointer-events-none"
-                        style={{
-                          backgroundColor: `${item.color}20`,
-                          color: item.color,
-                          border: `1px solid ${item.color}30`,
-                          x: "-50%",
-                        }}
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.12 }}
-                      >
-                        {item.label}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-
-            {/* Divider */}
-            <div className="h-5 w-px bg-white/[0.06] mx-1" />
-
-            {/* Join Code */}
-            <AnimatePresence mode="wait">
-              {!showJoinInput ? (
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <div key={item.href} className="relative">
+                <NewDot path={item.href} size="sm" />
                 <motion.button
-                  key="join-btn"
-                  onClick={() => {
-                    setShowJoinInput(true);
-                    setTimeout(() => joinInputRef.current?.focus(), 100);
+                  onClick={() => router.push(item.href)}
+                  onMouseEnter={() => setHoveredItem(item.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className="relative flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200"
+                  style={{
+                    color: active ? item.color : "rgba(255,255,255,0.28)",
+                    backgroundColor: active ? `${item.color}14` : "transparent",
                   }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/25 hover:text-amber-400/70 hover:bg-amber-500/[0.06] transition-all duration-200"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  whileHover={{ backgroundColor: `${item.color}12`, color: item.color }}
+                  whileTap={{ scale: 0.93 }}
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <span className="text-[11px] font-sans font-medium tracking-wide">Code</span>
+                  {active && (
+                    <motion.div
+                      className="absolute inset-0 rounded-lg"
+                      style={{ boxShadow: `0 0 8px ${item.color}25` }}
+                      layoutId="nav-glow"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10">{item.icon}</span>
                 </motion.button>
-              ) : (
-                <motion.div
-                  key="join-input"
-                  className="flex items-center gap-1"
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <input
-                    ref={joinInputRef}
-                    type="text"
-                    value={joinCode}
-                    onChange={(e) =>
-                      setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))
+
+                {/* Tooltip */}
+                <AnimatePresence>
+                  {hoveredItem === item.href && (
+                    <motion.div
+                      className="absolute top-full left-1/2 mt-1.5 px-2 py-0.5 rounded-md text-[9px] font-sans whitespace-nowrap pointer-events-none"
+                      style={{
+                        backgroundColor: `${item.color}18`,
+                        color: item.color,
+                        border: `1px solid ${item.color}25`,
+                        x: "-50%",
+                      }}
+                      initial={{ opacity: 0, y: -3, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -3, scale: 0.95 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      {item.label}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+
+          {/* Divider */}
+          <div className="h-4 w-px bg-white/[0.06] mx-0.5" />
+
+          {/* Join Code */}
+          <AnimatePresence mode="wait">
+            {!showJoinInput ? (
+              <motion.button
+                key="join-btn"
+                onClick={() => {
+                  setShowJoinInput(true);
+                  setTimeout(() => joinInputRef.current?.focus(), 100);
+                }}
+                className="flex items-center justify-center w-7 h-7 rounded-lg text-white/20 hover:text-amber-400/70 hover:bg-amber-500/[0.07] transition-all duration-200"
+                title="Join Code"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </motion.button>
+            ) : (
+              <motion.div
+                key="join-input"
+                className="flex items-center gap-1"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <input
+                  ref={joinInputRef}
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) =>
+                    setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && joinCode.trim())
+                      router.push(`/challenge/${joinCode.trim()}`);
+                    if (e.key === "Escape") {
+                      setShowJoinInput(false);
+                      setJoinCode("");
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && joinCode.trim())
-                        router.push(`/challenge/${joinCode.trim()}`);
-                      if (e.key === "Escape") {
-                        setShowJoinInput(false);
-                        setJoinCode("");
-                      }
-                    }}
-                    placeholder="CODE"
-                    maxLength={6}
-                    className="w-[4.5rem] px-2 py-1 rounded-md bg-amber-500/[0.06] border border-amber-500/15 text-amber-300 font-mono text-[11px] tracking-[0.2em] text-center placeholder:text-amber-500/20 focus:outline-none focus:border-amber-500/30 transition-colors"
-                  />
-                  <button
-                    onClick={() => {
-                      if (joinCode.trim()) router.push(`/challenge/${joinCode.trim()}`);
-                    }}
-                    disabled={!joinCode.trim()}
-                    className="px-1.5 py-1 rounded-md bg-amber-500/10 text-amber-400/80 font-mono text-[10px] hover:bg-amber-500/20 disabled:opacity-20 transition-all"
-                  >
-                    GO
-                  </button>
-                  <button
-                    onClick={() => { setShowJoinInput(false); setJoinCode(""); }}
-                    className="text-white/15 hover:text-white/40 text-[10px] transition-colors px-0.5"
-                  >
-                    ✕
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                  }}
+                  placeholder="CODE"
+                  maxLength={6}
+                  className="w-[4rem] px-1.5 py-0.5 rounded-md bg-amber-500/[0.06] border border-amber-500/15 text-amber-300 font-mono text-[10px] tracking-[0.2em] text-center placeholder:text-amber-500/20 focus:outline-none focus:border-amber-500/30 transition-colors"
+                />
+                <button
+                  onClick={() => { if (joinCode.trim()) router.push(`/challenge/${joinCode.trim()}`); }}
+                  disabled={!joinCode.trim()}
+                  className="px-1 py-0.5 rounded-md bg-amber-500/10 text-amber-400/80 font-mono text-[9px] hover:bg-amber-500/20 disabled:opacity-20 transition-all"
+                >
+                  GO
+                </button>
+                <button
+                  onClick={() => { setShowJoinInput(false); setJoinCode(""); }}
+                  className="text-white/15 hover:text-white/40 text-[9px] transition-colors px-0.5"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Right: Utils */}
-        <div className="flex items-center gap-1 ml-auto" ref={mobileMenuRef}>
+        <div className="flex items-center gap-0.5 ml-auto" ref={mobileMenuRef}>
           {/* Search */}
           <AnimatePresence mode="wait">
             {!showSearch ? (
@@ -305,13 +292,13 @@ export default function Navbar() {
                   setShowSearch(true);
                   setTimeout(() => searchInputRef.current?.focus(), 100);
                 }}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-200"
+                className="flex items-center justify-center w-7 h-7 rounded-lg text-white/25 hover:text-white/55 hover:bg-white/[0.04] transition-all duration-200"
                 aria-label="Search topics"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="6.5" cy="6.5" r="5" />
                   <path d="M10.5 10.5L15 15" />
                 </svg>
@@ -328,13 +315,13 @@ export default function Navbar() {
                     setSearchQuery("");
                   }
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-emerald-500/15"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07]"
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: "auto" }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeLinecap="round">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round">
                   <circle cx="6.5" cy="6.5" r="5" />
                   <path d="M10.5 10.5L15 15" />
                 </svg>
@@ -349,13 +336,13 @@ export default function Navbar() {
                   onBlur={() => {
                     if (!searchQuery.trim()) { setShowSearch(false); setSearchQuery(""); }
                   }}
-                  placeholder="Search topic..."
-                  className="w-28 sm:w-36 bg-transparent text-xs font-sans text-white placeholder:text-white/25 focus:outline-none"
+                  placeholder="Search..."
+                  className="w-24 sm:w-32 bg-transparent text-[11px] font-sans text-white placeholder:text-white/20 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => { setShowSearch(false); setSearchQuery(""); }}
-                  className="text-white/15 hover:text-white/40 text-[10px] transition-colors"
+                  className="text-white/15 hover:text-white/40 text-[9px] transition-colors"
                 >
                   ✕
                 </button>
@@ -371,14 +358,14 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen((o) => !o)}
-            className="flex lg:hidden items-center justify-center w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.1] transition-all duration-200"
+            className="flex lg:hidden items-center justify-center w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08] transition-all duration-200"
             aria-label="Menu"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               {mobileMenuOpen ? (
                 <><line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" /></>
               ) : (
-                <><line x1="2" y1="4" x2="14" y2="4" /><line x1="4" y1="8" x2="14" y2="8" /><line x1="6" y1="12" x2="14" y2="12" /></>
+                <><line x1="2" y1="5" x2="14" y2="5" /><line x1="4" y1="9" x2="14" y2="9" /><line x1="6" y1="13" x2="14" y2="13" /></>
               )}
             </svg>
           </button>
