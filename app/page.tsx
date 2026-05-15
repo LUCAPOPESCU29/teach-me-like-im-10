@@ -90,12 +90,12 @@ export default function Home() {
   const [lang, setLang] = useState<LangCode>("en");
   const [greeting, setGreeting] = useState<{ text: string; emoji: string } | null>(null);
 
-  // Unauthenticated visitors see the landing page, not the app
+  // Fallback client-side guard (middleware handles this server-side first)
   useEffect(() => {
     if (!isLoading && isGuest) {
-      router.replace("/landing");
+      window.location.replace("/landing/");
     }
-  }, [isLoading, isGuest, router]);
+  }, [isLoading, isGuest]);
   const [discoverTab, setDiscoverTab] = useState<string>("play");
   const [showDiscover, setShowDiscover] = useState(false);
 
@@ -128,7 +128,7 @@ export default function Home() {
 
   const filteredFeatures = ALL_FEATURES.filter((f) => f.cat === discoverTab);
 
-  // Show nothing while auth resolves or while redirecting guests to /landing
+  // Show nothing while auth resolves (middleware already blocked guests server-side)
   if (isLoading || isGuest) return null;
 
   return (
