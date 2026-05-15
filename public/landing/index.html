@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teach Me Like I'm 10 — Learn Anything, Simply.</title>
+  <meta name="description" content="Any topic. Five depths. From a 5-year-old to a PhD. Free forever." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --em:#34d399;--em2:#10b981;
+  --bg:#030609;--bg2:#070b14;
+  --surface:rgba(255,255,255,0.025);
+  --border:rgba(255,255,255,0.07);
+  --text:rgba(255,255,255,0.88);
+  --muted:rgba(255,255,255,0.38);
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  line-height:1.6;
+}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(52,211,153,0.35);border-radius:2px}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;
+}
+.container{max-width:1120px;margin:0 auto;padding:0 32px}
+
+/* ── SCROLL PROGRESS ── */
+#scroll-prog{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:500;
+  background:linear-gradient(90deg,var(--em),#6ee7b7,var(--em));
+  transform-origin:left;transform:scaleX(0);
+  box-shadow:0 0 12px rgba(52,211,153,0.6);
+}
+
+/* ── AMBIENT PARTICLES ── */
+#amb-wrap{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.amb-p{
+  position:absolute;border-radius:50%;
+  background:var(--em);
+  animation:ambFloat 6s ease-in-out infinite;
+}
+@keyframes ambFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-12px) scale(1.2)}
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:200;
+  display:flex;align-items:center;gap:0;
+  padding:7px 7px 7px 22px;
+  background:rgba(3,6,9,0.65);
+  backdrop-filter:blur(24px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:100px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+  white-space:nowrap;
+  opacity:0;
+  transition:background .3s;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  color:var(--em);margin-right:30px;letter-spacing:-.2px;
+}
+.nav-links{display:flex;align-items:center;gap:2px;margin-right:10px}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;
+  padding:7px 15px;border-radius:100px;
+  transition:all .2s;
+}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 20px;
+  background:linear-gradient(135deg,var(--em),var(--em2));
+  color:#000;font-size:13px;font-weight:700;
+  border-radius:100px;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:transform .2s var(--ease-out),box-shadow .3s;
+}
+.nav-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);
+  transform:translateX(-100%);
+  animation:sh 2.5s infinite 1.2s linear;
+}
+@keyframes sh{to{transform:translateX(200%)}}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(52,211,153,.45)}
+.nav-cta .chip{
+  width:20px;height:20px;border-radius:6px;
+  background:rgba(0,0,0,.18);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:100px 32px 60px;position:relative;overflow:hidden;
+}
+.hero-bg-grid{
+  position:absolute;inset:0;pointer-events:none;opacity:.02;
+  background-image:
+    linear-gradient(rgba(52,211,153,1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,211,153,1) 1px,transparent 1px);
+  background-size:72px 72px;
+}
+.hero-bg-glow{
+  position:absolute;top:-15%;left:-5%;
+  width:700px;height:700px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(52,211,153,.12) 0%,transparent 65%);
+}
+.hero-inner{
+  position:relative;z-index:2;
+  max-width:1120px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;gap:32px;width:100%;
+}
+.hero-left{max-width:580px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 14px 5px 8px;
+  background:rgba(52,211,153,.07);
+  border:1px solid rgba(52,211,153,.2);
+  border-radius:100px;
+  margin-bottom:28px;opacity:0;
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--em);box-shadow:0 0 10px var(--em);
+  animation:glow 2s infinite;
+}
+@keyframes glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+.badge-text{font-size:11px;font-weight:600;color:rgba(52,211,153,.85);letter-spacing:.12em;text-transform:uppercase}
+.hero-h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(50px,5.5vw,82px);
+  font-weight:800;line-height:.94;
+  letter-spacing:-.035em;
+  margin-bottom:22px;opacity:0;
+}
+.hero-h1 .line{display:block;overflow:hidden}
+.hero-h1 .li{display:block;transform:translateY(110%)}
+.hero-h1 .accent{
+  background:linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(15px,1.5vw,18px);color:var(--muted);
+  line-height:1.72;margin-bottom:36px;opacity:0;
+  max-width:440px;
+}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;opacity:0}
+.btn-p{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 26px;
+  background:linear-gradient(135deg,var(--em),var(--em2));
+  color:#000;font-size:14px;font-weight:700;
+  border-radius:14px;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:transform .22s var(--ease-out),box-shadow .3s;
+  box-shadow:0 4px 24px rgba(52,211,153,.3),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-p::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);
+  transform:translateX(-100%);animation:sh 2.2s infinite 0.8s linear;
+}
+.btn-p:hover{transform:scale(1.04) translateY(-2px);box-shadow:0 12px 40px rgba(52,211,153,.42)}
+.btn-p .chip{width:22px;height:22px;border-radius:7px;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-s{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 22px;
+  border:1px solid var(--border);
+  color:var(--muted);font-size:14px;font-weight:500;
+  border-radius:14px;text-decoration:none;
+  transition:all .25s;
+}
+.btn-s:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.hero-trust{
+  display:flex;align-items:center;gap:12px;
+  margin-top:28px;opacity:0;
+}
+.trust-avatars{display:flex}
+.trust-av{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--bg);
+  font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.05));
+}
+.trust-av+.trust-av{margin-left:-8px}
+.trust-text{font-size:12px;color:var(--muted)}
+.trust-text strong{color:rgba(255,255,255,.65)}
+
+/* ── THREE.JS CANVAS ── */
+.hero-right{position:relative;height:560px}
+#hero-canvas{
+  width:100%;height:100%;
+  border-radius:28px;
+  display:block;
+  opacity:0;
+}
+.canvas-glow{
+  position:absolute;inset:0;border-radius:28px;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(52,211,153,.08) 0%,transparent 70%);
+}
+.canvas-edge{
+  position:absolute;inset:0;border-radius:28px;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 50%,var(--bg) 100%);
+}
+/* Floating level pills */
+.float-pill{
+  position:absolute;z-index:5;
+  padding:7px 14px;border-radius:100px;
+  backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(7,11,20,.7);
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;gap:7px;
+  opacity:0;white-space:nowrap;
+  animation:float 4s ease-in-out infinite;
+}
+.float-pill .pdot{width:7px;height:7px;border-radius:50%}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fp1{top:12%;left:-8%;animation-delay:0s}
+.fp2{top:42%;right:-10%;animation-delay:.9s}
+.fp3{bottom:18%;left:-6%;animation-delay:1.7s}
+
+/* ── MARQUEE ── */
+.marquee-wrap{
+  padding:18px 0;overflow:hidden;position:relative;
+  border-top:1px solid rgba(255,255,255,.045);
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+.marquee-wrap::before,.marquee-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:130px;z-index:2;
+}
+.marquee-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.mtrack{display:flex;gap:32px;animation:mq 32s linear infinite;white-space:nowrap}
+@keyframes mq{to{transform:translateX(-50%)}}
+.mitem{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:rgba(255,255,255,.22)}
+.mdot{color:var(--em);font-size:9px}
+
+/* ── SHARED SECTION ── */
+section{padding:108px 0;position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--em);margin-bottom:14px;
+}
+.eyebrow::before{content:'';display:block;width:18px;height:1px;background:var(--em)}
+h2.sec{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(34px,4.5vw,58px);
+  font-weight:800;line-height:1.02;letter-spacing:-.03em;
+  color:#fff;margin-bottom:14px;
+}
+/* Word-split spans */
+.sw{display:inline-block;overflow:hidden;line-height:1.1}
+.swi{display:inline-block;transform:translateY(105%)}
+p.sec-sub{font-size:17px;color:var(--muted);max-width:480px;line-height:1.72}
+
+/* ── DECORATIVE 3D CANVASES ── */
+.deco-canvas{
+  position:absolute;pointer-events:none;z-index:0;
+  opacity:0;transition:opacity 1.2s ease;
+  border-radius:0;
+}
+@media(max-width:960px){.deco-canvas{display:none}}
+
+/* ── STATS ── */
+#stats{padding:64px 0}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2px;
+  background:rgba(255,255,255,.05);
+  border-radius:22px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  position:relative;z-index:1;
+}
+.stat{
+  background:var(--bg);padding:38px 24px;text-align:center;
+  transition:background .3s;cursor:default;
+}
+.stat:hover{background:rgba(52,211,153,.035)}
+.stat-val{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(30px,3.5vw,50px);font-weight:800;
+  color:#fff;letter-spacing:-.03em;margin-bottom:5px;
+}
+.stat-lbl{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ── LEVELS ── */
+#levels{background:linear-gradient(180deg,var(--bg) 0%,rgba(7,11,20,.6) 50%,var(--bg) 100%)}
+.levels-head{margin-bottom:56px;position:relative;z-index:1}
+.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;position:relative;z-index:1}
+.lvl-card{
+  padding:28px 20px 24px;border-radius:22px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  cursor:default;
+  transition:transform .4s var(--ease-out),border-color .3s,box-shadow .4s;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.lvl-card::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--lc);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s var(--ease-out);
+}
+.lvl-card:hover::before{transform:scaleX(1)}
+.lvl-card:hover{border-color:var(--lb);box-shadow:0 0 32px var(--lg)}
+.lvl-glow{
+  position:absolute;top:-30%;right:-20%;width:140px;height:140px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--lg) 0%,transparent 70%);
+  opacity:0;transition:opacity .4s;
+}
+.lvl-card:hover .lvl-glow{opacity:1}
+.lvl-emoji{font-size:26px;margin-bottom:14px;display:block}
+.lvl-n{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lc);margin-bottom:5px;opacity:.7}
+.lvl-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:8px}
+.lvl-desc{font-size:11.5px;color:var(--muted);line-height:1.65}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;position:relative;z-index:1}
+.steps-line{
+  position:absolute;top:62px;left:calc(16.66% + 30px);right:calc(16.66% + 30px);
+  height:1px;pointer-events:none;overflow:hidden;
+}
+.steps-line-fill{
+  width:100%;height:100%;
+  background:linear-gradient(to right,rgba(52,211,153,.3),rgba(52,211,153,.1),rgba(52,211,153,.3));
+  transform-origin:left;transform:scaleX(0);
+}
+.step{
+  padding:34px 26px;border-radius:22px;
+  background:var(--surface);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transform-style:preserve-3d;
+  will-change:transform;
+  transition:border-color .3s,box-shadow .3s;
+}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,rgba(52,211,153,.2),transparent);
+}
+.step:hover{border-color:rgba(52,211,153,.2);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.step-n{
+  font-family:'Syne',sans-serif;font-size:68px;font-weight:800;line-height:1;
+  position:absolute;top:14px;right:18px;
+  color:rgba(52,211,153,.06);user-select:none;letter-spacing:-.04em;
+}
+.step-icon{
+  width:46px;height:46px;border-radius:14px;
+  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:18px;
+}
+.step h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.68}
+
+/* ── BENTO ── */
+.bento{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  grid-template-rows:auto;gap:14px;margin-top:56px;
+  position:relative;z-index:1;
+}
+.bc{
+  padding:30px 26px;border-radius:22px;
+  background:var(--surface);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:border-color .35s,transform .35s var(--ease-out),box-shadow .35s;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.bc:hover{border-color:rgba(52,211,153,.2);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.bc.s7{grid-column:span 7}.bc.s5{grid-column:span 5}
+.bc.s4{grid-column:span 4}.bc.s8{grid-column:span 8}
+.bc.s6{grid-column:span 6}.bc.s3{grid-column:span 3}
+.bc.s9{grid-column:span 9}
+.bc-glow{
+  position:absolute;top:-40%;right:-15%;width:220px;height:220px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--bg-color,rgba(52,211,153,.12)) 0%,transparent 70%);
+}
+.bc-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:var(--ic-bg,rgba(52,211,153,.1));
+  border:1px solid var(--ic-bdr,rgba(52,211,153,.2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:18px;
+}
+.bc h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:7px}
+.bc p{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* depth pips */
+.pips{display:flex;gap:7px;margin-top:20px}
+.pip{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}
+.pip .pf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--em),var(--em2));transform-origin:left;transform:scaleX(0)}
+
+/* lang pills */
+.lang-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.lp{
+  padding:4px 10px;border-radius:100px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  font-size:11px;color:var(--muted);font-weight:500;
+}
+
+/* xp bar */
+.xp-bar{
+  margin-top:20px;height:6px;border-radius:3px;
+  background:rgba(255,255,255,.07);overflow:hidden;
+}
+.xp-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#f97316,#fbbf24);
+  transform:scaleX(0);transform-origin:left;
+}
+.xp-row{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--muted)}
+
+/* quiz card mini */
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin-top:18px}
+.qopt{
+  padding:8px 12px;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  font-size:11.5px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+  transition:all .2s;cursor:default;
+}
+.qopt:hover{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.18);color:rgba(255,255,255,.65)}
+.qopt.correct{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25);color:rgba(52,211,153,.85)}
+.qopt-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0}
+.qopt.correct .qopt-dot{background:var(--em);border-color:var(--em)}
+
+/* ── TESTIMONIALS ── */
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+.tc{
+  padding:26px;border-radius:20px;
+  background:var(--surface);border:1px solid var(--border);
+  transition:border-color .3s,transform .35s var(--ease-out),box-shadow .35s;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.tc:hover{border-color:rgba(52,211,153,.18);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.tc-stars{color:var(--em);font-size:12px;letter-spacing:2px;margin-bottom:12px}
+.tc-q{
+  font-size:13.5px;color:rgba(255,255,255,.52);line-height:1.75;
+  margin-bottom:18px;position:relative;
+}
+.tc-q::before{
+  content:'"';font-size:38px;color:var(--em);line-height:1;
+  display:block;margin-bottom:2px;font-family:'Syne',sans-serif;
+}
+.tc-a{display:flex;align-items:center;gap:10px}
+.tc-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:linear-gradient(135deg,rgba(52,211,153,.25),rgba(52,211,153,.06));
+  border:1px solid rgba(52,211,153,.2);
+}
+.tc-n{font-size:12px;font-weight:600;color:rgba(255,255,255,.72)}
+.tc-r{font-size:10px;color:var(--muted)}
+
+/* ── CTA ── */
+#cta{text-align:center;padding:120px 32px 160px;position:relative;overflow:hidden}
+.cta-glow{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:800px;height:500px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(52,211,153,.1) 0%,transparent 70%);
+}
+.cta-ring{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  border:1px solid rgba(52,211,153,.06);
+  border-radius:50%;pointer-events:none;
+  animation:spin 20s linear infinite;
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.r1{width:500px;height:500px;animation-duration:25s}
+.r2{width:700px;height:700px;animation-direction:reverse;animation-duration:35s}
+.r3{width:920px;height:920px;animation-duration:55s}
+.cta-in{position:relative;z-index:2}
+.cta-ey{color:var(--em);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px}
+#cta h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(44px,7vw,92px);font-weight:800;line-height:.93;
+  letter-spacing:-.035em;color:#fff;margin-bottom:18px;
+}
+#cta h2 .accent{
+  background:linear-gradient(135deg,#34d399,#6ee7b7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+#cta p{font-size:17px;color:var(--muted);margin-bottom:36px}
+.cta-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  padding:28px 0;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.foot-in{display:flex;align-items:center;justify-content:space-between}
+.foot-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--em)}
+.foot-note{font-size:11px;color:rgba(255,255,255,.18)}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  opacity:0;z-index:3;
+}
+.scroll-hint span{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.scroll-mouse{
+  width:18px;height:28px;border:1.5px solid rgba(255,255,255,.15);
+  border-radius:10px;display:flex;justify-content:center;padding-top:5px;
+}
+.scroll-wheel{
+  width:2px;height:5px;background:var(--em);border-radius:1px;
+  animation:scrollWheel 1.6s ease-in-out infinite;
+}
+@keyframes scrollWheel{0%,100%{opacity:1;transform:translateY(0)}80%{opacity:0;transform:translateY(7px)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .hero-inner{grid-template-columns:1fr;gap:48px}
+  .hero-left{max-width:100%}
+  .hero-right{height:400px}
+  .lvl-grid{grid-template-columns:repeat(3,1fr)}
+  .steps{grid-template-columns:1fr;gap:14px}
+  .steps-line{display:none}
+  .bc.s7,.bc.s5,.bc.s4,.bc.s8,.bc.s6,.bc.s3,.bc.s9{grid-column:span 12}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .tg{grid-template-columns:1fr}
+  nav .nav-links{display:none}
+  .float-pill{display:none}
+}
+@media(max-width:580px){
+  .lvl-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .hero-right{height:320px}
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress -->
+<div id="scroll-prog"></div>
+<!-- Ambient particles container -->
+<div id="amb-wrap"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <span class="nav-logo">✦ TMI10</span>
+  <div class="nav-links">
+    <a href="#levels">Levels</a>
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+  </div>
+  <a href="https://www.teachmelikeim10.xyz" class="nav-cta" target="_blank">
+    Try it free
+    <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-glow"></div>
+
+  <div class="hero-inner container">
+    <div class="hero-left">
+      <div class="hero-badge" id="hbadge">
+        <div class="badge-dot"></div>
+        <span class="badge-text">Free · No signup needed</span>
+      </div>
+
+      <h1 class="hero-h1" id="hh1">
+        <span class="line"><span class="li">Understand</span></span>
+        <span class="line"><span class="li">anything.</span></span>
+        <span class="line"><span class="li accent">Simply.</span></span>
+      </h1>
+
+      <p class="hero-sub" id="hsub">
+        Any topic. Five depths of explanation — from a 5-year-old to a PhD.
+        Powered by AI. Built for the relentlessly curious.
+      </p>
+
+      <div class="hero-actions" id="hacts">
+        <a href="https://www.teachmelikeim10.xyz" class="btn-p" target="_blank">
+          Start learning for free
+          <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        </a>
+        <a href="#levels" class="btn-s">See the levels ↓</a>
+      </div>
+
+      <div class="hero-trust" id="htrust">
+        <div class="trust-avatars">
+          <div class="trust-av">👨‍💻</div>
+          <div class="trust-av">👩‍🎓</div>
+          <div class="trust-av">👨‍🏫</div>
+          <div class="trust-av">👩‍💼</div>
+        </div>
+        <p class="trust-text">Loved by <strong>curious people</strong> worldwide</p>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <canvas id="hero-canvas"></canvas>
+      <div class="canvas-glow"></div>
+      <div class="canvas-edge"></div>
+
+      <!-- Floating pills -->
+      <div class="float-pill fp1" id="fp1">
+        <div class="pdot" style="background:#34d399;box-shadow:0 0 7px #34d399"></div>
+        <span style="color:#34d399">Level 1 — ELI5</span>
+      </div>
+      <div class="float-pill fp2" id="fp2">
+        <div class="pdot" style="background:#f97316;box-shadow:0 0 7px #f97316"></div>
+        <span style="color:rgba(255,255,255,.7)">Level 3 — High School</span>
+      </div>
+      <div class="float-pill fp3" id="fp3">
+        <div class="pdot" style="background:#a855f7;box-shadow:0 0 7px #a855f7"></div>
+        <span style="color:rgba(255,255,255,.5)">Level 5 — PhD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" id="scroll-hint">
+    <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="mtrack" id="mtrack">
+    <span class="mitem"><span class="mdot">✦</span> Quantum Physics</span>
+    <span class="mitem"><span class="mdot">✦</span> Machine Learning</span>
+    <span class="mitem"><span class="mdot">✦</span> Black Holes</span>
+    <span class="mitem"><span class="mdot">✦</span> CRISPR Gene Editing</span>
+    <span class="mitem"><span class="mdot">✦</span> The Roman Empire</span>
+    <span class="mitem"><span class="mdot">✦</span> How Vaccines Work</span>
+    <span class="mitem"><span class="mdot">✦</span> Neural Networks</span>
+    <span class="mitem"><span class="mdot">✦</span> Options Trading</span>
+    <span class="mitem"><span class="mdot">✦</span> String Theory</span>
+    <span class="mitem"><span class="mdot">✦</span> Gut Microbiome</span>
+    <span class="mitem"><span class="mdot">✦</span> Climate Change</span>
+    <span class="mitem"><span class="mdot">✦</span> Blockchain</span>
+    <span class="mitem"><span class="mdot">✦</span> Quantum Physics</span>
+    <span class="mitem"><span class="mdot">✦</span> Machine Learning</span>
+    <span class="mitem"><span class="mdot">✦</span> Black Holes</span>
+    <span class="mitem"><span class="mdot">✦</span> CRISPR Gene Editing</span>
+    <span class="mitem"><span class="mdot">✦</span> The Roman Empire</span>
+    <span class="mitem"><span class="mdot">✦</span> How Vaccines Work</span>
+    <span class="mitem"><span class="mdot">✦</span> Neural Networks</span>
+    <span class="mitem"><span class="mdot">✦</span> Options Trading</span>
+    <span class="mitem"><span class="mdot">✦</span> String Theory</span>
+    <span class="mitem"><span class="mdot">✦</span> Gut Microbiome</span>
+    <span class="mitem"><span class="mdot">✦</span> Climate Change</span>
+    <span class="mitem"><span class="mdot">✦</span> Blockchain</span>
+  </div>
+</div>
+
+<!-- STATS — Crystal 3D decoration -->
+<section id="stats">
+  <canvas id="crystal-canvas" class="deco-canvas" style="width:220px;height:280px;top:-20px;right:5%"></canvas>
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-val" data-count="5" data-sfx="">0</div>
+        <div class="stat-lbl">Explanation depths</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="40" data-sfx="+">0</div>
+        <div class="stat-lbl">Languages supported</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="10" data-sfx="+">0</div>
+        <div class="stat-lbl">Learning modes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="100" data-sfx="%">0</div>
+        <div class="stat-lbl">Free forever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEVELS -->
+<section id="levels">
+  <div class="container">
+    <div class="levels-head">
+      <div class="eyebrow">Five depths of understanding</div>
+      <h2 class="sec">One topic.<br/>Five realities.</h2>
+      <p class="sec-sub">Start anywhere. Go as deep as you want. Each level unlocks more sophisticated understanding of the exact same concept.</p>
+    </div>
+    <div class="lvl-grid">
+      <div class="lvl-card" style="--lc:#34d399;--lb:rgba(52,211,153,.22);--lg:rgba(52,211,153,.1)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🍎</span>
+        <div class="lvl-n">Level 1</div>
+        <div class="lvl-name">ELI5</div>
+        <div class="lvl-desc">Pure analogies. Simple language. Like explaining it to your 5-year-old sibling.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#fbbf24;--lb:rgba(251,191,36,.2);--lg:rgba(251,191,36,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">📚</span>
+        <div class="lvl-n">Level 2</div>
+        <div class="lvl-name">Middle School</div>
+        <div class="lvl-desc">Key concepts introduced. Real vocabulary. The dots start connecting.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#f97316;--lb:rgba(249,115,22,.2);--lg:rgba(249,115,22,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🔬</span>
+        <div class="lvl-n">Level 3</div>
+        <div class="lvl-name">High School</div>
+        <div class="lvl-desc">The mechanics. Cause and effect. Why things actually work.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#f43f5e;--lb:rgba(244,63,94,.2);--lg:rgba(244,63,94,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🏛️</span>
+        <div class="lvl-n">Level 4</div>
+        <div class="lvl-name">College</div>
+        <div class="lvl-desc">Technical depth. Domain language. The kind used in papers and research.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#a855f7;--lb:rgba(168,85,247,.2);--lg:rgba(168,85,247,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🎓</span>
+        <div class="lvl-n">Level 5</div>
+        <div class="lvl-name">PhD</div>
+        <div class="lvl-desc">First principles. Edge cases. Open questions at the frontier of research.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS — DNA Helix decoration -->
+<section id="how">
+  <canvas id="dna-canvas" class="deco-canvas" style="width:240px;height:380px;right:2%;top:50%;transform:translateY(-50%)"></canvas>
+  <div class="container">
+    <div class="eyebrow">Dead simple</div>
+    <h2 class="sec">Three steps.<br/>Zero friction.</h2>
+    <div class="steps">
+      <div class="steps-line"><div class="steps-line-fill" id="steps-line-fill"></div></div>
+      <div class="step">
+        <div class="step-n">01</div>
+        <div class="step-icon">🔍</div>
+        <h3>Type any topic</h3>
+        <p>Black holes. Options trading. Why the sky is blue. No limits — if humans have thought about it, we can explain it.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div class="step-icon">⚡</div>
+        <h3>Pick your depth</h3>
+        <p>Five levels, ELI5 to PhD. Start at the bottom and go deeper — or skip straight to the deep end.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div class="step-icon">🧪</div>
+        <h3>Test yourself</h3>
+        <p>Quiz battles, teach-it-back AI grading, flashcards, and speed runs. Learning only sticks when you prove it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO — Torus Knot decoration -->
+<section id="features">
+  <canvas id="knot-canvas" class="deco-canvas" style="width:200px;height:200px;top:60px;right:3%"></canvas>
+  <div class="container">
+    <div class="eyebrow">Everything you need</div>
+    <h2 class="sec">Built for real<br/>understanding.</h2>
+
+    <div class="bento">
+      <!-- Depth meter -->
+      <div class="bc s7">
+        <div class="bc-glow" style="--bg-color:rgba(52,211,153,.13)"></div>
+        <div class="bc-icon">🎚️</div>
+        <h3>Adaptive depth meter</h3>
+        <p>Five stages. Each one unlocks a more sophisticated view of the same concept — watch your understanding visibly grow.</p>
+        <div class="pips">
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(.45)"></div></div>
+          <div class="pip"></div>
+        </div>
+      </div>
+
+      <!-- Languages -->
+      <div class="bc s5" style="--bg-color:rgba(251,191,36,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(251,191,36,.1);--ic-bdr:rgba(251,191,36,.2)">🌍</div>
+        <h3>40+ languages</h3>
+        <p>Every topic, every level, fully localized.</p>
+        <div class="lang-pills">
+          <span class="lp">English</span><span class="lp">Español</span>
+          <span class="lp">Français</span><span class="lp">Română</span>
+          <span class="lp">日本語</span><span class="lp">+35 more</span>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div class="bc s4" style="--bg-color:rgba(168,85,247,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(168,85,247,.1);--ic-bdr:rgba(168,85,247,.2)">🧠</div>
+        <h3>Quiz battles</h3>
+        <p>AI questions targeted at exactly what you just learned.</p>
+        <div class="quiz-opts">
+          <div class="qopt correct"><div class="qopt-dot"></div>Electromagnetic induction</div>
+          <div class="qopt"><div class="qopt-dot"></div>Static discharge</div>
+          <div class="qopt"><div class="qopt-dot"></div>Photoelectric effect</div>
+        </div>
+      </div>
+
+      <!-- XP -->
+      <div class="bc s4" style="--bg-color:rgba(249,115,22,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(249,115,22,.1);--ic-bdr:rgba(249,115,22,.2)">🔥</div>
+        <h3>Streaks & XP</h3>
+        <p>Daily rewards, a solar-system progress map, and an XP shop that makes learning genuinely addictive.</p>
+        <div class="xp-bar"><div class="xp-fill" id="xpfill"></div></div>
+        <div class="xp-row"><span>1,240 XP</span><span>Next level · 1,500</span></div>
+      </div>
+
+      <!-- Study rooms -->
+      <div class="bc s4" style="--bg-color:rgba(6,182,212,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(6,182,212,.1);--ic-bdr:rgba(6,182,212,.2)">🏠</div>
+        <h3>Study rooms</h3>
+        <p>Invite friends. Learn the same topic together. Real-time multiplayer knowledge sessions.</p>
+      </div>
+
+      <!-- Teach it back -->
+      <div class="bc s8" style="--bg-color:rgba(52,211,153,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon">📝</div>
+        <h3>Teach it back — AI grading</h3>
+        <p>Write your own explanation. Our AI grades it like a professor — spots the gaps, rewards the clarity, gives targeted feedback. The single best way to prove you actually understand something.</p>
+      </div>
+
+      <!-- Audio -->
+      <div class="bc s4" style="--bg-color:rgba(244,63,94,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(244,63,94,.1);--ic-bdr:rgba(244,63,94,.2)">🎧</div>
+        <h3>Audio narration</h3>
+        <p>Any level read aloud. Perfect for commutes, auditory learners, or when you just want to close your eyes and think.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div class="eyebrow">People love it</div>
+    <h2 class="sec">Built for the<br/>relentlessly curious.</h2>
+    <div class="tg">
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">I learned more about quantum physics in one evening than in an entire semester. The five-level system is genuinely brilliant.</p>
+        <div class="tc-a">
+          <div class="tc-av">👨‍💻</div>
+          <div><div class="tc-n">Alex M.</div><div class="tc-r">Software engineer</div></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">My students actually want to use it. The streak system keeps them coming back without me having to chase them down.</p>
+        <div class="tc-a">
+          <div class="tc-av">👩‍🏫</div>
+          <div><div class="tc-n">Sarah K.</div><div class="tc-r">High school teacher</div></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">I use it to prep for meetings on topics I know nothing about. Level 3 is my sweet spot — fast, accurate, and actually useful.</p>
+        <div class="tc-a">
+          <div class="tc-av">👨‍💼</div>
+          <div><div class="tc-n">James L.</div><div class="tc-r">Product manager</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA — Large Wireframe Orb -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-ring r1"></div>
+  <div class="cta-ring r2"></div>
+  <div class="cta-ring r3"></div>
+  <canvas id="orb-canvas" class="deco-canvas" style="width:520px;height:520px;top:50%;left:50%;transform:translate(-50%,-52%)"></canvas>
+  <div class="container">
+    <div class="cta-in">
+      <p class="cta-ey">Ready to understand everything?</p>
+      <h2>Learn anything.<br/><span class="accent">Simply.</span></h2>
+      <p>No account. No credit card. Just curiosity.</p>
+      <div class="cta-acts">
+        <a href="https://www.teachmelikeim10.xyz" class="btn-p" target="_blank">
+          Open the app — it's free
+          <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-in">
+      <span class="foot-logo">✦ Teach Me Like I'm 10</span>
+      <span class="foot-note">Free · No signup · Built for curiosity</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   HERO THREE.JS — Knowledge particle sphere
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const wrap   = canvas.parentElement;
+
+  function getSize(){ return { w: wrap.clientWidth, h: wrap.clientHeight }; }
+  let { w, h } = getSize();
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 100);
+  camera.position.z = 5.8;
+
+  /* Particle sphere — Fibonacci lattice */
+  const COUNT  = 700;
+  const RADIUS = 2.3;
+  const phi    = Math.PI * (3 - Math.sqrt(5));
+  const pos    = new Float32Array(COUNT * 3);
+
+  for (let i = 0; i < COUNT; i++) {
+    const y  = 1 - (i / (COUNT - 1)) * 2;
+    const r  = Math.sqrt(1 - y * y);
+    const th = phi * i;
+    pos[i*3]   = RADIUS * r * Math.cos(th);
+    pos[i*3+1] = RADIUS * y;
+    pos[i*3+2] = RADIUS * r * Math.sin(th);
+  }
+
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pMat = new THREE.PointsMaterial({ color:0x34d399, size:0.032, transparent:true, opacity:0.75, sizeAttenuation:true });
+  const points = new THREE.Points(pGeo, pMat);
+  scene.add(points);
+
+  /* Connecting lines */
+  const linePts = [];
+  const DIST    = 0.62;
+  for (let i = 0; i < COUNT; i++) {
+    for (let j = i + 1; j < COUNT; j++) {
+      const dx = pos[i*3]   - pos[j*3];
+      const dy = pos[i*3+1] - pos[j*3+1];
+      const dz = pos[i*3+2] - pos[j*3+2];
+      if (Math.sqrt(dx*dx+dy*dy+dz*dz) < DIST) {
+        linePts.push(pos[i*3],pos[i*3+1],pos[i*3+2]);
+        linePts.push(pos[j*3],pos[j*3+1],pos[j*3+2]);
+      }
+    }
+  }
+  const lGeo = new THREE.BufferGeometry();
+  lGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePts), 3));
+  const lMat = new THREE.LineBasicMaterial({ color:0x34d399, transparent:true, opacity:0.11 });
+  const lines = new THREE.LineSegments(lGeo, lMat);
+  scene.add(lines);
+
+  /* Inner glow sphere */
+  const gGeo = new THREE.SphereGeometry(1.85, 32, 32);
+  const gMat = new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.025 });
+  const glow = new THREE.Mesh(gGeo, gMat);
+  scene.add(glow);
+
+  /* Orbital rings */
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.35, 0.008, 8, 80),
+    new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.08 })
+  );
+  ring.rotation.x = Math.PI / 2.8;
+  scene.add(ring);
+
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.5, 0.006, 8, 80),
+    new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.05 })
+  );
+  ring2.rotation.x = Math.PI / 1.6;
+  ring2.rotation.z = Math.PI / 5;
+  scene.add(ring2);
+
+  /* Third ring — tilted differently */
+  const ring3 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.62, 0.004, 8, 80),
+    new THREE.MeshBasicMaterial({ color:0x6ee7b7, transparent:true, opacity:0.04 })
+  );
+  ring3.rotation.z = Math.PI / 3;
+  ring3.rotation.x = Math.PI / 4;
+  scene.add(ring3);
+
+  /* Mouse */
+  let mx=0, my=0, tmx=0, tmy=0;
+  document.addEventListener('mousemove', e => {
+    mx = (e.clientX/window.innerWidth  - 0.5)*2;
+    my = (e.clientY/window.innerHeight - 0.5)*2;
+  });
+
+  /* Scroll reactivity */
+  let scrollY = 0;
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+  let t = 0;
+  const heroGroup = new THREE.Group();
+  heroGroup.add(points, lines, glow, ring, ring2, ring3);
+  scene.add(heroGroup);
+  // Remove individual adds since group handles them
+  scene.remove(points, lines, glow, ring, ring2, ring3);
+  heroGroup.add(points, lines, glow, ring, ring2, ring3);
+
+  function tick() {
+    requestAnimationFrame(tick);
+    t += 0.004;
+
+    /* Scroll-based speed boost */
+    const scrollFactor = 1 + scrollY * 0.0006;
+    points.rotation.y = t * 0.12 * scrollFactor;
+    lines.rotation.y  = t * 0.12 * scrollFactor;
+    glow.rotation.y   = t * 0.12 * scrollFactor;
+    ring.rotation.z   = t * 0.06;
+    ring2.rotation.y  = -t * 0.04;
+    ring3.rotation.z  = t * 0.025;
+
+    /* Breathe */
+    const s = 1 + Math.sin(t * 0.8) * 0.012;
+    points.scale.setScalar(s);
+    lines.scale.setScalar(s);
+
+    /* Mouse parallax */
+    tmx += (mx * 0.35 - tmx) * 0.045;
+    tmy += (-my * 0.35 - tmy) * 0.045;
+    camera.position.x = tmx;
+    camera.position.y = tmy;
+    camera.lookAt(scene.position);
+
+    renderer.render(scene, camera);
+  }
+  tick();
+
+  window.addEventListener('resize', () => {
+    const s = getSize();
+    renderer.setSize(s.w, s.h);
+    camera.aspect = s.w / s.h;
+    camera.updateProjectionMatrix();
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   CRYSTAL — Rotating Icosahedron (Stats section)
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('crystal-canvas');
+  if (!canvas) return;
+  const W = 220, H = 280;
+  canvas.width  = W * Math.min(devicePixelRatio, 2);
+  canvas.height = H * Math.min(devicePixelRatio, 2);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0,0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 100);
+  camera.position.z = 4.2;
+
+  const crystalGroup = new THREE.Group();
+  scene.add(crystalGroup);
+
+  /* Solid inner — low opacity */
+  const cGeo = new THREE.IcosahedronGeometry(1.2, 1);
+  const cMat = new THREE.MeshBasicMaterial({ color:0x0d2e21, transparent:true, opacity:0.55 });
+  crystalGroup.add(new THREE.Mesh(cGeo, cMat));
+
+  /* Wireframe outer */
+  const wGeo = new THREE.IcosahedronGeometry(1.22, 1);
+  const wMat = new THREE.MeshBasicMaterial({ color:0x34d399, wireframe:true, transparent:true, opacity:0.38 });
+  crystalGroup.add(new THREE.Mesh(wGeo, wMat));
+
+  /* Edge highlight — larger icosahedron wireframe */
+  const eGeo = new THREE.IcosahedronGeometry(1.55, 0);
+  const eMat = new THREE.MeshBasicMaterial({ color:0x34d399, wireframe:true, transparent:true, opacity:0.12 });
+  crystalGroup.add(new THREE.Mesh(eGeo, eMat));
+
+  /* Glowing particles at vertices */
+  const verts = cGeo.attributes.position;
+  const vPos  = new Float32Array(verts.count * 3);
+  for (let i = 0; i < verts.count; i++) {
+    vPos[i*3]   = verts.getX(i) * 1.22;
+    vPos[i*3+1] = verts.getY(i) * 1.22;
+    vPos[i*3+2] = verts.getZ(i) * 1.22;
+  }
+  const vGeo = new THREE.BufferGeometry();
+  vGeo.setAttribute('position', new THREE.BufferAttribute(vPos, 3));
+  const vMat = new THREE.PointsMaterial({ color:0x6ee7b7, size:0.07, transparent:true, opacity:0.9, sizeAttenuation:true });
+  crystalGroup.add(new THREE.Points(vGeo, vMat));
+
+  /* Orbit ring */
+  const oRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.9, 0.006, 8, 64),
+    new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.15 })
+  );
+  oRing.rotation.x = Math.PI / 3;
+  scene.add(oRing);
+
+  let ct = 0;
+  function crystalTick() {
+    requestAnimationFrame(crystalTick);
+    ct += 0.006;
+    crystalGroup.rotation.y = ct * 0.5;
+    crystalGroup.rotation.x = Math.sin(ct * 0.3) * 0.3;
+    oRing.rotation.z = ct * 0.08;
+    /* float */
+    crystalGroup.position.y = Math.sin(ct * 0.7) * 0.12;
+    renderer.render(scene, camera);
+  }
+  crystalTick();
+
+  /* Reveal on scroll enter */
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.create({
+      trigger: '#stats', start: 'top 80%', once: true,
+      onEnter() { canvas.style.opacity = '0.55'; }
+    });
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   DNA DOUBLE HELIX (How it works section)
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('dna-canvas');
+  if (!canvas) return;
+  const W = 240, H = 380;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0,0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 100);
+  camera.position.z = 4.5;
+
+  const dnaGroup = new THREE.Group();
+  scene.add(dnaGroup);
+
+  /* Two helix strands */
+  const TURNS  = 3.5;
+  const PTS    = 160;
+  const HRAD   = 0.65;
+  const YSCALE = 0.5;
+
+  [0, Math.PI].forEach((offset, si) => {
+    const pts = [];
+    for (let i = 0; i < PTS; i++) {
+      const t = (i / (PTS-1)) * Math.PI * 2 * TURNS;
+      pts.push(new THREE.Vector3(
+        Math.cos(t + offset) * HRAD,
+        (i / (PTS-1)) * 4 * YSCALE - YSCALE * 2,
+        Math.sin(t + offset) * HRAD
+      ));
+    }
+    const curve  = new THREE.CatmullRomCurve3(pts);
+    const tubeGeo = new THREE.TubeGeometry(curve, 240, 0.028, 7, false);
+    const tubeMat = new THREE.MeshBasicMaterial({
+      color: si === 0 ? 0x34d399 : 0x6ee7b7,
+      transparent:true, opacity: si === 0 ? 0.8 : 0.55
+    });
+    dnaGroup.add(new THREE.Mesh(tubeGeo, tubeMat));
+  });
+
+  /* Connecting rungs */
+  const RUNGS = 24;
+  for (let i = 0; i < RUNGS; i++) {
+    const frac = i / (RUNGS-1);
+    const t    = frac * Math.PI * 2 * TURNS;
+    const y    = frac * 4 * YSCALE - YSCALE * 2;
+    const x1 = Math.cos(t)          * HRAD;
+    const z1 = Math.sin(t)          * HRAD;
+    const x2 = Math.cos(t+Math.PI)  * HRAD;
+    const z2 = Math.sin(t+Math.PI)  * HRAD;
+
+    /* Rung line */
+    const rGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(x1,y,z1), new THREE.Vector3(x2,y,z2)
+    ]);
+    dnaGroup.add(new THREE.Line(rGeo, new THREE.LineBasicMaterial({ color:0x34d399, transparent:true, opacity:0.25 })));
+
+    /* Node spheres */
+    const nsGeo = new THREE.SphereGeometry(0.052, 7, 7);
+    [[x1,y,z1,0x34d399],[x2,y,z2,0x6ee7b7]].forEach(([nx,ny,nz,nc]) => {
+      const ns = new THREE.Mesh(nsGeo, new THREE.MeshBasicMaterial({ color:nc, transparent:true, opacity:0.85 }));
+      ns.position.set(nx,ny,nz);
+      dnaGroup.add(ns);
+    });
+  }
+
+  let dt = 0;
+  function dnaTick() {
+    requestAnimationFrame(dnaTick);
+    dt += 0.0045;
+    dnaGroup.rotation.y = dt * 0.6;
+    dnaGroup.position.y = Math.sin(dt * 0.5) * 0.08;
+    renderer.render(scene, camera);
+  }
+  dnaTick();
+
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.create({
+      trigger:'#how', start:'top 75%', once:true,
+      onEnter() { canvas.style.opacity='0.45'; }
+    });
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   TORUS KNOT (Features section)
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('knot-canvas');
+  if (!canvas) return;
+  const W = 200, H = 200;
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setSize(W,H);
+  renderer.setClearColor(0,0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
+  camera.position.z = 4;
+
+  const knotGroup = new THREE.Group();
+  scene.add(knotGroup);
+
+  /* Torus knot solid */
+  const kGeo = new THREE.TorusKnotGeometry(0.9, 0.22, 128, 14, 2, 3);
+  const kMat = new THREE.MeshBasicMaterial({ color:0x0d2e21, transparent:true, opacity:0.6 });
+  knotGroup.add(new THREE.Mesh(kGeo, kMat));
+
+  /* Wireframe overlay */
+  const kwGeo = new THREE.TorusKnotGeometry(0.92, 0.225, 128, 14, 2, 3);
+  const kwMat = new THREE.MeshBasicMaterial({ color:0x34d399, wireframe:true, transparent:true, opacity:0.35 });
+  knotGroup.add(new THREE.Mesh(kwGeo, kwMat));
+
+  /* Outer ring */
+  const kr = new THREE.Mesh(
+    new THREE.TorusGeometry(1.5, 0.006, 8, 64),
+    new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.12 })
+  );
+  scene.add(kr);
+
+  let kt = 0;
+  function knotTick() {
+    requestAnimationFrame(knotTick);
+    kt += 0.006;
+    knotGroup.rotation.y = kt * 0.45;
+    knotGroup.rotation.x = kt * 0.22;
+    kr.rotation.z = kt * 0.1;
+    knotGroup.position.y = Math.sin(kt*0.6)*0.1;
+    renderer.render(scene, camera);
+  }
+  knotTick();
+
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.create({
+      trigger:'#features', start:'top 75%', once:true,
+      onEnter() { canvas.style.opacity='0.5'; }
+    });
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   CTA ORB — Large pulsing wireframe sphere
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('orb-canvas');
+  if (!canvas) return;
+  const W = 520, H = 520;
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setSize(W,H);
+  renderer.setClearColor(0,0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52,1,0.1,100);
+  camera.position.z = 5.5;
+
+  const orbGroup = new THREE.Group();
+  scene.add(orbGroup);
+
+  /* Dense particle cloud */
+  const OP = 360;
+  const ORAD = 2.0;
+  const ophi = Math.PI*(3-Math.sqrt(5));
+  const opos = new Float32Array(OP*3);
+  for (let i=0;i<OP;i++){
+    const y  = 1-(i/(OP-1))*2;
+    const r  = Math.sqrt(1-y*y);
+    const th = ophi*i;
+    opos[i*3]   = ORAD*r*Math.cos(th);
+    opos[i*3+1] = ORAD*y;
+    opos[i*3+2] = ORAD*r*Math.sin(th);
+  }
+  const opGeo = new THREE.BufferGeometry();
+  opGeo.setAttribute('position', new THREE.BufferAttribute(opos,3));
+  orbGroup.add(new THREE.Points(opGeo, new THREE.PointsMaterial({ color:0x34d399, size:0.025, transparent:true, opacity:0.55, sizeAttenuation:true })));
+
+  /* Lines */
+  const olPts = [];
+  for (let i=0;i<OP;i++){
+    for (let j=i+1;j<OP;j++){
+      const dx=opos[i*3]-opos[j*3], dy=opos[i*3+1]-opos[j*3+1], dz=opos[i*3+2]-opos[j*3+2];
+      if(Math.sqrt(dx*dx+dy*dy+dz*dz)<0.72){
+        olPts.push(opos[i*3],opos[i*3+1],opos[i*3+2],opos[j*3],opos[j*3+1],opos[j*3+2]);
+      }
+    }
+  }
+  const olGeo = new THREE.BufferGeometry();
+  olGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(olPts),3));
+  orbGroup.add(new THREE.LineSegments(olGeo, new THREE.LineBasicMaterial({ color:0x34d399, transparent:true, opacity:0.08 })));
+
+  /* Icosahedron wireframe */
+  orbGroup.add(new THREE.Mesh(
+    new THREE.IcosahedronGeometry(2.15, 2),
+    new THREE.MeshBasicMaterial({ color:0x34d399, wireframe:true, transparent:true, opacity:0.08 })
+  ));
+
+  /* Rings */
+  for (let ri=0;ri<3;ri++){
+    const or = new THREE.Mesh(
+      new THREE.TorusGeometry(2.3+ri*0.25, 0.005, 8, 80),
+      new THREE.MeshBasicMaterial({ color:0x34d399, transparent:true, opacity:0.06-ri*0.015 })
+    );
+    or.rotation.x = (Math.PI/4)*ri;
+    or.rotation.z = (Math.PI/6)*ri;
+    orbGroup.add(or);
+  }
+
+  let ot = 0;
+  function orbTick() {
+    requestAnimationFrame(orbTick);
+    ot += 0.003;
+    orbGroup.rotation.y = ot * 0.18;
+    orbGroup.rotation.x = Math.sin(ot*0.4)*0.12;
+    const ps = 1 + Math.sin(ot*1.1)*0.025;
+    orbGroup.scale.setScalar(ps);
+    renderer.render(scene, camera);
+  }
+  orbTick();
+
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.create({
+      trigger:'#cta', start:'top 80%', once:true,
+      onEnter() { canvas.style.opacity='0.38'; }
+    });
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   GSAP ANIMATIONS
+═══════════════════════════════════════════════════ */
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Scroll Progress Bar ── */
+ScrollTrigger.create({
+  start:0, end:'max',
+  onUpdate(self) {
+    document.getElementById('scroll-prog').style.transform = `scaleX(${self.progress})`;
+  }
+});
+
+/* ── Nav ── */
+gsap.to('#nav', { opacity:1, y:0, duration:.7, ease:'power3.out', delay:.35 });
+
+/* ── Scroll hint ── */
+gsap.to('#scroll-hint', { opacity:1, y:0, duration:.8, ease:'power3.out', delay:2.2 });
+ScrollTrigger.create({
+  trigger:'#hero', start:'top top', end:'20% top',
+  onLeave(){ gsap.to('#scroll-hint',{opacity:0,y:8,duration:.4}); }
+});
+
+/* ── Badge ── */
+gsap.to('#hbadge', { opacity:1, duration:.6, ease:'power3.out', delay:.5 });
+
+/* ── Headline split ── */
+gsap.set('#hh1', { opacity:1 });
+gsap.to('.hero-h1 .li', {
+  y:0, duration:1.05, ease:'power4.out', stagger:.1, delay:.65,
+});
+
+/* ── Sub + actions + trust ── */
+gsap.to(['#hsub','#hacts','#htrust'], {
+  opacity:1, y:0, duration:.85, ease:'power3.out', stagger:.1, delay:1.1,
+});
+
+/* ── Canvas ── */
+gsap.to('#hero-canvas', { opacity:1, duration:1, ease:'power2.out', delay:1.3 });
+
+/* ── Floating pills ── */
+['#fp1','#fp2','#fp3'].forEach((id,i) => {
+  gsap.to(id, { opacity:1, duration:.6, ease:'power3.out', delay:1.6+i*.15 });
+});
+
+/* ── Word-split reveal for h2.sec ── */
+function splitWordReveal(el) {
+  const original = el.innerHTML;
+  /* Replace <br> tags temporarily */
+  const temp = original.replace(/<br\s*\/?>/gi, '|BR|');
+  const words = temp.split(' ');
+  el.innerHTML = words.map(w => {
+    if (w.includes('|BR|')) {
+      const parts = w.split('|BR|');
+      return parts.map((p, i) => {
+        const br = i < parts.length - 1 ? '<br>' : '';
+        return p ? `<span class="sw"><span class="swi">${p}</span></span>${br}` : br;
+      }).join(' ');
+    }
+    return `<span class="sw"><span class="swi">${w}</span></span>`;
+  }).join(' ');
+
+  gsap.utils.toArray(el.querySelectorAll('.swi')).forEach((word, i) => {
+    gsap.fromTo(word,
+      { y:'110%' },
+      {
+        y:0, duration:.85, ease:'power3.out', delay:i*.06,
+        scrollTrigger:{ trigger:el, start:'top 86%', once:true }
+      }
+    );
+  });
+}
+document.querySelectorAll('h2.sec').forEach(splitWordReveal);
+
+/* ── Eyebrow & sub-text reveals ── */
+gsap.utils.toArray('.eyebrow').forEach(el => {
+  gsap.fromTo(el, { opacity:0, x:-22 }, {
+    opacity:1, x:0, duration:.75, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 87%', once:true }
+  });
+});
+gsap.utils.toArray('.sec-sub').forEach(el => {
+  gsap.fromTo(el, { opacity:0, y:28 }, {
+    opacity:1, y:0, duration:.8, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 87%', once:true }
+  });
+});
+
+/* ── Step cards — stagger + line draw ── */
+gsap.utils.toArray('.step').forEach((el, i) => {
+  gsap.fromTo(el, { opacity:0, y:36 }, {
+    opacity:1, y:0, duration:.75, ease:'power3.out',
+    delay: i * .12,
+    scrollTrigger:{ trigger:'.steps', start:'top 84%', once:true }
+  });
+});
+ScrollTrigger.create({
+  trigger:'.steps', start:'top 84%', once:true,
+  onEnter() {
+    gsap.to('#steps-line-fill', { scaleX:1, duration:1.1, ease:'power2.inOut', delay:.3 });
+  }
+});
+
+/* ── Level cards — stagger ── */
+gsap.utils.toArray('.lvl-card').forEach((el, i) => {
+  gsap.fromTo(el, { opacity:0, y:42, scale:.97 }, {
+    opacity:1, y:0, scale:1, duration:.72, ease:'power3.out',
+    delay:i*.075,
+    scrollTrigger:{ trigger:'.lvl-grid', start:'top 84%', once:true }
+  });
+});
+
+/* ── Bento cards ── */
+gsap.utils.toArray('.bc').forEach((el, i) => {
+  gsap.fromTo(el, { opacity:0, y:32 }, {
+    opacity:1, y:0, duration:.75, ease:'power3.out',
+    delay:i*.055,
+    scrollTrigger:{ trigger:'.bento', start:'top 84%', once:true }
+  });
+});
+
+/* ── Testimonials — stagger slide-in ── */
+gsap.utils.toArray('.tc').forEach((el, i) => {
+  gsap.fromTo(el, { opacity:0, y:36, filter:'blur(6px)' }, {
+    opacity:1, y:0, filter:'blur(0px)', duration:.85, ease:'power3.out',
+    delay:i*.14,
+    scrollTrigger:{ trigger:'.tg', start:'top 83%', once:true }
+  });
+});
+
+/* ── Stats counters ── */
+document.querySelectorAll('.stat-val[data-count]').forEach(el => {
+  const n = +el.dataset.count, sfx = el.dataset.sfx||'';
+  ScrollTrigger.create({
+    trigger:el, start:'top 88%', once:true,
+    onEnter() {
+      gsap.fromTo(el, { scale:.85, opacity:.3 }, { scale:1, opacity:1, duration:.5, ease:'back.out(1.7)' });
+      gsap.fromTo({ v:0 }, { v:n }, {
+        duration:1.7, ease:'power2.out',
+        onUpdate() { el.textContent = Math.floor(this.targets()[0].v) + sfx; },
+      });
+    }
+  });
+});
+
+/* ── Depth pips — stagger ── */
+document.querySelectorAll('.pip .pf').forEach((pf, i) => {
+  ScrollTrigger.create({
+    trigger:pf, start:'top 85%', once:true,
+    onEnter() { gsap.to(pf, { scaleX:1, duration:.75+i*.1, ease:'power2.out', delay:i*.08 }); }
+  });
+});
+
+/* ── XP bar ── */
+ScrollTrigger.create({
+  trigger:'#xpfill', start:'top 85%', once:true,
+  onEnter() { gsap.to('#xpfill', { scaleX:1240/1500, duration:1.2, ease:'power2.out', delay:.3 }); }
+});
+
+/* ── CTA section reveal ── */
+ScrollTrigger.create({
+  trigger:'#cta', start:'top 75%', once:true,
+  onEnter() {
+    gsap.fromTo('.cta-ey',   { opacity:0, y:20 }, { opacity:1, y:0, duration:.7, ease:'power3.out' });
+    gsap.fromTo('#cta h2',   { opacity:0, y:36 }, { opacity:1, y:0, duration:.9, ease:'power3.out', delay:.12 });
+    gsap.fromTo('#cta p',    { opacity:1, y:18 }, { opacity:1, y:0, duration:.7, ease:'power3.out', delay:.26 });
+    gsap.fromTo('.cta-acts', { opacity:0, y:22 }, { opacity:1, y:0, duration:.7, ease:'power3.out', delay:.38 });
+  }
+});
+
+/* ── Hero parallax layers ── */
+gsap.to('.hero-bg-glow', {
+  y:-80, ease:'none',
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+});
+gsap.to('.hero-bg-grid', {
+  y:-40, ease:'none',
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+});
+
+/* ── Section background glows — parallax ── */
+gsap.utils.toArray('.bc-glow').forEach(el => {
+  gsap.to(el, {
+    y:-30, ease:'none',
+    scrollTrigger:{ trigger:el.closest('.bc'), start:'top bottom', end:'bottom top', scrub:1 }
+  });
+});
+
+/* ── Nav scroll style ── */
+ScrollTrigger.create({
+  start:80,
+  onUpdate(self) {
+    const n = document.getElementById('nav');
+    n.style.background = self.progress > 0 ? 'rgba(3,6,9,0.92)' : 'rgba(3,6,9,0.65)';
+  }
+});
+
+/* ── Hero canvas fade on scroll ── */
+ScrollTrigger.create({
+  trigger:'#hero', start:'30% top', end:'bottom top', scrub:0.8,
+  onUpdate(self) {
+    const c = document.getElementById('hero-canvas');
+    if (c) c.style.opacity = Math.max(0, 1 - self.progress * 1.8);
+  }
+});
+
+/* ═══════════════════════════════════════════════════
+   3D TILT EFFECT — Cards
+═══════════════════════════════════════════════════ */
+(function(){
+  const TILT = 10; /* max degrees */
+  function addTilt(selector) {
+    document.querySelectorAll(selector).forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const cx   = rect.left + rect.width  / 2;
+        const cy   = rect.top  + rect.height / 2;
+        const rx   = (e.clientY - cy) / (rect.height/2) * -TILT;
+        const ry   = (e.clientX - cx) / (rect.width /2) *  TILT;
+        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+        card.style.transition = 'transform .5s cubic-bezier(0.23,1,0.32,1)';
+        setTimeout(() => { card.style.transition = ''; }, 500);
+      });
+      card.addEventListener('mouseenter', () => {
+        card.style.transition = 'transform .15s ease-out';
+      });
+    });
+  }
+  addTilt('.lvl-card');
+  addTilt('.step');
+  addTilt('.bc');
+  addTilt('.tc');
+})();
+
+/* ═══════════════════════════════════════════════════
+   MARQUEE — Scroll velocity
+═══════════════════════════════════════════════════ */
+(function(){
+  const track = document.getElementById('mtrack');
+  if (!track) return;
+  let lastY = 0, vel = 0, currentDur = 32;
+
+  gsap.ticker.add(() => {
+    const curY = window.scrollY;
+    vel = Math.abs(curY - lastY);
+    lastY = curY;
+    const targetDur = Math.max(8, 32 - vel * 2.5);
+    currentDur += (targetDur - currentDur) * 0.04;
+    track.style.animationDuration = currentDur.toFixed(1) + 's';
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   AMBIENT FLOATING PARTICLES
+═══════════════════════════════════════════════════ */
+(function(){
+  const wrap = document.getElementById('amb-wrap');
+  if (!wrap) return;
+  const count = 18;
+  for (let i=0; i<count; i++) {
+    const p = document.createElement('div');
+    p.className = 'amb-p';
+    const size = 2 + Math.random() * 2.5;
+    p.style.cssText = [
+      `left:${Math.random()*100}%`,
+      `top:${5 + Math.random()*90}%`,
+      `width:${size}px`,
+      `height:${size}px`,
+      `opacity:${0.05 + Math.random()*0.12}`,
+      `animation-delay:${Math.random()*6}s`,
+      `animation-duration:${5+Math.random()*7}s`,
+    ].join(';');
+    wrap.appendChild(p);
+    gsap.to(p, {
+      y:-(60 + Math.random()*120),
+      ease:'none',
+      scrollTrigger:{
+        trigger:'body', start:'top top', end:'bottom bottom',
+        scrub:0.6 + Math.random()*1.2
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
