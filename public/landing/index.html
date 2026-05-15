@@ -2081,15 +2081,36 @@ ScrollTrigger.create({
 ═══════════════════════════════════════════════════ */
 (function(){
   const el = document.getElementById('cta-morph');
-  if (!el) return;
-  const texts = ['Explain quantum physics','Understand black holes','Master options trading',
-    'Decode CRISPR editing','Learn string theory','Start learning for free'];
+  const btn = document.getElementById('hero-cta');
+  if (!el || !btn) return;
+
+  function slugify(text){
+    return text.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  }
+
+  // [label, topic slug or null for /daily]
+  const items = [
+    ['Explain quantum physics','quantum-physics'],
+    ['Understand black holes','black-holes'],
+    ['Master options trading','options-trading'],
+    ['Decode CRISPR editing','crispr-editing'],
+    ['Learn string theory','string-theory'],
+    ['How do vaccines work?','how-do-vaccines-work'],
+    ['Start learning for free', null],
+  ];
   let idx = 0;
+
+  function updateBtn(){
+    const [label, slug] = items[idx];
+    el.textContent = label;
+    btn.href = slug ? '/learn/' + slug : '/daily';
+  }
+
   setInterval(() => {
-    idx = (idx+1) % texts.length;
+    idx = (idx + 1) % items.length;
     gsap.to(el, { clipPath:'inset(0 100% 0 0)', duration:0.26, ease:'power2.in',
       onComplete(){
-        el.textContent = texts[idx];
+        updateBtn();
         gsap.fromTo(el,{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0% 0 0)',duration:0.3,ease:'power2.out'});
       }
     });
