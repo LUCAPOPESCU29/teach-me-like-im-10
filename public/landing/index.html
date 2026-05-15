@@ -2366,9 +2366,9 @@ ScrollTrigger.create({
   let idx = 0;
 
   function updateBtn(){
-    const [label, slug] = items[idx];
+    const [label] = items[idx];
     el.textContent = label;
-    btn.href = slug ? '/?q=' + encodeURIComponent(label) : '/daily';
+    btn.href = '/';
   }
 
   setInterval(() => {
