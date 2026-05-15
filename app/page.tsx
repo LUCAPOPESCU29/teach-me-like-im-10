@@ -133,72 +133,123 @@ export default function Home() {
 
   return (
     <PullToRefresh>
-      <main className="min-h-screen flex flex-col items-center px-4 pt-10 sm:pt-24 pb-10 relative overflow-hidden">
+      <main className="min-h-screen flex flex-col items-center px-4 pt-14 sm:pt-20 pb-10 relative overflow-hidden">
       <ShakeDetector />
-      <Aurora />
 
-      {/* Compact hero */}
+      {/* Lander-style background: subtle grid + green glow */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: "linear-gradient(rgba(52,211,153,1) 1px,transparent 1px),linear-gradient(90deg,rgba(52,211,153,1) 1px,transparent 1px)",
+          backgroundSize: "72px 72px",
+          opacity: 0.018,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute"
+        style={{
+          top: "-10%", left: "-5%",
+          width: "700px", height: "700px",
+          background: "radial-gradient(ellipse,rgba(52,211,153,0.1) 0%,transparent 65%)",
+        }}
+      />
+
+      {/* Hero */}
       <motion.div
-        className="text-center mb-10 sm:mb-16 relative z-10"
-        initial={{ opacity: 0, y: -16 }}
+        className="text-center mb-10 sm:mb-14 relative z-10 w-full max-w-2xl"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+        transition={{ duration: 0.85, ease: [0.23, 1, 0.32, 1] }}
       >
-        {/* Greeting + eyebrow */}
+        {/* Greeting */}
+        {greeting && (
+          <motion.p
+            className="text-white/28 text-sm font-sans mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+          >
+            {greeting.emoji}{" "}{greeting.text}
+            {user?.user_metadata?.display_name ? `, ${user.user_metadata.display_name}` : ""}
+          </motion.p>
+        )}
+
+        {/* Eyebrow badge — matches lander .hero-badge */}
         <motion.div
-          className="flex flex-col items-center gap-3 mb-6 sm:mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.07] mb-7"
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
         >
-          {greeting && (
-            <p className="text-white/25 text-sm font-sans">
-              {greeting.emoji}{" "}
-              {greeting.text}
-              {!isGuest && user?.user_metadata?.display_name
-                ? `, ${user.user_metadata.display_name}`
-                : ", learner"}
-            </p>
-          )}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.05]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ boxShadow: "0 0 7px rgba(52,211,153,0.9)" }} />
-            <span className="text-emerald-400/75 text-[10px] font-sans font-semibold tracking-[0.16em] uppercase">
-              AI-Powered Learning
-            </span>
-          </div>
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"
+            style={{ boxShadow: "0 0 8px rgba(52,211,153,0.9)", animation: "pulse 2s infinite" }}
+          />
+          <span className="text-emerald-400/80 text-[10px] font-sans font-semibold tracking-[0.16em] uppercase">
+            AI-Powered Learning
+          </span>
         </motion.div>
 
-        <h1 className="font-display text-5xl sm:text-[5.5rem] text-white mb-5 sm:mb-7" style={{ perspective: 600, lineHeight: 1.04 }}>
-          <SplitText text="Teach Me" delay={0.2} stagger={0.04} />
-          <br />
-          <SplitText
-            text="Like I'm 10"
-            delay={0.5}
-            stagger={0.04}
-            charClassName="text-accent"
-          />
-        </h1>
-        <motion.p
-          className="text-white/30 text-base sm:text-lg max-w-sm mx-auto font-serif leading-relaxed"
-          initial={{ opacity: 0, y: 6 }}
+        {/* Main heading — Syne, matches lander .hero-h1 */}
+        <motion.h1
+          className="mb-5 sm:mb-6"
+          style={{
+            fontFamily: "Syne, sans-serif",
+            fontSize: "clamp(52px, 7vw, 92px)",
+            fontWeight: 800,
+            lineHeight: 0.96,
+            letterSpacing: "-0.035em",
+          }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.75, duration: 0.6 }}
+          transition={{ duration: 0.85, delay: 0.18, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <span className="block text-white/90">Teach Me</span>
+          <span
+            className="block"
+            style={{
+              background: "linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Like I&apos;m 10
+          </span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          className="text-white/38 text-base sm:text-[1.1rem] max-w-sm mx-auto font-sans leading-[1.72] mb-7"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38, duration: 0.65, ease: [0.23, 1, 0.32, 1] }}
         >
           Pick any topic. Start simple. Go as deep as you want.
         </motion.p>
-        <motion.button
-          onClick={() => router.push("/how-it-works")}
-          className="mt-6 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/75 hover:bg-white/[0.07] hover:border-white/[0.14] font-sans text-sm inline-flex items-center gap-2 group"
-          style={{ transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.95 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
+
+        {/* CTA row — matches lander .hero-actions */}
+        <motion.div
+          className="flex items-center justify-center gap-3 flex-wrap"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.52, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
         >
-          <span className="group-hover:rotate-12 transition-transform duration-500" style={{ display: "inline-block" }}>✨</span>
-          How does it work?
-        </motion.button>
+          <button
+            onClick={() => router.push("/how-it-works")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/[0.08] bg-white/[0.04] text-white/45 hover:text-white/80 hover:bg-white/[0.08] hover:border-white/[0.16] font-sans text-sm"
+            style={{ transition: "all 0.35s cubic-bezier(0.23,1,0.32,1)" }}
+          >
+            ✦ How does it work?
+          </button>
+          <button
+            onClick={() => router.push("/pro")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/[0.06] text-emerald-400/80 hover:bg-emerald-500/[0.12] hover:border-emerald-500/40 font-sans text-sm"
+            style={{ transition: "all 0.35s cubic-bezier(0.23,1,0.32,1)" }}
+          >
+            Pro plans ✦
+          </button>
+        </motion.div>
         <ShakeHint />
       </motion.div>
 
