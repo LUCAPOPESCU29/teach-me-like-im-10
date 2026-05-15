@@ -541,6 +541,124 @@ footer{
 }
 @keyframes scrollWheel{0%,100%{opacity:1;transform:translateY(0)}80%{opacity:0;transform:translateY(7px)}}
 
+/* ══════════════ NEW FEATURE CSS ══════════════ */
+
+/* 1. Cursor trail */
+.ct{position:fixed;width:8px;height:8px;border-radius:50%;background:#34d399;pointer-events:none;z-index:9999;will-change:transform;mix-blend-mode:screen}
+@media(max-width:960px){.ct{display:none!important}}
+
+/* 2. Section nav dots */
+#sec-dots{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:9px}
+.sd{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);border:none;padding:0;cursor:pointer;transition:all .3s}
+.sd.active{background:var(--em);box-shadow:0 0 9px var(--em);transform:scale(1.4)}
+
+/* 3. Orbit labels */
+.orbit-label{position:absolute;z-index:6;pointer-events:none;font-size:10px;font-weight:600;letter-spacing:.1em;color:rgba(52,211,153,.75);padding:3px 9px;border-radius:100px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.18);white-space:nowrap}
+
+/* 4. CTA morphing text */
+#cta-morph{display:inline-block;clip-path:inset(0 0 0 0);transition:clip-path .3s}
+
+/* 5. Matrix rain */
+#matrix-rain{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;transition:opacity 1.5s}
+
+/* 6. Aurora in CTA */
+.aurora-band{position:absolute;left:-25%;right:-25%;height:260px;border-radius:50%;filter:blur(70px);opacity:.1;animation:auroraWave var(--adur,9s) ease-in-out infinite var(--adly,0s)}
+@keyframes auroraWave{0%,100%{transform:scaleY(1) translateY(0)}50%{transform:scaleY(1.4) translateY(var(--ay,25px))}}
+
+/* 9. Depth Journey */
+#depth-journey{min-height:100vh;position:relative;overflow:hidden;background:var(--bg);display:flex;align-items:center}
+.dj-galaxy{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dj-star{position:absolute;border-radius:50%;background:#34d399}
+@keyframes twinkle{0%,100%{opacity:var(--op,.15)}50%{opacity:var(--op2,.04)}}
+#bh-canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:.4}
+.dj-inner{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:80px 32px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:100vh}
+.dj-bg-num{font-family:'Syne',sans-serif;font-size:clamp(120px,18vw,200px);font-weight:800;line-height:1;letter-spacing:-.05em;color:rgba(52,211,153,.04);position:absolute;top:50%;left:-5%;transform:translateY(-50%);user-select:none;pointer-events:none;transition:opacity .6s}
+.dj-text{transition:opacity .35s,transform .4s}
+.dj-text.exit{opacity:0;transform:translateY(-22px)}
+.dj-text.enter{opacity:1;transform:translateY(0)}
+.dj-label{display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px;border:1px solid currentColor}
+.dj-content{font-size:clamp(15px,1.55vw,19px);color:rgba(255,255,255,.62);line-height:1.78}
+.dj-emoji{font-size:2.7rem;margin-bottom:14px;display:block}
+.dj-steps{display:flex;flex-direction:column;gap:9px}
+.dj-step{padding:13px 16px;border-radius:13px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.015);cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:11px}
+.dj-step.active{border-color:var(--dc);background:rgba(52,211,153,.04)}
+.dj-step-dot{width:7px;height:7px;border-radius:50%;background:var(--dc,rgba(255,255,255,.2));flex-shrink:0;transition:box-shadow .3s}
+.dj-step.active .dj-step-dot{box-shadow:0 0 8px var(--dc)}
+.dj-step-lbl{font-size:12px;font-weight:600;color:var(--muted);transition:color .3s}
+.dj-step.active .dj-step-lbl{color:#fff}
+.dj-scroll-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+
+/* 11. Typewriter demo */
+#tw-section{background:rgba(7,11,20,.55);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.tw-browser{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;max-width:700px;margin:48px auto 0}
+.tw-bar{background:rgba(255,255,255,.04);padding:12px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tw-dots{display:flex;gap:6px}
+.tw-dot{width:10px;height:10px;border-radius:50%}
+.tw-url{flex:1;background:rgba(255,255,255,.03);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--muted);font-family:monospace;text-align:center}
+.tw-body{padding:28px 32px}
+.tw-prompt{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;letter-spacing:.05em}
+.tw-input-box{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,36px);font-weight:700;color:#fff;min-height:48px}
+.tw-caret{display:inline-block;width:2px;height:1.1em;background:var(--em);margin-left:2px;vertical-align:text-bottom;animation:blink .8s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.tw-output{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)}
+.tw-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(52,211,153,.1);color:var(--em);border:1px solid rgba(52,211,153,.2);margin-bottom:9px}
+.tw-ans{font-size:13.5px;color:rgba(255,255,255,.48);line-height:1.75}
+
+/* 12. Before/after slider */
+#ba-section{padding:108px 0}
+.ba-wrap{position:relative;max-width:780px;margin:48px auto 0;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.08);cursor:ew-resize;user-select:none}
+.ba-left{padding:36px 32px;min-height:240px;background:rgba(255,255,255,.02)}
+.ba-right-panel{position:absolute;inset:0;padding:36px 32px;background:linear-gradient(135deg,rgba(52,211,153,.07),rgba(16,185,129,.04));clip-path:inset(0 50% 0 0)}
+.ba-divider{position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--em);box-shadow:0 0 12px rgba(52,211,153,.5);transform:translateX(-50%);z-index:5;display:flex;align-items:center;justify-content:center}
+.ba-handle{width:34px;height:34px;border-radius:50%;background:var(--em);display:flex;align-items:center;justify-content:center;font-size:13px;position:absolute;box-shadow:0 4px 20px rgba(52,211,153,.4)}
+.ba-tag{position:absolute;top:12px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.ba-tag.l{left:12px;background:rgba(255,255,255,.06);color:var(--muted)}
+.ba-tag.r{right:12px;background:rgba(52,211,153,.1);color:var(--em)}
+.ba-head{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:7px}
+.ba-text{font-size:13px;color:var(--muted);line-height:1.72}
+
+/* 13. Floating mockup */
+#mockup-section{padding:108px 0;overflow:hidden}
+.mockup-scene{max-width:860px;margin:56px auto 0;perspective:1400px}
+.mockup-card{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;transform:rotateX(10deg) rotateY(-2deg);transition:transform .7s var(--ease-out);will-change:transform}
+.mockup-scene:hover .mockup-card{transform:rotateX(2deg) rotateY(0deg)}
+.mockup-bar{background:rgba(255,255,255,.04);padding:12px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.m-dot{width:10px;height:10px;border-radius:50%}
+.mockup-body{padding:28px 32px}
+.mockup-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.18);font-size:13px;font-weight:600;color:var(--em);margin-bottom:16px}
+.mockup-lvls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.ml{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--muted);transition:all .2s;cursor:default}
+.ml.on{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.28);color:#fff}
+.mockup-lines{display:flex;flex-direction:column;gap:8px}
+.mline{height:11px;border-radius:6px;background:rgba(255,255,255,.05)}
+.mline:nth-child(2){width:88%}.mline:nth-child(3){width:72%}
+.mline:nth-child(4){width:93%}.mline:nth-child(5){width:58%}
+@keyframes mlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* 17. Live XP counter */
+#live-xp-counter{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;
+  background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);
+  font-size:12px;font-weight:700;color:#fb923c;
+  position:absolute;top:16px;right:16px;
+}
+
+/* 18. Horizontal topic scroll */
+#topics-scroll-section{padding:64px 0;overflow:hidden}
+.topic-track-wrap{overflow:hidden;position:relative;margin-top:32px}
+.topic-track{display:flex;gap:12px;padding:0 32px;width:max-content}
+.topic-pill{
+  padding:10px 20px;border-radius:100px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  font-size:13px;font-weight:500;color:var(--muted);
+  white-space:nowrap;cursor:default;
+  transition:all .3s;
+}
+.topic-pill:hover{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.2);color:rgba(255,255,255,.8)}
+
+/* ══════════════ END NEW FEATURE CSS ══════════════ */
+
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   .hero-inner{grid-template-columns:1fr;gap:48px}
@@ -607,8 +725,8 @@ footer{
       </p>
 
       <div class="hero-actions" id="hacts">
-        <a href="https://www.teachmelikeim10.xyz" class="btn-p" target="_blank">
-          Start learning for free
+        <a href="https://www.teachmelikeim10.xyz" class="btn-p" id="hero-cta" target="_blank">
+          <span id="cta-morph">Start learning for free</span>
           <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         </a>
         <a href="#levels" class="btn-s">See the levels ↓</a>
@@ -629,6 +747,13 @@ footer{
       <canvas id="hero-canvas"></canvas>
       <div class="canvas-glow"></div>
       <div class="canvas-edge"></div>
+
+      <!-- Orbit labels -->
+      <div class="orbit-label" id="ol1">Quantum Physics</div>
+      <div class="orbit-label" id="ol2">Machine Learning</div>
+      <div class="orbit-label" id="ol3">Black Holes</div>
+      <div class="orbit-label" id="ol4">CRISPR</div>
+      <div class="orbit-label" id="ol5">String Theory</div>
 
       <!-- Floating pills -->
       <div class="float-pill fp1" id="fp1">
@@ -908,6 +1033,11 @@ footer{
 
 <!-- FINAL CTA — Large Wireframe Orb -->
 <section id="cta">
+  <!-- Aurora bands -->
+  <div class="aurora-band" style="--adur:8s;--adly:0s;--ay:-30px;top:10%;background:linear-gradient(90deg,#34d399,#10b981)"></div>
+  <div class="aurora-band" style="--adur:11s;--adly:-3s;--ay:25px;top:35%;background:linear-gradient(90deg,#6ee7b7,#34d399)"></div>
+  <div class="aurora-band" style="--adur:9s;--adly:-6s;--ay:-20px;top:60%;background:linear-gradient(90deg,#10b981,#059669)"></div>
+  <div class="aurora-band" style="--adur:13s;--adly:-9s;--ay:30px;top:80%;background:linear-gradient(90deg,#34d399,#6ee7b7)"></div>
   <div class="cta-glow"></div>
   <div class="cta-ring r1"></div>
   <div class="cta-ring r2"></div>
@@ -923,6 +1053,140 @@ footer{
           Open the app — it's free
           <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPTH JOURNEY (pinned scroll storytelling) -->
+<section id="depth-journey">
+  <div class="dj-galaxy" id="dj-galaxy"></div>
+  <canvas id="bh-canvas" width="500" height="500"></canvas>
+  <div class="dj-bg-num" id="dj-bg-num">1</div>
+  <div class="dj-inner">
+    <div style="position:relative;padding-left:28px">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.06);border-radius:1px">
+        <div id="dj-prog-fill" style="position:absolute;top:0;left:0;width:100%;height:20%;background:linear-gradient(to bottom,#34d399,#6ee7b7);border-radius:1px;transition:height .5s cubic-bezier(0.23,1,0.32,1)"></div>
+      </div>
+      <div class="dj-text enter" id="dj-text">
+        <div class="dj-emoji" id="dj-emoji">🍎</div>
+        <div class="dj-label" id="dj-label" style="color:#34d399;border-color:rgba(52,211,153,.4)">Level 1 — ELI5</div>
+        <div class="dj-content" id="dj-content">
+          The internet is like a giant postal system for information. When you watch a video, your computer sends a letter asking for it, and a faraway computer mails it back — super fast!
+        </div>
+      </div>
+      <p class="dj-scroll-hint">Scroll to go deeper ↓</p>
+    </div>
+    <div class="dj-steps" id="dj-steps">
+      <div class="dj-step active" data-lvl="0" style="--dc:#34d399">
+        <div class="dj-step-dot"></div>
+        <span class="dj-step-lbl">🍎 Level 1 — ELI5</span>
+      </div>
+      <div class="dj-step" data-lvl="1" style="--dc:#fbbf24">
+        <div class="dj-step-dot"></div>
+        <span class="dj-step-lbl">📚 Level 2 — Middle School</span>
+      </div>
+      <div class="dj-step" data-lvl="2" style="--dc:#f97316">
+        <div class="dj-step-dot"></div>
+        <span class="dj-step-lbl">🔬 Level 3 — High School</span>
+      </div>
+      <div class="dj-step" data-lvl="3" style="--dc:#f43f5e">
+        <div class="dj-step-dot"></div>
+        <span class="dj-step-lbl">🏛️ Level 4 — College</span>
+      </div>
+      <div class="dj-step" data-lvl="4" style="--dc:#a855f7">
+        <div class="dj-step-dot"></div>
+        <span class="dj-step-lbl">🎓 Level 5 — PhD</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPEWRITER DEMO -->
+<section id="tw-section">
+  <div class="container">
+    <div class="eyebrow">See it in action</div>
+    <h2 class="sec">Ask anything.<br/>Get clarity instantly.</h2>
+    <div class="tw-browser">
+      <div class="tw-bar">
+        <div class="tw-dots">
+          <div class="tw-dot" style="background:#ff5f57"></div>
+          <div class="tw-dot" style="background:#febc2e"></div>
+          <div class="tw-dot" style="background:#28c840"></div>
+        </div>
+        <div class="tw-url">teachmelikeim10.xyz</div>
+      </div>
+      <div class="tw-body">
+        <p class="tw-prompt">✦ What do you want to understand today?</p>
+        <div class="tw-input-box">
+          <span id="tw-text"></span><span class="tw-caret"></span>
+        </div>
+        <div class="tw-output">
+          <div class="tw-badge" id="tw-badge">Level 1 — ELI5</div>
+          <p class="tw-ans" id="tw-ans">Imagine the universe is a giant trampoline. Heavy objects like the Sun sink into it, creating a dip — and planets roll around that dip, orbiting it. That's gravity!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER SLIDER -->
+<section id="ba-section">
+  <div class="container" style="text-align:center">
+    <div class="eyebrow">The difference depth makes</div>
+    <h2 class="sec">Same topic.<br/>Different worlds.</h2>
+    <p class="sec-sub" style="margin:0 auto">Drag to compare how the same concept feels at Level 1 vs Level 5.</p>
+    <div class="ba-wrap" id="ba-wrap">
+      <div class="ba-tag l">ELI5</div>
+      <div class="ba-tag r">PhD</div>
+      <div class="ba-left">
+        <div class="ba-head">🍎 Black Holes — Level 1</div>
+        <p class="ba-text">A black hole is like a giant vacuum cleaner in space that sucks in everything nearby — even light can't escape! It forms when a very massive star collapses under its own weight.</p>
+      </div>
+      <div class="ba-right-panel" id="ba-right">
+        <div class="ba-head" style="color:#a855f7">🎓 Black Holes — Level 5</div>
+        <p class="ba-text">A black hole is a region of spacetime where the gravitational field is so intense that the escape velocity exceeds c. Described by the Schwarzschild metric, the event horizon marks the boundary beyond which causal contact is severed. Hawking radiation predicts thermal emission via quantum effects near the horizon.</p>
+      </div>
+      <div class="ba-divider" id="ba-divider">
+        <div class="ba-handle">⇔</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOATING MOCKUP -->
+<section id="mockup-section">
+  <div class="container" style="text-align:center">
+    <div class="eyebrow">The interface</div>
+    <h2 class="sec">Clean. Fast.<br/>Distraction-free.</h2>
+    <div class="mockup-scene">
+      <div class="mockup-card">
+        <div class="mockup-bar">
+          <div class="m-dot" style="background:#ff5f57"></div>
+          <div class="m-dot" style="background:#febc2e"></div>
+          <div class="m-dot" style="background:#28c840"></div>
+          <span style="font-size:11px;color:rgba(255,255,255,.25);margin-left:8px">teachmelikeim10.xyz/learn</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-chip">⚛️ Quantum Entanglement</div>
+          <div class="mockup-lvls">
+            <div class="ml">🍎 ELI5</div>
+            <div class="ml on">📚 Middle School</div>
+            <div class="ml">🔬 High School</div>
+            <div class="ml">🏛️ College</div>
+            <div class="ml">🎓 PhD</div>
+          </div>
+          <div style="position:relative">
+            <div id="live-xp-counter">+12 XP ⚡</div>
+          </div>
+          <div class="mockup-lines">
+            <div class="mline" style="width:100%"></div>
+            <div class="mline"></div>
+            <div class="mline"></div>
+            <div class="mline"></div>
+            <div class="mline"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1694,6 +1958,428 @@ ScrollTrigger.create({
     });
   }
 })();
+
+/* ═══════════════════════════════════════════════════
+   1. CURSOR TRAIL
+═══════════════════════════════════════════════════ */
+(function(){
+  if (window.matchMedia('(max-width:960px)').matches) return;
+  const LERP = 0.35;
+  const dots = Array.from({length:12}, (_,i) => {
+    const el = document.getElementById('ct'+i);
+    return el ? { el, ox:0, oy:0 } : null;
+  }).filter(Boolean);
+  let mx = window.innerWidth/2, my = window.innerHeight/2;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  gsap.ticker.add(() => {
+    dots[0].ox += (mx - dots[0].ox) * LERP;
+    dots[0].oy += (my - dots[0].oy) * LERP;
+    dots[0].el.style.transform = `translate(${dots[0].ox-4}px,${dots[0].oy-4}px)`;
+    for (let i = 1; i < dots.length; i++) {
+      dots[i].ox += (dots[i-1].ox - dots[i].ox) * LERP;
+      dots[i].oy += (dots[i-1].oy - dots[i].oy) * LERP;
+      dots[i].el.style.transform = `translate(${dots[i].ox-4}px,${dots[i].oy-4}px) scale(${1-i*0.065})`;
+      dots[i].el.style.opacity = Math.max(0, 1 - i*0.09);
+    }
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   2. MAGNETIC BUTTONS
+═══════════════════════════════════════════════════ */
+(function(){
+  if (window.matchMedia('(max-width:960px)').matches) return;
+  document.querySelectorAll('.btn-p,.nav-cta').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width/2);
+      const dy = e.clientY - (r.top + r.height/2);
+      if (Math.sqrt(dx*dx+dy*dy) < 80)
+        gsap.to(btn, { x: dx*0.38, y: dy*0.38, duration: 0.3, ease:'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x:0, y:0, duration:0.7, ease:'elastic.out(1,0.5)' });
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   3. TEXT SCRAMBLE on eyebrows
+═══════════════════════════════════════════════════ */
+(function(){
+  const CHARS = '!<>-_\\/[]{}=+*^?#ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function scramble(el) {
+    const target = el.dataset.orig || el.innerText;
+    el.dataset.orig = target;
+    let f = 0;
+    const id = setInterval(() => {
+      el.innerText = target.split('').map((ch,i) =>
+        i < (f/18)*target.length ? ch : (ch===' ' ? ' ' : CHARS[Math.floor(Math.random()*CHARS.length)])
+      ).join('');
+      if (++f > 18) { el.innerText = target; clearInterval(id); }
+    }, 38);
+  }
+  document.querySelectorAll('.eyebrow').forEach(el => {
+    ScrollTrigger.create({ trigger:el, start:'top 88%', once:true,
+      onEnter(){ setTimeout(()=>scramble(el), 150); }
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   4. MORPHING CTA BUTTON TEXT
+═══════════════════════════════════════════════════ */
+(function(){
+  const el = document.getElementById('cta-morph');
+  if (!el) return;
+  const texts = ['Explain quantum physics','Understand black holes','Master options trading',
+    'Decode CRISPR editing','Learn string theory','Start learning for free'];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx+1) % texts.length;
+    gsap.to(el, { clipPath:'inset(0 100% 0 0)', duration:0.26, ease:'power2.in',
+      onComplete(){
+        el.textContent = texts[idx];
+        gsap.fromTo(el,{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0% 0 0)',duration:0.3,ease:'power2.out'});
+      }
+    });
+  }, 2800);
+})();
+
+/* ═══════════════════════════════════════════════════
+   5. MATRIX RAIN
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('matrix-rain');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const words = ['quantum','gravity','entropy','genome','neural','photon',
+    'crispr','tensor','orbital','qubit','lepton','eigen','lambda','sigma'];
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const COLS = 28;
+  const drops = Array.from({length:COLS}, ()=>Math.random()*-100);
+  let active = false;
+  ScrollTrigger.create({
+    trigger:'#depth-journey', start:'top 65%', end:'bottom 35%',
+    onEnter(){ active=true; gsap.to(canvas,{opacity:0.06,duration:1}); },
+    onLeave(){ active=false; gsap.to(canvas,{opacity:0,duration:1}); },
+    onEnterBack(){ active=true; gsap.to(canvas,{opacity:0.06,duration:1}); },
+    onLeaveBack(){ active=false; gsap.to(canvas,{opacity:0,duration:1}); },
+  });
+  (function tick(){
+    requestAnimationFrame(tick);
+    if (!active) return;
+    ctx.fillStyle='rgba(3,6,9,0.14)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#34d399'; ctx.font='11px monospace';
+    const cw = canvas.width/COLS;
+    drops.forEach((y,i)=>{
+      const w = words[Math.floor(Math.random()*words.length)];
+      ctx.fillText(w[0], i*cw, y);
+      drops[i] = y > canvas.height+Math.random()*200 ? -20 : y+14;
+    });
+  })();
+})();
+
+/* ═══════════════════════════════════════════════════
+   6. SPHERE MORPHING (hero canvas scale states)
+═══════════════════════════════════════════════════ */
+(function(){
+  const c = document.getElementById('hero-canvas');
+  if (!c) return;
+  const phases = [{sx:1,sy:1},{sx:1.45,sy:0.14},{sx:0.62,sy:1.65}];
+  let p = 0;
+  function morph(){
+    p = (p+1)%phases.length;
+    gsap.to(c,{scaleX:phases[p].sx,scaleY:phases[p].sy,duration:3.5,ease:'power2.inOut',
+      onComplete:()=>setTimeout(morph,5000)});
+  }
+  setTimeout(morph, 6000);
+})();
+
+/* ═══════════════════════════════════════════════════
+   7. ORBIT LABELS around hero sphere
+═══════════════════════════════════════════════════ */
+(function(){
+  if (window.matchMedia('(max-width:960px)').matches) return;
+  const hr = document.querySelector('.hero-right');
+  if (!hr) return;
+  const cfgs = [
+    {id:'ol1',r:215,sp:0.28,ph:0},  {id:'ol2',r:255,sp:-0.19,ph:1.2},
+    {id:'ol3',r:198,sp:0.34,ph:2.6},{id:'ol4',r:238,sp:-0.23,ph:4.1},
+    {id:'ol5',r:192,sp:0.30,ph:5.5},
+  ].map(c=>({...c,el:document.getElementById(c.id)})).filter(c=>c.el);
+  const cx = ()=>hr.clientWidth/2, cy = ()=>hr.clientHeight/2;
+  let t=0;
+  gsap.ticker.add(()=>{
+    t+=0.011;
+    cfgs.forEach(c=>{
+      const a = t*c.sp+c.ph;
+      const x = cx()+Math.cos(a)*c.r;
+      const y = cy()+Math.sin(a)*c.r*0.38;
+      const d = (Math.sin(a)+1)/2;
+      c.el.style.transform=`translate(${x-c.el.offsetWidth/2}px,${y-10}px)`;
+      c.el.style.opacity=0.2+d*0.7;
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   9. PINNED DEPTH JOURNEY
+═══════════════════════════════════════════════════ */
+(function(){
+  const DJ=[
+    {label:'Level 1 — ELI5',color:'#34d399',emoji:'🍎',
+     text:'The internet is like a giant postal system for information. Your computer sends a letter asking for a video, and a faraway server mails it back in milliseconds.'},
+    {label:'Level 2 — Middle School',color:'#fbbf24',emoji:'📚',
+     text:'The internet connects billions of devices using agreed-upon rules called protocols (TCP/IP). Data is broken into packets, routed through servers, and reassembled at your device.'},
+    {label:'Level 3 — High School',color:'#f97316',emoji:'🔬',
+     text:'TCP ensures reliable, ordered packet delivery via acknowledgements. IP handles addressing and routing. DNS translates domain names to IP addresses so browsers know where to connect.'},
+    {label:'Level 4 — College',color:'#f43f5e',emoji:'🏛️',
+     text:'The OSI model defines 7 layers from Physical to Application. BGP handles inter-AS routing globally. HTTP/2 multiplexes streams over a single TLS connection to reduce latency.'},
+    {label:'Level 5 — PhD',color:'#a855f7',emoji:'🎓',
+     text:'QUIC (RFC 9000) eliminates TCP head-of-line blocking via stream-level multiplexing. BBR congestion control uses bandwidth-delay product models rather than loss-based signals.'},
+  ];
+  const textEl=document.getElementById('dj-text');
+  const labelEl=document.getElementById('dj-label');
+  const emojiEl=document.getElementById('dj-emoji');
+  const contentEl=document.getElementById('dj-content');
+  const bgNumEl=document.getElementById('dj-bg-num');
+  const progFill=document.getElementById('dj-prog-fill');
+  const steps=document.querySelectorAll('.dj-step');
+  let cur=-1;
+  function updateDJ(lvl){
+    if(lvl===cur) return; cur=lvl;
+    const d=DJ[lvl];
+    textEl.classList.remove('enter'); textEl.classList.add('exit');
+    setTimeout(()=>{
+      emojiEl.textContent=d.emoji;
+      labelEl.textContent=d.label;
+      labelEl.style.color=d.color;
+      labelEl.style.borderColor=d.color+'55';
+      contentEl.textContent=d.text;
+      if(bgNumEl) bgNumEl.textContent=lvl+1;
+      if(progFill) progFill.style.height=((lvl+1)/5*100)+'%';
+      steps.forEach((s,i)=>{
+        s.classList.toggle('active',i===lvl);
+        s.style.setProperty('--dc',DJ[i].color);
+        const dot=s.querySelector('.dj-step-dot');
+        if(dot) dot.style.background=DJ[i].color;
+      });
+      textEl.classList.remove('exit'); textEl.classList.add('enter');
+    },350);
+  }
+  steps.forEach((s,i)=>s.addEventListener('click',()=>updateDJ(i)));
+  updateDJ(0);
+  ScrollTrigger.create({
+    trigger:'#depth-journey', start:'top top', end:'+=400%',
+    pin:true, scrub:0.9,
+    onUpdate(self){ updateDJ(Math.min(4,Math.floor(self.progress*5))); }
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   10. BLACK HOLE Three.js
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('bh-canvas');
+  if(!canvas||typeof THREE==='undefined') return;
+  const W=500,H=500;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setSize(W,H); renderer.setClearColor(0,0);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(55,1,0.1,100);
+  camera.position.z=5;
+  const N=1400;
+  const pos=new Float32Array(N*3),cols=new Float32Array(N*3),spds=new Float32Array(N),rads=new Float32Array(N),angs=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    const r=0.8+Math.random()*1.8, theta=Math.random()*Math.PI*2;
+    pos[i*3]=Math.cos(theta)*r; pos[i*3+1]=(Math.random()-.5)*0.12/r; pos[i*3+2]=Math.sin(theta)*r;
+    rads[i]=r; spds[i]=0.5/Math.pow(r,1.3); angs[i]=theta;
+    const t=(r-0.8)/1.8;
+    cols[i*3]=0.2+(1-t)*0.8; cols[i*3+1]=0.83-t*0.55; cols[i*3+2]=0.6+t*0.4;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:0.022,vertexColors:true,transparent:true,opacity:0.85,sizeAttenuation:true}));
+  const grp=new THREE.Group(); scene.add(grp); grp.add(pts);
+  grp.add(new THREE.Mesh(new THREE.SphereGeometry(0.72,24,24),new THREE.MeshBasicMaterial({color:0x000000})));
+  grp.add(new THREE.Mesh(new THREE.TorusGeometry(0.78,0.04,8,64),new THREE.MeshBasicMaterial({color:0x34d399,transparent:true,opacity:0.7})));
+  const pAttr=geo.attributes.position;
+  let bht=0;
+  (function bhTick(){
+    requestAnimationFrame(bhTick); bht+=0.016;
+    for(let i=0;i<N;i++){
+      angs[i]+=spds[i]*0.016;
+      pAttr.array[i*3]=Math.cos(angs[i])*rads[i];
+      pAttr.array[i*3+2]=Math.sin(angs[i])*rads[i];
+    }
+    pAttr.needsUpdate=true;
+    grp.rotation.x=Math.sin(bht*0.11)*0.22+0.28;
+    renderer.render(scene,camera);
+  })();
+})();
+
+/* ═══════════════════════════════════════════════════
+   11. TYPEWRITER DEMO
+═══════════════════════════════════════════════════ */
+(function(){
+  const textEl=document.getElementById('tw-text');
+  const badgeEl=document.getElementById('tw-badge');
+  const ansEl=document.getElementById('tw-ans');
+  if(!textEl) return;
+  const demos=[
+    {topic:'How does gravity work?',badge:'Level 1 — ELI5',
+     ans:'Imagine the universe is a giant trampoline. Heavy objects sink into it, making a dip — and planets roll around that dip. That\'s gravity bending space!'},
+    {topic:'What is machine learning?',badge:'Level 3 — High School',
+     ans:'ML systems find patterns in data by adjusting millions of parameters. Neural networks transform inputs through layers of matrix multiplications and non-linear activations to make predictions.'},
+    {topic:'Explain quantum entanglement',badge:'Level 2 — Middle School',
+     ans:'Two particles can be "linked" so measuring one instantly affects the other — no matter how far apart they are. Einstein called it "spooky action at a distance."'},
+    {topic:'How do vaccines work?',badge:'Level 1 — ELI5',
+     ans:'A vaccine shows your immune system a "wanted poster" of a germ. Your body learns to recognize and fight it — so when the real thing shows up, you\'re already ready!'},
+  ];
+  let dIdx=0, busy=false;
+  function typeDemo(d){
+    busy=true; textEl.textContent=''; badgeEl.textContent=d.badge; ansEl.textContent='';
+    let i=0;
+    const id=setInterval(()=>{
+      textEl.textContent=d.topic.slice(0,++i);
+      if(i>=d.topic.length){ clearInterval(id); setTimeout(()=>{ ansEl.textContent=d.ans; busy=false; },400); }
+    }, 52);
+  }
+  ScrollTrigger.create({trigger:'#tw-section',start:'top 70%',once:true,onEnter(){typeDemo(demos[0]);}});
+  setInterval(()=>{ if(!busy){ dIdx=(dIdx+1)%demos.length; typeDemo(demos[dIdx]); } },5500);
+})();
+
+/* ═══════════════════════════════════════════════════
+   12. BEFORE/AFTER SLIDER
+═══════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('ba-wrap');
+  const right=document.getElementById('ba-right');
+  const div=document.getElementById('ba-divider');
+  if(!wrap||!right||!div) return;
+  let drag=false;
+  function setPct(pct){
+    pct=Math.max(5,Math.min(95,pct));
+    right.style.clipPath=`inset(0 ${100-pct}% 0 0)`;
+    div.style.left=pct+'%';
+  }
+  const gx=e=>e.touches?e.touches[0].clientX:e.clientX;
+  wrap.addEventListener('mousedown',e=>{drag=true;e.preventDefault();});
+  wrap.addEventListener('touchstart',()=>drag=true,{passive:true});
+  window.addEventListener('mousemove',e=>{ if(!drag) return; const r=wrap.getBoundingClientRect(); setPct((gx(e)-r.left)/r.width*100); });
+  window.addEventListener('touchmove',e=>{ if(!drag) return; const r=wrap.getBoundingClientRect(); setPct((gx(e)-r.left)/r.width*100); },{passive:true});
+  window.addEventListener('mouseup',()=>drag=false);
+  window.addEventListener('touchend',()=>drag=false);
+  ScrollTrigger.create({trigger:'#ba-section',start:'top 70%',once:true,
+    onEnter(){gsap.fromTo(wrap,{opacity:0,y:32},{opacity:1,y:0,duration:0.85,ease:'power3.out'});}
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   13. FLOATING MOCKUP REVEAL
+═══════════════════════════════════════════════════ */
+(function(){
+  const sc=document.querySelector('.mockup-scene');
+  if(!sc) return;
+  sc.style.opacity='0';
+  ScrollTrigger.create({trigger:'#mockup-section',start:'top 75%',once:true,
+    onEnter(){gsap.fromTo(sc,{opacity:0,y:50},{opacity:1,y:0,duration:1,ease:'power3.out'});}
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   17. LIVE XP COUNTER
+═══════════════════════════════════════════════════ */
+(function(){
+  const el=document.getElementById('live-xp-counter');
+  if(!el) return;
+  let xp=12;
+  function tick(){
+    xp+=Math.floor(Math.random()*8)+1;
+    el.textContent=`+${xp} XP ⚡`;
+    gsap.fromTo(el,{scale:1.3,background:'rgba(249,115,22,.25)'},{scale:1,background:'rgba(249,115,22,.1)',duration:0.55,ease:'power2.out'});
+    setTimeout(tick, 1800+Math.random()*2400);
+  }
+  ScrollTrigger.create({trigger:'#mockup-section',start:'top 70%',once:true,onEnter(){setTimeout(tick,600);}});
+})();
+
+/* ═══════════════════════════════════════════════════
+   18. SECTION NAV DOTS
+═══════════════════════════════════════════════════ */
+(function(){
+  const dots=document.querySelectorAll('.sd');
+  const secs=['#hero','#stats','#levels','#how','#features',
+    '#testimonials','#depth-journey','#tw-section','#ba-section','#cta'];
+  dots.forEach((d,i)=>d.addEventListener('click',()=>{
+    const t=document.querySelector(secs[i]);
+    if(t) t.scrollIntoView({behavior:'smooth'});
+  }));
+  secs.forEach((sel,i)=>{
+    const el=document.querySelector(sel);
+    if(!el) return;
+    ScrollTrigger.create({trigger:el,start:'top 55%',end:'bottom 45%',
+      onEnter(){dots.forEach((d,j)=>d.classList.toggle('active',j===i));},
+      onEnterBack(){dots.forEach((d,j)=>d.classList.toggle('active',j===i));}
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   19. KNOWLEDGE GALAXY (80 stars in depth journey)
+═══════════════════════════════════════════════════ */
+(function(){
+  const container=document.getElementById('dj-galaxy');
+  if(!container) return;
+  for(let i=0;i<80;i++){
+    const star=document.createElement('div');
+    star.className='dj-star';
+    const size=1+Math.random()*2.5;
+    const op=0.06+Math.random()*0.22;
+    const dur=2.5+Math.random()*5;
+    star.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;--op:${op};--op2:${op*0.2};--dur:${dur}s;animation:twinkle ${dur}s ease-in-out infinite ${Math.random()*dur}s;opacity:${op}`;
+    container.appendChild(star);
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   NEW SECTION SCROLL REVEALS
+═══════════════════════════════════════════════════ */
+gsap.utils.toArray(['#tw-section','#ba-section','#mockup-section']).forEach(sec=>{
+  gsap.utils.toArray(sec.querySelectorAll('.eyebrow,h2.sec,.sec-sub')).forEach((el,i)=>{
+    gsap.fromTo(el,{opacity:0,y:28},{
+      opacity:1,y:0,duration:.8,ease:'power3.out',delay:i*.1,
+      scrollTrigger:{trigger:sec,start:'top 80%',once:true}
+    });
+  });
+});
 </script>
+<!-- Cursor trail dots -->
+<div class="ct" id="ct0"></div><div class="ct" id="ct1"></div><div class="ct" id="ct2"></div>
+<div class="ct" id="ct3"></div><div class="ct" id="ct4"></div><div class="ct" id="ct5"></div>
+<div class="ct" id="ct6"></div><div class="ct" id="ct7"></div><div class="ct" id="ct8"></div>
+<div class="ct" id="ct9"></div><div class="ct" id="ct10"></div><div class="ct" id="ct11"></div>
+
+<!-- Section nav dots -->
+<div id="sec-dots">
+  <button class="sd active" data-target="#hero" title="Hero"></button>
+  <button class="sd" data-target="#stats" title="Stats"></button>
+  <button class="sd" data-target="#levels" title="Levels"></button>
+  <button class="sd" data-target="#how" title="How it works"></button>
+  <button class="sd" data-target="#features" title="Features"></button>
+  <button class="sd" data-target="#testimonials" title="Testimonials"></button>
+  <button class="sd" data-target="#depth-journey" title="Depth Journey"></button>
+  <button class="sd" data-target="#tw-section" title="Demo"></button>
+  <button class="sd" data-target="#ba-section" title="Compare"></button>
+  <button class="sd" data-target="#cta" title="Get started"></button>
+</div>
+
+<!-- Matrix rain canvas -->
+<canvas id="matrix-rain"></canvas>
+
 </body>
 </html>
