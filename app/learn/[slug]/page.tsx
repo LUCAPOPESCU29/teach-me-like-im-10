@@ -22,6 +22,9 @@ import { LEVEL_XP } from "@/lib/xp";
 import { useAuth } from "@/components/AuthProvider";
 import { useCelebration } from "@/components/CelebrationProvider";
 import type { LevelData } from "@/lib/data";
+import PageTransition from "@/components/PageTransition";
+import { checkAndRecordTopic, getMinutesUntilSlotFrees, FREE_LIMITS, isPro } from "@/lib/limits";
+import ProUpgradeModal from "@/components/ProUpgradeModal";
 
 export default function LearnPage() {
   const params = useParams();
@@ -68,9 +71,11 @@ export default function LearnPage() {
   const [error, setError] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showTeachBack, setShowTeachBack] = useState(false);
+  const [showTeachBackProModal, setShowTeachBackProModal] = useState(false);
   const [showTeachFriend, setShowTeachFriend] = useState(false);
   const [lastXPGain, setLastXPGain] = useState<number | null>(null);
   const [topicRating, setTopicRating] = useState<{ userRating: number | null; avgRating: number | null; totalRatings: number }>({ userRating: null, avgRating: null, totalRatings: 0 });
+  const [limitHit, setLimitHit] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const initialized = useRef(false);
 
@@ -78,6 +83,13 @@ export default function LearnPage() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
+
+    // Check daily limit before loading
+    const check = checkAndRecordTopic(slug);
+    if (!check.allowed) {
+      setLimitHit(true);
+      return;
+    }
 
     dataLayer.getTopicLevels(slug, lang).then((cached) => {
       if (cached.length > 0) {
@@ -293,10 +305,52 @@ export default function LearnPage() {
     } catch {}
   }
 
+  // Rate limit wall
+  if (limitHit) {
+    const minsLeft = getMinutesUntilSlotFrees();
+    return (
+      <PageTransition>
+        <main className="min-h-screen flex items-center justify-center px-4">
+          <div className="max-w-md w-full text-center">
+            <div className="text-5xl mb-6">🔒</div>
+            <h1 className="font-display text-3xl text-white mb-3">Topic limit reached</h1>
+            <p className="text-white/50 font-sans mb-2">
+              Free plan allows <strong className="text-white">{FREE_LIMITS.topicsPerWindow} topics</strong> every {FREE_LIMITS.windowMinutes} minutes.
+            </p>
+            <p className="text-white/30 font-sans text-sm mb-8">
+              {minsLeft > 0 ? `A slot frees up in ~${minsLeft} min · ` : ""}or unlock unlimited topics with Pro
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => router.push("/pro")}
+                className="w-full py-3.5 rounded-xl font-sans font-semibold text-sm text-black"
+                style={{ background: "linear-gradient(135deg,#34d399,#10b981)" }}
+              >
+                ✦ Get Pro — unlimited topics
+              </button>
+              <button
+                onClick={() => router.push("/")}
+                className="w-full py-3 rounded-xl border border-white/10 text-white/50 hover:text-white/70 font-sans text-sm transition-colors"
+              >
+                ← Back to home
+              </button>
+            </div>
+
+            <p className="text-white/20 text-xs font-sans mt-8">
+              Limit resets at midnight in your timezone
+            </p>
+          </div>
+        </main>
+      </PageTransition>
+    );
+  }
+
   // Dynamic background gradient based on depth
   const bgGradient = currentLevel > 0 ? LEVEL_META[Math.min(currentLevel - 1, 4)].color : LEVEL_META[0].color;
 
   return (
+    <PageTransition>
     <>
       <DepthMeter currentLevel={currentLevel} unlockedLevels={currentLevel} />
 
@@ -436,7 +490,7 @@ export default function LearnPage() {
                   </span>
                 </motion.button>
                 <motion.button
-                  onClick={() => setShowTeachBack(true)}
+                  onClick={() => isPro() ? setShowTeachBack(true) : setShowTeachBackProModal(true)}
                   className="group relative px-4 sm:px-6 py-3 rounded-xl font-mono text-sm tracking-wider overflow-hidden"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -460,6 +514,18 @@ export default function LearnPage() {
                   <span className="relative z-10 text-purple-400 flex items-center gap-2">
                     <span className="text-lg">📝</span>
                     TEACH IT BACK
+                    {!isPro() && (
+                      <span
+                        className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[9px] font-sans font-semibold"
+                        style={{
+                          background: "rgba(251,191,36,0.12)",
+                          border: "1px solid rgba(251,191,36,0.28)",
+                          color: "#fbbf24",
+                        }}
+                      >
+                        PRO
+                      </span>
+                    )}
                   </span>
                 </motion.button>
                 <FlashcardButton
@@ -627,6 +693,16 @@ export default function LearnPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Pro upgrade modal — teach-back gate */}
+      <ProUpgradeModal
+        open={showTeachBackProModal}
+        onClose={() => setShowTeachBackProModal(false)}
+        featureName="Teach It Back"
+        featureEmoji="📝"
+        featureDescription="Get AI-graded on how well you explain the topic — a Pro-exclusive learning exercise."
+      />
     </>
+  </PageTransition>
   );
 }

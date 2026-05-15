@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LEVEL_META } from "@/lib/utils";
 import StreamingText from "./StreamingText";
 import TopicIllustration from "./TopicIllustration";
+import ProUpgradeModal from "./ProUpgradeModal";
+import { isPro } from "@/lib/limits";
 
 const ANALOGY_CATEGORIES = [
   { key: "sports", emoji: "\u{1F3C0}", label: "Sports" },
@@ -58,6 +60,7 @@ export default function LevelCard({
 
   // Audio state
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
 
   // Analogy state
   const [showAnalogyPicker, setShowAnalogyPicker] = useState(false);
@@ -77,6 +80,10 @@ export default function LevelCard({
   }, []);
 
   const handleToggleAudio = useCallback(() => {
+    if (!isPro()) {
+      setShowProModal(true);
+      return;
+    }
     if (typeof window === "undefined" || !window.speechSynthesis) return;
 
     if (isSpeaking) {
@@ -208,6 +215,7 @@ export default function LevelCard({
   );
 
   return (
+    <>
     <motion.div
       id={`level-${level}`}
       className="relative rounded-2xl border bg-white/[0.02] backdrop-blur-sm overflow-hidden"
@@ -253,7 +261,7 @@ export default function LevelCard({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              title={isSpeaking ? "Stop listening" : "Listen to this level"}
+              title={isPro() ? (isSpeaking ? "Stop listening" : "Listen to this level") : "Pro feature — upgrade to listen"}
             >
               {isSpeaking ? (
                 <>
@@ -265,8 +273,23 @@ export default function LevelCard({
                   </motion.span>
                   STOP
                 </>
-              ) : (
+              ) : isPro() ? (
                 <>🔊 LISTEN</>
+              ) : (
+                <span className="flex items-center gap-1">
+                  🔊 LISTEN
+                  <span
+                    className="inline-flex items-center justify-center w-3 h-3 rounded-full text-[7px] font-bold ml-0.5"
+                    style={{
+                      background: "rgba(251,191,36,0.15)",
+                      border: "1px solid rgba(251,191,36,0.3)",
+                      color: "#fbbf24",
+                      lineHeight: 1,
+                    }}
+                  >
+                    ★
+                  </span>
+                </span>
               )}
             </motion.button>
           )}
@@ -445,6 +468,14 @@ export default function LevelCard({
         style={{ backgroundColor: meta.color }}
       />
     </motion.div>
+    <ProUpgradeModal
+      open={showProModal}
+      onClose={() => setShowProModal(false)}
+      featureName="Audio narration"
+      featureEmoji="🔊"
+      featureDescription="Listen to every level read aloud — upgrade to Pro to unlock audio for all your topics."
+    />
+    </>
   );
 }
 

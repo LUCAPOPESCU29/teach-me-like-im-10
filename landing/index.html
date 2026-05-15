@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teach Me Like I'm 10 — Learn Anything, Simply.</title>
+  <meta name="description" content="Any topic. Five depths. From a 5-year-old to a PhD. Free forever." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --em:#34d399;--em2:#10b981;
+  --bg:#030609;--bg2:#070b14;
+  --surface:rgba(255,255,255,0.025);
+  --border:rgba(255,255,255,0.07);
+  --text:rgba(255,255,255,0.88);
+  --muted:rgba(255,255,255,0.38);
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  line-height:1.6;
+}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(52,211,153,0.35);border-radius:2px}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;
+}
+.container{max-width:1120px;margin:0 auto;padding:0 32px}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:200;
+  display:flex;align-items:center;gap:0;
+  padding:7px 7px 7px 22px;
+  background:rgba(3,6,9,0.65);
+  backdrop-filter:blur(24px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:100px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+  white-space:nowrap;
+  opacity:0;transform:translateX(-50%) translateY(-8px);
+  transition:background .3s;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  color:var(--em);margin-right:30px;letter-spacing:-.2px;
+}
+.nav-links{display:flex;align-items:center;gap:2px;margin-right:10px}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;
+  padding:7px 15px;border-radius:100px;
+  transition:all .2s;
+}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 20px;
+  background:linear-gradient(135deg,var(--em),var(--em2));
+  color:#000;font-size:13px;font-weight:700;
+  border-radius:100px;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:transform .2s var(--ease-out),box-shadow .3s;
+}
+.nav-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);
+  transform:translateX(-100%);
+  animation:sh 2.5s infinite 1.2s linear;
+}
+@keyframes sh{to{transform:translateX(200%)}}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(52,211,153,.45)}
+.nav-cta .chip{
+  width:20px;height:20px;border-radius:6px;
+  background:rgba(0,0,0,.18);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:100px 32px 60px;position:relative;overflow:hidden;
+}
+.hero-bg-grid{
+  position:absolute;inset:0;pointer-events:none;opacity:.02;
+  background-image:
+    linear-gradient(rgba(52,211,153,1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,211,153,1) 1px,transparent 1px);
+  background-size:72px 72px;
+}
+.hero-bg-glow{
+  position:absolute;top:-15%;left:-5%;
+  width:700px;height:700px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(52,211,153,.12) 0%,transparent 65%);
+}
+.hero-inner{
+  position:relative;z-index:2;
+  max-width:1120px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;gap:32px;width:100%;
+}
+.hero-left{max-width:580px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 14px 5px 8px;
+  background:rgba(52,211,153,.07);
+  border:1px solid rgba(52,211,153,.2);
+  border-radius:100px;
+  margin-bottom:28px;opacity:0;
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--em);box-shadow:0 0 10px var(--em);
+  animation:glow 2s infinite;
+}
+@keyframes glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+.badge-text{font-size:11px;font-weight:600;color:rgba(52,211,153,.85);letter-spacing:.12em;text-transform:uppercase}
+.hero-h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(50px,5.5vw,82px);
+  font-weight:800;line-height:.94;
+  letter-spacing:-.035em;
+  margin-bottom:22px;opacity:0;
+}
+.hero-h1 .line{display:block;overflow:hidden}
+.hero-h1 .li{display:block;transform:translateY(110%)}
+.hero-h1 .accent{
+  background:linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(15px,1.5vw,18px);color:var(--muted);
+  line-height:1.72;margin-bottom:36px;opacity:0;
+  max-width:440px;
+}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;opacity:0}
+.btn-p{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 26px;
+  background:linear-gradient(135deg,var(--em),var(--em2));
+  color:#000;font-size:14px;font-weight:700;
+  border-radius:14px;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:transform .22s var(--ease-out),box-shadow .3s;
+  box-shadow:0 4px 24px rgba(52,211,153,.3),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-p::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);
+  transform:translateX(-100%);animation:sh 2.2s infinite 0.8s linear;
+}
+.btn-p:hover{transform:scale(1.04) translateY(-2px);box-shadow:0 12px 40px rgba(52,211,153,.42)}
+.btn-p .chip{width:22px;height:22px;border-radius:7px;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-s{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 22px;
+  border:1px solid var(--border);
+  color:var(--muted);font-size:14px;font-weight:500;
+  border-radius:14px;text-decoration:none;
+  transition:all .25s;
+}
+.btn-s:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.hero-trust{
+  display:flex;align-items:center;gap:12px;
+  margin-top:28px;opacity:0;
+}
+.trust-avatars{display:flex}
+.trust-av{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--bg);
+  font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.05));
+}
+.trust-av+.trust-av{margin-left:-8px}
+.trust-text{font-size:12px;color:var(--muted)}
+.trust-text strong{color:rgba(255,255,255,.65)}
+
+/* ── THREE.JS CANVAS ── */
+.hero-right{position:relative;height:560px}
+#hero-canvas{
+  width:100%;height:100%;
+  border-radius:28px;
+  display:block;
+  opacity:0;
+}
+.canvas-glow{
+  position:absolute;inset:0;border-radius:28px;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(52,211,153,.08) 0%,transparent 70%);
+}
+.canvas-edge{
+  position:absolute;inset:0;border-radius:28px;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 50%,var(--bg) 100%);
+}
+/* Floating level pills on the canvas */
+.float-pill{
+  position:absolute;z-index:5;
+  padding:7px 14px;border-radius:100px;
+  backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(7,11,20,.7);
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;gap:7px;
+  opacity:0;white-space:nowrap;
+  animation:float 4s ease-in-out infinite;
+}
+.float-pill .pdot{width:7px;height:7px;border-radius:50%}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fp1{top:12%;left:-8%;animation-delay:0s}
+.fp2{top:42%;right:-10%;animation-delay:.9s}
+.fp3{bottom:18%;left:-6%;animation-delay:1.7s}
+
+/* ── MARQUEE ── */
+.marquee-wrap{
+  padding:18px 0;overflow:hidden;position:relative;
+  border-top:1px solid rgba(255,255,255,.045);
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+.marquee-wrap::before,.marquee-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:130px;z-index:2;
+}
+.marquee-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.mtrack{display:flex;gap:32px;animation:mq 32s linear infinite;white-space:nowrap}
+@keyframes mq{to{transform:translateX(-50%)}}
+.mitem{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:rgba(255,255,255,.22)}
+.mdot{color:var(--em);font-size:9px}
+
+/* ── SHARED SECTION ── */
+section{padding:108px 0}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--em);margin-bottom:14px;
+}
+.eyebrow::before{content:'';display:block;width:18px;height:1px;background:var(--em)}
+h2.sec{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(34px,4.5vw,58px);
+  font-weight:800;line-height:1.02;letter-spacing:-.03em;
+  color:#fff;margin-bottom:14px;
+}
+p.sec-sub{font-size:17px;color:var(--muted);max-width:480px;line-height:1.72}
+
+/* ── STATS ── */
+#stats{padding:64px 0}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2px;
+  background:rgba(255,255,255,.05);
+  border-radius:22px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+}
+.stat{
+  background:var(--bg);padding:38px 24px;text-align:center;
+  transition:background .3s;cursor:default;
+}
+.stat:hover{background:rgba(52,211,153,.035)}
+.stat-val{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(30px,3.5vw,50px);font-weight:800;
+  color:#fff;letter-spacing:-.03em;margin-bottom:5px;
+}
+.stat-lbl{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ── LEVELS ── */
+#levels{background:linear-gradient(180deg,var(--bg) 0%,rgba(7,11,20,.6) 50%,var(--bg) 100%)}
+.levels-head{margin-bottom:56px}
+.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.lvl-card{
+  padding:28px 20px 24px;border-radius:22px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  cursor:default;
+  transition:transform .4s var(--ease-out),border-color .3s,box-shadow .4s;
+}
+.lvl-card::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--lc);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s var(--ease-out);
+}
+.lvl-card:hover{transform:translateY(-8px)}
+.lvl-card:hover::before{transform:scaleX(1)}
+.lvl-card:hover{border-color:var(--lb);box-shadow:0 0 32px var(--lg)}
+.lvl-glow{
+  position:absolute;top:-30%;right:-20%;width:140px;height:140px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--lg) 0%,transparent 70%);
+  opacity:0;transition:opacity .4s;
+}
+.lvl-card:hover .lvl-glow{opacity:1}
+.lvl-emoji{font-size:26px;margin-bottom:14px;display:block}
+.lvl-n{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lc);margin-bottom:5px;opacity:.7}
+.lvl-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:8px}
+.lvl-desc{font-size:11.5px;color:var(--muted);line-height:1.65}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;position:relative}
+.steps::before{
+  content:'';position:absolute;top:62px;left:calc(16.66% + 30px);right:calc(16.66% + 30px);
+  height:1px;background:linear-gradient(to right,rgba(52,211,153,.3),rgba(52,211,153,.1),rgba(52,211,153,.3));
+  pointer-events:none;
+}
+.step{
+  padding:34px 26px;border-radius:22px;
+  background:var(--surface);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,rgba(52,211,153,.2),transparent);
+}
+.step-n{
+  font-family:'Syne',sans-serif;font-size:68px;font-weight:800;line-height:1;
+  position:absolute;top:14px;right:18px;
+  color:rgba(52,211,153,.06);user-select:none;letter-spacing:-.04em;
+}
+.step-icon{
+  width:46px;height:46px;border-radius:14px;
+  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:18px;
+}
+.step h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.68}
+
+/* ── BENTO ── */
+.bento{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  grid-template-rows:auto;gap:14px;margin-top:56px;
+}
+.bc{
+  padding:30px 26px;border-radius:22px;
+  background:var(--surface);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:border-color .35s,transform .35s var(--ease-out),box-shadow .35s;
+}
+.bc:hover{border-color:rgba(52,211,153,.2);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.bc.s7{grid-column:span 7}.bc.s5{grid-column:span 5}
+.bc.s4{grid-column:span 4}.bc.s8{grid-column:span 8}
+.bc.s6{grid-column:span 6}.bc.s3{grid-column:span 3}
+.bc.s9{grid-column:span 9}
+.bc-glow{
+  position:absolute;top:-40%;right:-15%;width:220px;height:220px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--bg-color,rgba(52,211,153,.12)) 0%,transparent 70%);
+}
+.bc-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:var(--ic-bg,rgba(52,211,153,.1));
+  border:1px solid var(--ic-bdr,rgba(52,211,153,.2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:18px;
+}
+.bc h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:7px}
+.bc p{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* depth pips */
+.pips{display:flex;gap:7px;margin-top:20px}
+.pip{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}
+.pip .pf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--em),var(--em2));transform-origin:left;transform:scaleX(0)}
+
+/* lang pills */
+.lang-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.lp{
+  padding:4px 10px;border-radius:100px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  font-size:11px;color:var(--muted);font-weight:500;
+}
+
+/* xp bar */
+.xp-bar{
+  margin-top:20px;height:6px;border-radius:3px;
+  background:rgba(255,255,255,.07);overflow:hidden;
+}
+.xp-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#f97316,#fbbf24);
+  transform:scaleX(0);transform-origin:left;
+}
+.xp-row{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--muted)}
+
+/* quiz card mini */
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin-top:18px}
+.qopt{
+  padding:8px 12px;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  font-size:11.5px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+  transition:all .2s;cursor:default;
+}
+.qopt:hover{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.18);color:rgba(255,255,255,.65)}
+.qopt.correct{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25);color:rgba(52,211,153,.85)}
+.qopt-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0}
+.qopt.correct .qopt-dot{background:var(--em);border-color:var(--em)}
+
+/* ── TESTIMONIALS ── */
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+.tc{
+  padding:26px;border-radius:20px;
+  background:var(--surface);border:1px solid var(--border);
+  transition:border-color .3s,transform .35s var(--ease-out);
+}
+.tc:hover{border-color:rgba(52,211,153,.18);transform:translateY(-4px)}
+.tc-stars{color:var(--em);font-size:12px;letter-spacing:2px;margin-bottom:12px}
+.tc-q{
+  font-size:13.5px;color:rgba(255,255,255,.52);line-height:1.75;
+  margin-bottom:18px;position:relative;
+}
+.tc-q::before{
+  content:'"';font-size:38px;color:var(--em);line-height:1;
+  display:block;margin-bottom:2px;font-family:'Syne',sans-serif;
+}
+.tc-a{display:flex;align-items:center;gap:10px}
+.tc-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:linear-gradient(135deg,rgba(52,211,153,.25),rgba(52,211,153,.06));
+  border:1px solid rgba(52,211,153,.2);
+}
+.tc-n{font-size:12px;font-weight:600;color:rgba(255,255,255,.72)}
+.tc-r{font-size:10px;color:var(--muted)}
+
+/* ── CTA ── */
+#cta{text-align:center;padding:120px 32px 160px;position:relative;overflow:hidden}
+.cta-glow{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:800px;height:500px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(52,211,153,.1) 0%,transparent 70%);
+}
+.cta-ring{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  border:1px solid rgba(52,211,153,.06);
+  border-radius:50%;pointer-events:none;
+  animation:spin 20s linear infinite;
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.r1{width:500px;height:500px;animation-duration:25s}
+.r2{width:700px;height:700px;animation-direction:reverse;animation-duration:35s}
+.cta-in{position:relative;z-index:2}
+.cta-ey{color:var(--em);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px}
+#cta h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(44px,7vw,92px);font-weight:800;line-height:.93;
+  letter-spacing:-.035em;color:#fff;margin-bottom:18px;
+}
+#cta h2 .accent{
+  background:linear-gradient(135deg,#34d399,#6ee7b7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+#cta p{font-size:17px;color:var(--muted);margin-bottom:36px}
+.cta-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  padding:28px 0;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.foot-in{display:flex;align-items:center;justify-content:space-between}
+.foot-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--em)}
+.foot-note{font-size:11px;color:rgba(255,255,255,.18)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .hero-inner{grid-template-columns:1fr;gap:48px}
+  .hero-left{max-width:100%}
+  .hero-right{height:400px}
+  .lvl-grid{grid-template-columns:repeat(3,1fr)}
+  .steps{grid-template-columns:1fr;gap:14px}
+  .steps::before{display:none}
+  .bc.s7,.bc.s5,.bc.s4,.bc.s8,.bc.s6,.bc.s3,.bc.s9{grid-column:span 12}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .tg{grid-template-columns:1fr}
+  nav .nav-links{display:none}
+  .float-pill{display:none}
+}
+@media(max-width:580px){
+  .lvl-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .hero-right{height:320px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <span class="nav-logo">✦ TMI10</span>
+  <div class="nav-links">
+    <a href="#levels">Levels</a>
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+  </div>
+  <a href="https://www.teachmelikeim10.xyz" class="nav-cta" target="_blank">
+    Try it free
+    <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-glow"></div>
+
+  <div class="hero-inner container">
+    <div class="hero-left">
+      <div class="hero-badge" id="hbadge">
+        <div class="badge-dot"></div>
+        <span class="badge-text">Free · No signup needed</span>
+      </div>
+
+      <h1 class="hero-h1" id="hh1">
+        <span class="line"><span class="li">Understand</span></span>
+        <span class="line"><span class="li">anything.</span></span>
+        <span class="line"><span class="li accent">Simply.</span></span>
+      </h1>
+
+      <p class="hero-sub" id="hsub">
+        Any topic. Five depths of explanation — from a 5-year-old to a PhD.
+        Powered by AI. Built for the relentlessly curious.
+      </p>
+
+      <div class="hero-actions" id="hacts">
+        <a href="https://www.teachmelikeim10.xyz" class="btn-p" target="_blank">
+          Start learning for free
+          <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        </a>
+        <a href="#levels" class="btn-s">See the levels ↓</a>
+      </div>
+
+      <div class="hero-trust" id="htrust">
+        <div class="trust-avatars">
+          <div class="trust-av">👨‍💻</div>
+          <div class="trust-av">👩‍🎓</div>
+          <div class="trust-av">👨‍🏫</div>
+          <div class="trust-av">👩‍💼</div>
+        </div>
+        <p class="trust-text">Loved by <strong>curious people</strong> worldwide</p>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <canvas id="hero-canvas"></canvas>
+      <div class="canvas-glow"></div>
+      <div class="canvas-edge"></div>
+
+      <!-- Floating pills -->
+      <div class="float-pill fp1" id="fp1">
+        <div class="pdot" style="background:#34d399;box-shadow:0 0 7px #34d399"></div>
+        <span style="color:#34d399">Level 1 — ELI5</span>
+      </div>
+      <div class="float-pill fp2" id="fp2">
+        <div class="pdot" style="background:#f97316;box-shadow:0 0 7px #f97316"></div>
+        <span style="color:rgba(255,255,255,.7)">Level 3 — High School</span>
+      </div>
+      <div class="float-pill fp3" id="fp3">
+        <div class="pdot" style="background:#a855f7;box-shadow:0 0 7px #a855f7"></div>
+        <span style="color:rgba(255,255,255,.5)">Level 5 — PhD</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="mtrack">
+    <span class="mitem"><span class="mdot">✦</span> Quantum Physics</span>
+    <span class="mitem"><span class="mdot">✦</span> Machine Learning</span>
+    <span class="mitem"><span class="mdot">✦</span> Black Holes</span>
+    <span class="mitem"><span class="mdot">✦</span> CRISPR Gene Editing</span>
+    <span class="mitem"><span class="mdot">✦</span> The Roman Empire</span>
+    <span class="mitem"><span class="mdot">✦</span> How Vaccines Work</span>
+    <span class="mitem"><span class="mdot">✦</span> Neural Networks</span>
+    <span class="mitem"><span class="mdot">✦</span> Options Trading</span>
+    <span class="mitem"><span class="mdot">✦</span> String Theory</span>
+    <span class="mitem"><span class="mdot">✦</span> Gut Microbiome</span>
+    <span class="mitem"><span class="mdot">✦</span> Climate Change</span>
+    <span class="mitem"><span class="mdot">✦</span> Blockchain</span>
+    <span class="mitem"><span class="mdot">✦</span> Quantum Physics</span>
+    <span class="mitem"><span class="mdot">✦</span> Machine Learning</span>
+    <span class="mitem"><span class="mdot">✦</span> Black Holes</span>
+    <span class="mitem"><span class="mdot">✦</span> CRISPR Gene Editing</span>
+    <span class="mitem"><span class="mdot">✦</span> The Roman Empire</span>
+    <span class="mitem"><span class="mdot">✦</span> How Vaccines Work</span>
+    <span class="mitem"><span class="mdot">✦</span> Neural Networks</span>
+    <span class="mitem"><span class="mdot">✦</span> Options Trading</span>
+    <span class="mitem"><span class="mdot">✦</span> String Theory</span>
+    <span class="mitem"><span class="mdot">✦</span> Gut Microbiome</span>
+    <span class="mitem"><span class="mdot">✦</span> Climate Change</span>
+    <span class="mitem"><span class="mdot">✦</span> Blockchain</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-val" data-count="5" data-sfx="">0</div>
+        <div class="stat-lbl">Explanation depths</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="40" data-sfx="+">0</div>
+        <div class="stat-lbl">Languages supported</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="10" data-sfx="+">0</div>
+        <div class="stat-lbl">Learning modes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="100" data-sfx="%">0</div>
+        <div class="stat-lbl">Free forever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEVELS -->
+<section id="levels">
+  <div class="container">
+    <div class="levels-head">
+      <div class="eyebrow">Five depths of understanding</div>
+      <h2 class="sec">One topic.<br/>Five realities.</h2>
+      <p class="sec-sub">Start anywhere. Go as deep as you want. Each level unlocks more sophisticated understanding of the exact same concept.</p>
+    </div>
+    <div class="lvl-grid">
+      <div class="lvl-card" style="--lc:#34d399;--lb:rgba(52,211,153,.22);--lg:rgba(52,211,153,.1)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🍎</span>
+        <div class="lvl-n">Level 1</div>
+        <div class="lvl-name">ELI5</div>
+        <div class="lvl-desc">Pure analogies. Simple language. Like explaining it to your 5-year-old sibling.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#fbbf24;--lb:rgba(251,191,36,.2);--lg:rgba(251,191,36,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">📚</span>
+        <div class="lvl-n">Level 2</div>
+        <div class="lvl-name">Middle School</div>
+        <div class="lvl-desc">Key concepts introduced. Real vocabulary. The dots start connecting.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#f97316;--lb:rgba(249,115,22,.2);--lg:rgba(249,115,22,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🔬</span>
+        <div class="lvl-n">Level 3</div>
+        <div class="lvl-name">High School</div>
+        <div class="lvl-desc">The mechanics. Cause and effect. Why things actually work.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#f43f5e;--lb:rgba(244,63,94,.2);--lg:rgba(244,63,94,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🏛️</span>
+        <div class="lvl-n">Level 4</div>
+        <div class="lvl-name">College</div>
+        <div class="lvl-desc">Technical depth. Domain language. The kind used in papers and research.</div>
+      </div>
+      <div class="lvl-card" style="--lc:#a855f7;--lb:rgba(168,85,247,.2);--lg:rgba(168,85,247,.08)">
+        <div class="lvl-glow"></div>
+        <span class="lvl-emoji">🎓</span>
+        <div class="lvl-n">Level 5</div>
+        <div class="lvl-name">PhD</div>
+        <div class="lvl-desc">First principles. Edge cases. Open questions at the frontier of research.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="eyebrow">Dead simple</div>
+    <h2 class="sec">Three steps.<br/>Zero friction.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div class="step-icon">🔍</div>
+        <h3>Type any topic</h3>
+        <p>Black holes. Options trading. Why the sky is blue. No limits — if humans have thought about it, we can explain it.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div class="step-icon">⚡</div>
+        <h3>Pick your depth</h3>
+        <p>Five levels, ELI5 to PhD. Start at the bottom and go deeper — or skip straight to the deep end.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div class="step-icon">🧪</div>
+        <h3>Test yourself</h3>
+        <p>Quiz battles, teach-it-back AI grading, flashcards, and speed runs. Learning only sticks when you prove it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO -->
+<section id="features">
+  <div class="container">
+    <div class="eyebrow">Everything you need</div>
+    <h2 class="sec">Built for real<br/>understanding.</h2>
+
+    <div class="bento">
+
+      <!-- Depth meter — wide left -->
+      <div class="bc s7">
+        <div class="bc-glow" style="--bg-color:rgba(52,211,153,.13)"></div>
+        <div class="bc-icon">🎚️</div>
+        <h3>Adaptive depth meter</h3>
+        <p>Five stages. Each one unlocks a more sophisticated view of the same concept — watch your understanding visibly grow.</p>
+        <div class="pips">
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(1)"></div></div>
+          <div class="pip"><div class="pf" style="transform:scaleX(.45)"></div></div>
+          <div class="pip"></div>
+        </div>
+      </div>
+
+      <!-- Languages — right -->
+      <div class="bc s5" style="--bg-color:rgba(251,191,36,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(251,191,36,.1);--ic-bdr:rgba(251,191,36,.2)">🌍</div>
+        <h3>40+ languages</h3>
+        <p>Every topic, every level, fully localized.</p>
+        <div class="lang-pills">
+          <span class="lp">English</span><span class="lp">Español</span>
+          <span class="lp">Français</span><span class="lp">Română</span>
+          <span class="lp">日本語</span><span class="lp">+35 more</span>
+        </div>
+      </div>
+
+      <!-- Quiz mini-UI -->
+      <div class="bc s4" style="--bg-color:rgba(168,85,247,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(168,85,247,.1);--ic-bdr:rgba(168,85,247,.2)">🧠</div>
+        <h3>Quiz battles</h3>
+        <p>AI questions targeted at exactly what you just learned.</p>
+        <div class="quiz-opts">
+          <div class="qopt correct"><div class="qopt-dot"></div>Electromagnetic induction</div>
+          <div class="qopt"><div class="qopt-dot"></div>Static discharge</div>
+          <div class="qopt"><div class="qopt-dot"></div>Photoelectric effect</div>
+        </div>
+      </div>
+
+      <!-- XP & Streaks -->
+      <div class="bc s4" style="--bg-color:rgba(249,115,22,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(249,115,22,.1);--ic-bdr:rgba(249,115,22,.2)">🔥</div>
+        <h3>Streaks & XP</h3>
+        <p>Daily rewards, a solar-system progress map, and an XP shop that makes learning genuinely addictive.</p>
+        <div class="xp-bar"><div class="xp-fill" id="xpfill"></div></div>
+        <div class="xp-row"><span>1,240 XP</span><span>Next level · 1,500</span></div>
+      </div>
+
+      <!-- Study rooms -->
+      <div class="bc s4" style="--bg-color:rgba(6,182,212,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(6,182,212,.1);--ic-bdr:rgba(6,182,212,.2)">🏠</div>
+        <h3>Study rooms</h3>
+        <p>Invite friends. Learn the same topic together. Real-time multiplayer knowledge sessions.</p>
+      </div>
+
+      <!-- Teach it back — wide -->
+      <div class="bc s8" style="--bg-color:rgba(52,211,153,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon">📝</div>
+        <h3>Teach it back — AI grading</h3>
+        <p>Write your own explanation. Our AI grades it like a professor — spots the gaps, rewards the clarity, gives targeted feedback. The single best way to prove you actually understand something.</p>
+      </div>
+
+      <!-- Audio -->
+      <div class="bc s4" style="--bg-color:rgba(244,63,94,.1)">
+        <div class="bc-glow"></div>
+        <div class="bc-icon" style="--ic-bg:rgba(244,63,94,.1);--ic-bdr:rgba(244,63,94,.2)">🎧</div>
+        <h3>Audio narration</h3>
+        <p>Any level read aloud. Perfect for commutes, auditory learners, or when you just want to close your eyes and think.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div class="eyebrow">People love it</div>
+    <h2 class="sec">Built for the<br/>relentlessly curious.</h2>
+    <div class="tg">
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">I learned more about quantum physics in one evening than in an entire semester. The five-level system is genuinely brilliant.</p>
+        <div class="tc-a">
+          <div class="tc-av">👨‍💻</div>
+          <div><div class="tc-n">Alex M.</div><div class="tc-r">Software engineer</div></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">My students actually want to use it. The streak system keeps them coming back without me having to chase them down.</p>
+        <div class="tc-a">
+          <div class="tc-av">👩‍🏫</div>
+          <div><div class="tc-n">Sarah K.</div><div class="tc-r">High school teacher</div></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-q">I use it to prep for meetings on topics I know nothing about. Level 3 is my sweet spot — fast, accurate, and actually useful.</p>
+        <div class="tc-a">
+          <div class="tc-av">👨‍💼</div>
+          <div><div class="tc-n">James L.</div><div class="tc-r">Product manager</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-ring r1"></div>
+  <div class="cta-ring r2"></div>
+  <div class="container">
+    <div class="cta-in">
+      <p class="cta-ey">Ready to understand everything?</p>
+      <h2>Learn anything.<br/><span class="accent">Simply.</span></h2>
+      <p>No account. No credit card. Just curiosity.</p>
+      <div class="cta-acts">
+        <a href="https://www.teachmelikeim10.xyz" class="btn-p" target="_blank">
+          Open the app — it's free
+          <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-in">
+      <span class="foot-logo">✦ Teach Me Like I'm 10</span>
+      <span class="foot-note">Free · No signup · Built for curiosity</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   THREE.JS — Knowledge particle sphere
+═══════════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const wrap   = canvas.parentElement;
+
+  function getSize(){ return { w: wrap.clientWidth, h: wrap.clientHeight }; }
+  let { w, h } = getSize();
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 100);
+  camera.position.z = 5.8;
+
+  /* ── Particle sphere (Fibonacci lattice) ── */
+  const COUNT  = 700;
+  const RADIUS = 2.3;
+  const phi    = Math.PI * (3 - Math.sqrt(5));
+  const pos    = new Float32Array(COUNT * 3);
+
+  for (let i = 0; i < COUNT; i++) {
+    const y   = 1 - (i / (COUNT - 1)) * 2;
+    const r   = Math.sqrt(1 - y * y);
+    const th  = phi * i;
+    pos[i*3]   = RADIUS * r * Math.cos(th);
+    pos[i*3+1] = RADIUS * y;
+    pos[i*3+2] = RADIUS * r * Math.sin(th);
+  }
+
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+  const pMat = new THREE.PointsMaterial({
+    color: 0x34d399,
+    size: 0.032,
+    transparent: true,
+    opacity: 0.75,
+    sizeAttenuation: true,
+  });
+
+  const points = new THREE.Points(pGeo, pMat);
+  scene.add(points);
+
+  /* ── Connecting lines ── */
+  const linePts = [];
+  const DIST    = 0.62;
+
+  for (let i = 0; i < COUNT; i++) {
+    for (let j = i + 1; j < COUNT; j++) {
+      const dx = pos[i*3]   - pos[j*3];
+      const dy = pos[i*3+1] - pos[j*3+1];
+      const dz = pos[i*3+2] - pos[j*3+2];
+      if (Math.sqrt(dx*dx + dy*dy + dz*dz) < DIST) {
+        linePts.push(pos[i*3], pos[i*3+1], pos[i*3+2]);
+        linePts.push(pos[j*3], pos[j*3+1], pos[j*3+2]);
+      }
+    }
+  }
+
+  const lGeo = new THREE.BufferGeometry();
+  lGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePts), 3));
+
+  const lMat = new THREE.LineBasicMaterial({
+    color: 0x34d399, transparent: true, opacity: 0.11,
+  });
+
+  const lines = new THREE.LineSegments(lGeo, lMat);
+  scene.add(lines);
+
+  /* ── Inner glow sphere ── */
+  const gGeo  = new THREE.SphereGeometry(1.85, 32, 32);
+  const gMat  = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.025 });
+  const glow  = new THREE.Mesh(gGeo, gMat);
+  scene.add(glow);
+
+  /* ── Wireframe outer ring ── */
+  const wGeo = new THREE.TorusGeometry(2.35, 0.008, 8, 80);
+  const wMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.08 });
+  const ring = new THREE.Mesh(wGeo, wMat);
+  ring.rotation.x = Math.PI / 2.8;
+  scene.add(ring);
+
+  /* ── Second tilted ring ── */
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.5, 0.006, 8, 80),
+    new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.05 })
+  );
+  ring2.rotation.x = Math.PI / 1.6;
+  ring2.rotation.z = Math.PI / 5;
+  scene.add(ring2);
+
+  /* ── Mouse ── */
+  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  document.addEventListener('mousemove', e => {
+    mx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  /* ── Animate ── */
+  let t = 0;
+  function tick() {
+    requestAnimationFrame(tick);
+    t += 0.004;
+
+    points.rotation.y = t * 0.12;
+    lines.rotation.y  = t * 0.12;
+    glow.rotation.y   = t * 0.12;
+    ring.rotation.z   = t * 0.06;
+    ring2.rotation.y  = -t * 0.04;
+
+    // Subtle breathe
+    const s = 1 + Math.sin(t * 0.8) * 0.012;
+    points.scale.setScalar(s);
+    lines.scale.setScalar(s);
+
+    // Mouse parallax
+    tmx += (mx * 0.35 - tmx) * 0.045;
+    tmy += (-my * 0.35 - tmy) * 0.045;
+    camera.position.x = tmx;
+    camera.position.y = tmy;
+    camera.lookAt(scene.position);
+
+    renderer.render(scene, camera);
+  }
+  tick();
+
+  /* ── Resize ── */
+  window.addEventListener('resize', () => {
+    const s = getSize();
+    renderer.setSize(s.w, s.h);
+    camera.aspect = s.w / s.h;
+    camera.updateProjectionMatrix();
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   GSAP ANIMATIONS
+═══════════════════════════════════════════════════ */
+gsap.registerPlugin(ScrollTrigger);
+
+// Nav
+gsap.to('#nav', { opacity:1, y:0, duration:.7, ease:'power3.out', delay:.35 });
+
+// Badge
+gsap.to('#hbadge', { opacity:1, duration:.6, ease:'power3.out', delay:.5 });
+
+// Headline split
+gsap.set('#hh1', { opacity:1 });
+gsap.to('.hero-h1 .li', {
+  y:0, duration:1.05, ease:'power4.out',
+  stagger:.1, delay:.65,
+});
+
+// Sub + actions + trust
+gsap.to(['#hsub','#hacts','#htrust'], {
+  opacity:1, y:0, duration:.85, ease:'power3.out',
+  stagger:.1, delay:1.1,
+});
+
+// Canvas
+gsap.to('#hero-canvas', { opacity:1, duration:1, ease:'power2.out', delay:1.3 });
+
+// Floating pills
+['#fp1','#fp2','#fp3'].forEach((id, i) => {
+  gsap.to(id, { opacity:1, duration:.6, ease:'power3.out', delay: 1.6 + i * 0.15 });
+});
+
+/* Generic scroll reveals */
+const revealAll = (sel, from) => {
+  gsap.utils.toArray(sel).forEach(el => {
+    gsap.fromTo(el, from || { opacity:0, y:36 }, {
+      opacity:1, y:0,
+      duration:.85, ease:'power3.out',
+      scrollTrigger:{ trigger:el, start:'top 87%', toggleActions:'play none none none' },
+    });
+  });
+};
+revealAll('.eyebrow', { opacity:0, x:-22 });
+revealAll('.sec');
+revealAll('.sec-sub');
+revealAll('.step', { opacity:0, y:32 });
+revealAll('.tc', { opacity:0, y:28 });
+revealAll('.bc', { opacity:0, y:28 });
+
+/* Level cards — stagger */
+gsap.utils.toArray('.lvl-card').forEach((el, i) => {
+  gsap.fromTo(el, { opacity:0, y:40 }, {
+    opacity:1, y:0, duration:.7, ease:'power3.out',
+    delay: i * .07,
+    scrollTrigger:{ trigger:'.lvl-grid', start:'top 85%', toggleActions:'play none none none' },
+  });
+});
+
+/* Stats counters */
+document.querySelectorAll('.stat-val[data-count]').forEach(el => {
+  const n = +el.dataset.count, sfx = el.dataset.sfx || '';
+  ScrollTrigger.create({
+    trigger: el, start:'top 88%', once:true,
+    onEnter() {
+      gsap.fromTo({ v:0 }, { v:n }, {
+        duration:1.6, ease:'power2.out',
+        onUpdate() { el.textContent = Math.floor(this.targets()[0].v) + sfx; },
+      });
+    },
+  });
+});
+
+/* Depth pips */
+document.querySelectorAll('.pip .pf').forEach((pf, i) => {
+  ScrollTrigger.create({
+    trigger: pf, start:'top 85%', once:true,
+    onEnter() {
+      gsap.to(pf, { scaleX:1, duration:.7+i*.1, ease:'power2.out', delay:i*.06 });
+    },
+  });
+});
+
+/* XP bar */
+ScrollTrigger.create({
+  trigger:'#xpfill', start:'top 85%', once:true,
+  onEnter() {
+    gsap.to('#xpfill', { scaleX: 1240/1500, duration:1.2, ease:'power2.out', delay:.3 });
+  },
+});
+
+/* Hero parallax */
+gsap.to('.hero-bg-glow', {
+  y:-70, ease:'none',
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:true },
+});
+
+/* Nav scroll style */
+ScrollTrigger.create({
+  start:80,
+  onUpdate(self) {
+    const n = document.getElementById('nav');
+    n.style.background = self.progress > 0
+      ? 'rgba(3,6,9,0.92)'
+      : 'rgba(3,6,9,0.65)';
+  },
+});
+</script>
+</body>
+</html>
