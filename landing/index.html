@@ -696,6 +696,46 @@ footer{
 
 /* ══════════════ END NEW FEATURE CSS ══════════════ */
 
+/* ══════════════ PRO PLANS SECTION ══════════════ */
+#pro-plans{padding:120px 0;position:relative;overflow:hidden}
+#pro-plans::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 50%,rgba(52,211,153,.08) 0%,transparent 65%);pointer-events:none}
+.pp-header{text-align:center;margin-bottom:56px}
+.pp-toggle-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+.pp-toggle-lbl{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.06em}
+.pp-toggle{width:44px;height:24px;border-radius:100px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);cursor:pointer;position:relative;transition:background .25s,border-color .25s;flex-shrink:0}
+.pp-toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.pp-toggle.annual{background:var(--em);border-color:var(--em)}
+.pp-toggle.annual::after{transform:translateX(20px)}
+.pp-save-pill{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;padding:3px 9px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.28);color:var(--em);text-transform:uppercase}
+
+.pp-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:840px;margin:0 auto;padding:0 20px}
+.pp-card{border-radius:26px;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.022);position:relative;display:flex;flex-direction:column;transition:border-color .35s,transform .35s cubic-bezier(.34,1.2,.64,1)}
+.pp-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.14)}
+.pp-card.pro-card{border-color:rgba(52,211,153,.22);background:linear-gradient(160deg,rgba(52,211,153,.06) 0%,rgba(16,185,129,.02) 100%)}
+.pp-card.pro-card:hover{border-color:rgba(52,211,153,.4)}
+.pp-best{position:absolute;top:14px;right:14px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.15em;padding:4px 11px;border-radius:100px;background:rgba(52,211,153,.18);border:1px solid rgba(52,211,153,.38);color:var(--em);text-transform:uppercase;z-index:4}
+
+.pp-fig-wrap{height:210px;position:relative;overflow:hidden;background:radial-gradient(ellipse 70% 60% at 50% 90%,rgba(52,211,153,.07) 0%,transparent 70%)}
+.pp-fig-wrap canvas{width:100%!important;height:100%!important;display:block}
+
+.pp-card-body{padding:22px 24px 24px;flex:1;display:flex;flex-direction:column}
+.pp-plan-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.pp-price-row{display:flex;align-items:baseline;gap:3px;margin-bottom:4px}
+.pp-price-amt{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.03em}
+.pp-price-period{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+.pp-billed{font-size:11px;font-family:'Space Mono',monospace;color:rgba(52,211,153,.55);margin-bottom:22px;min-height:14px}
+.pp-feats{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:9px;flex:1}
+.pp-feat{display:flex;align-items:center;gap:9px;font-size:13px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,.68);line-height:1.3}
+.pp-feat.locked{color:rgba(255,255,255,.22)}
+.pp-check{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:8px;font-weight:700}
+.pp-check.yes{background:rgba(52,211,153,.15);color:var(--em)}
+.pp-check.no{background:rgba(255,255,255,.05);color:rgba(255,255,255,.18)}
+.pp-cta-btn{display:block;text-align:center;padding:13px;border-radius:14px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:all .25s cubic-bezier(.34,1.2,.64,1)}
+.pp-cta-btn.free-btn{border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);background:transparent}
+.pp-cta-btn.free-btn:hover{border-color:rgba(255,255,255,.25);color:#fff}
+.pp-cta-btn.pro-btn{background:var(--em);color:#030609;border:none;font-weight:700;letter-spacing:.08em}
+.pp-cta-btn.pro-btn:hover{background:#6ee7b7;transform:scale(1.03)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   .hero-inner{grid-template-columns:1fr;gap:48px}
@@ -719,6 +759,9 @@ footer{
   .stats-grid{grid-template-columns:1fr 1fr}
   .hero-right{height:320px}
   .hero-h1{font-size:clamp(36px,10vw,50px)}
+  .pp-cards{grid-template-columns:1fr;padding:0 16px}
+  .pp-card:hover{transform:none}
+  #pro-plans{padding:80px 0}
 }
 </style>
 </head>
@@ -771,7 +814,7 @@ footer{
           <span id="cta-morph">Start learning for free</span>
           <div class="chip"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 7.5L7.5 1.5M7.5 1.5H3.5M7.5 1.5V5.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         </a>
-        <a href="#levels" class="btn-s">See the levels ↓</a>
+        <a href="#pro-plans" class="btn-s">Pro plans ✦</a>
       </div>
 
       <div class="hero-trust" id="htrust">
@@ -1234,6 +1277,71 @@ footer{
             <div class="mline"></div>
             <div class="mline"></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRO PLANS — Spline-style figurines + scroll reveal -->
+<section id="pro-plans">
+  <div class="container">
+    <div class="pp-header">
+      <div class="eyebrow">Simple pricing</div>
+      <h2 class="sec">Free forever.<br/><span class="accent">Pro when you're ready.</span></h2>
+      <p class="sec-sub" style="margin:0 auto">Two topics a day for free — or go unlimited and unlock everything.</p>
+      <div class="pp-toggle-wrap">
+        <span class="pp-toggle-lbl">Monthly</span>
+        <button class="pp-toggle annual" id="pp-toggle" aria-label="Toggle billing"></button>
+        <span class="pp-toggle-lbl">Annual</span>
+        <span class="pp-save-pill" id="pp-save-pill">Save 33%</span>
+      </div>
+    </div>
+
+    <div class="pp-cards">
+      <!-- FREE -->
+      <div class="pp-card free-card">
+        <div class="pp-fig-wrap"><canvas id="fig-free"></canvas></div>
+        <div class="pp-card-body">
+          <div class="pp-plan-tag">Free</div>
+          <div class="pp-price-row"><span class="pp-price-amt">$0</span></div>
+          <div class="pp-billed">Always free — no card needed</div>
+          <ul class="pp-feats">
+            <li class="pp-feat"><div class="pp-check yes">✓</div>2 topics per 45 min</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>All 5 depth levels</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Streak &amp; XP system</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>40+ languages</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Daily challenges</li>
+            <li class="pp-feat locked"><div class="pp-check no">✕</div>Unlimited topics</li>
+            <li class="pp-feat locked"><div class="pp-check no">✕</div>Audio narration</li>
+            <li class="pp-feat locked"><div class="pp-check no">✕</div>Private study rooms</li>
+          </ul>
+          <a href="/daily" class="pp-cta-btn free-btn">Start free →</a>
+        </div>
+      </div>
+
+      <!-- PRO -->
+      <div class="pp-card pro-card">
+        <div class="pp-best" id="pp-best-lbl">Best Value</div>
+        <div class="pp-fig-wrap"><canvas id="fig-pro"></canvas></div>
+        <div class="pp-card-body">
+          <div class="pp-plan-tag">Pro</div>
+          <div class="pp-price-row">
+            <span class="pp-price-amt" id="pp-price-num">$3.33</span>
+            <span class="pp-price-period">/mo</span>
+          </div>
+          <div class="pp-billed" id="pp-billed-note">Billed $40/year — save 33%</div>
+          <ul class="pp-feats">
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Everything in Free</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Unlimited topics daily</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Audio narration</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>PDF export</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>AI follow-up questions</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Private study rooms</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Teach-back AI grading</li>
+            <li class="pp-feat"><div class="pp-check yes">✓</div>Full XP shop</li>
+          </ul>
+          <a href="/checkout?plan=annual" class="pp-cta-btn pro-btn" id="pp-pro-cta">Get Pro</a>
         </div>
       </div>
     </div>
@@ -2441,6 +2549,227 @@ gsap.utils.toArray(['#tw-section','#ba-section','#mockup-section']).forEach(sec=
     });
   });
 });
+
+/* ═══════════════════════════════════════════════════
+   PRO PLANS — Spline-style figurines + scroll reveal
+═══════════════════════════════════════════════════ */
+(function(){
+
+  /* ── Pricing toggle ── */
+  const toggle   = document.getElementById('pp-toggle');
+  const priceEl  = document.getElementById('pp-price-num');
+  const billedEl = document.getElementById('pp-billed-note');
+  const ctaEl    = document.getElementById('pp-pro-cta');
+  const savePill = document.getElementById('pp-save-pill');
+  const bestLbl  = document.getElementById('pp-best-lbl');
+  let annual = true;
+
+  function applyPricing(){
+    if(annual){
+      priceEl.textContent  = '$3.33';
+      billedEl.textContent = 'Billed $40/year — save 33%';
+      ctaEl.href           = '/checkout?plan=annual';
+      if(savePill) savePill.style.opacity='1';
+      if(bestLbl)  bestLbl.textContent='Best Value';
+    } else {
+      priceEl.textContent  = '$5';
+      billedEl.textContent = 'Billed monthly';
+      ctaEl.href           = '/checkout?plan=monthly';
+      if(savePill) savePill.style.opacity='0';
+      if(bestLbl)  bestLbl.textContent='Most Popular';
+    }
+  }
+
+  if(toggle) toggle.addEventListener('click',()=>{
+    annual = !annual;
+    toggle.classList.toggle('annual', annual);
+    gsap.to([priceEl, billedEl],{opacity:0,y:-6,duration:.14,onComplete(){
+      applyPricing();
+      gsap.fromTo([priceEl,billedEl],{opacity:0,y:6},{opacity:1,y:0,duration:.18});
+    }});
+  });
+
+  /* ── Scroll reveal animations (Webflow-style) ── */
+  gsap.fromTo('#pro-plans .pp-header',
+    {opacity:0, y:50},
+    {opacity:1, y:0, duration:1, ease:'power3.out',
+     scrollTrigger:{trigger:'#pro-plans',start:'top 78%',once:true}}
+  );
+  gsap.fromTo('#pro-plans .pp-toggle-wrap',
+    {opacity:0, y:20},
+    {opacity:1, y:0, duration:.7, ease:'power2.out', delay:.25,
+     scrollTrigger:{trigger:'#pro-plans',start:'top 78%',once:true}}
+  );
+  gsap.fromTo('.free-card',
+    {opacity:0, y:70, rotate:-2},
+    {opacity:1, y:0, rotate:0, duration:.9, ease:'power3.out',
+     scrollTrigger:{trigger:'.pp-cards',start:'top 82%',once:true}}
+  );
+  gsap.fromTo('.pro-card',
+    {opacity:0, y:70, rotate:2},
+    {opacity:1, y:0, rotate:0, duration:.9, ease:'power3.out', delay:.12,
+     scrollTrigger:{trigger:'.pp-cards',start:'top 82%',once:true}}
+  );
+  gsap.fromTo('.pp-feat',
+    {opacity:0, x:-12},
+    {opacity:1, x:0, duration:.45, ease:'power2.out', stagger:.05,
+     scrollTrigger:{trigger:'.pp-cards',start:'top 75%',once:true}}
+  );
+
+  /* ── Three.js figurine helper (r134-compatible) ── */
+  function mat(col, rough){ return new THREE.MeshStandardMaterial({color:col,roughness:rough||.88,metalness:.04}); }
+  function sphere(r,col,rough){ return new THREE.Mesh(new THREE.SphereGeometry(r,32,32), mat(col,rough)); }
+  function blob(sx,sy,sz,col){ const m=sphere(1,col); m.scale.set(sx,sy,sz); return m; }
+  function cyl(rt,rb,h,col){ return new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,20), mat(col)); }
+
+  /* ── Free figurine: "Bookie" — sky blue, reading a book ── */
+  function makeFree(){
+    const C1='#7dd3fc', C2='#38bdf8', DARK='#082f49';
+    const g = new THREE.Group();
+
+    const body = blob(.82,1.05,.72,C2);                          g.add(body);
+    const head = sphere(.64,C1);  head.position.y=1.58;          g.add(head);
+
+    const eyeL = sphere(.085,DARK); eyeL.position.set(-.2,1.65,.57); g.add(eyeL);
+    const eyeR = sphere(.085,DARK); eyeR.position.set( .2,1.65,.57); g.add(eyeR);
+
+    // Arms (blobs, slightly rotated)
+    const aL=blob(.22,.62,.22,C1); aL.position.set(-1,.18,0); aL.rotation.z= .42; g.add(aL);
+    const aR=blob(.22,.62,.22,C1); aR.position.set( 1,.18,0); aR.rotation.z=-.42; g.add(aR);
+
+    // Legs
+    const lL=blob(.25,.7,.25,C2); lL.position.set(-.32,-1.28,0); g.add(lL);
+    const lR=blob(.25,.7,.25,C2); lR.position.set( .32,-1.28,0); g.add(lR);
+
+    // Book cover
+    const book = new THREE.Mesh(new THREE.BoxGeometry(.52,.65,.07), mat('#e0f2fe',.6));
+    book.position.set(-.94,-.1,.44); book.rotation.set(0,.28,.08); g.add(book);
+    // Book pages (edge)
+    const pages = new THREE.Mesh(new THREE.BoxGeometry(.46,.58,.06), mat('#f0f9ff',.5));
+    pages.position.set(-.96,-.1,.5); pages.rotation.set(0,.28,.08); g.add(pages);
+
+    // Shadow blob on floor
+    const shadow=blob(1.1,.06,1.1,'#030609'); shadow.position.y=-2.1; shadow.material.transparent=true; shadow.material.opacity=.35; g.add(shadow);
+
+    return g;
+  }
+
+  /* ── Pro figurine: "Sparky" — emerald + gold crown, arm raised ── */
+  function makePro(){
+    const C1='#34d399', C2='#059669', GOLD='#fbbf24', DARK='#022c22';
+    const g = new THREE.Group();
+
+    const body = blob(.85,1.1,.75,C2);                           g.add(body);
+    const head = sphere(.65,C1);  head.position.y=1.62;          g.add(head);
+
+    // Eyes (gold stars shape — small octahedra)
+    const eyeL = new THREE.Mesh(new THREE.OctahedronGeometry(.1), mat(GOLD,.3));
+    eyeL.position.set(-.2,1.7,.57); eyeL.rotation.z=.785; g.add(eyeL);
+    const eyeR = eyeL.clone(); eyeR.position.set(.2,1.7,.57);    g.add(eyeR);
+
+    // Smile dots
+    const smL=sphere(.065,DARK); smL.position.set(-.16,1.5,.6);  g.add(smL);
+    const smR=sphere(.065,DARK); smR.position.set( .16,1.5,.6);  g.add(smR);
+
+    // Crown base (torus)
+    const crown = new THREE.Mesh(new THREE.TorusGeometry(.42,.1,12,40), mat(GOLD,.3));
+    crown.position.y=2.38; crown.rotation.x=Math.PI/2;           g.add(crown);
+    // Crown points (5 spheres)
+    for(let i=0;i<5;i++){
+      const a=(i/5)*Math.PI*2;
+      const pt=sphere(.115,GOLD,.25);
+      pt.position.set(Math.cos(a)*.37, 2.6, Math.sin(a)*.37);    g.add(pt);
+    }
+    // Crown center gem
+    const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.14), mat('#a5f3fc',.2));
+    gem.position.set(0,2.7,0);                                    g.add(gem);
+
+    // Arms — left raised triumphantly, right relaxed
+    const aL=blob(.22,.72,.22,C1); aL.position.set(-1,.7,0); aL.rotation.z= .9; g.add(aL);
+    const aR=blob(.22,.65,.22,C1); aR.position.set( 1,.12,0); aR.rotation.z=-.35; g.add(aR);
+
+    // Legs
+    const lL=blob(.26,.72,.26,C2); lL.position.set(-.33,-1.3,0); g.add(lL);
+    const lR=blob(.26,.72,.26,C2); lR.position.set( .33,-1.3,0); g.add(lR);
+
+    // Floating gold stars (octahedra)
+    const starMat = mat(GOLD,.25);
+    [[1.5,.6,0],[-1.5,.3,0],[1.1,-.5,.4],[-.9,1.1,.3]].forEach((pos,i)=>{
+      const s=new THREE.Mesh(new THREE.OctahedronGeometry(.11+i*.02),starMat);
+      s.position.set(pos[0],pos[1],pos[2]);
+      s.userData.fi=i*1.7;                                        g.add(s);
+    });
+
+    // Shadow
+    const shadow=blob(1.1,.06,1.1,'#030609'); shadow.position.y=-2.1; shadow.material.transparent=true; shadow.material.opacity=.35; g.add(shadow);
+
+    return g;
+  }
+
+  /* ── Scene initialiser ── */
+  function initFig(canvasId, makeFn, fillCol){
+    const canvas=document.getElementById(canvasId);
+    if(!canvas) return;
+    const w=canvas.offsetWidth||280, h=canvas.offsetHeight||210;
+
+    const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(w,h);
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+    const scene=new THREE.Scene();
+    const cam=new THREE.PerspectiveCamera(38,w/h,.1,50);
+    cam.position.set(0,.3,7.8);
+
+    // Lighting — key to the Spline clay look
+    scene.add(new THREE.AmbientLight(0xffffff,.95));
+    const key=new THREE.DirectionalLight(0xffffff,1.5);
+    key.position.set(4,7,5); key.castShadow=true; scene.add(key);
+    const fill=new THREE.DirectionalLight(fillCol||0x7dd3fc,.45);
+    fill.position.set(-5,0,4); scene.add(fill);
+    const rim=new THREE.DirectionalLight(0x34d399,.3);
+    rim.position.set(0,-5,-3); scene.add(rim);
+
+    const fig=makeFn();
+    scene.add(fig);
+
+    // Entry pop-in
+    fig.scale.set(0,0,0);
+    gsap.to(fig.scale,{x:1,y:1,z:1,duration:.7,ease:'back.out(1.6)',delay:.15});
+
+    const clock=new THREE.Clock();
+    (function tick(){
+      requestAnimationFrame(tick);
+      const t=clock.getElapsedTime();
+      fig.position.y=Math.sin(t*.75)*.14;
+      fig.rotation.y=Math.sin(t*.4)*.22;
+      // Animate floating stars on pro fig
+      fig.children.forEach(c=>{
+        if(c.userData.fi!==undefined){
+          c.rotation.x+=.025; c.rotation.z+=.018;
+          c.position.y+=Math.sin(t*1.3+c.userData.fi)*.004;
+        }
+      });
+      renderer.render(scene,cam);
+    })();
+
+    window.addEventListener('resize',()=>{
+      const nw=canvas.offsetWidth, nh=canvas.offsetHeight;
+      renderer.setSize(nw,nh); cam.aspect=nw/nh; cam.updateProjectionMatrix();
+    });
+  }
+
+  // Init both scenes when section enters viewport
+  ScrollTrigger.create({
+    trigger:'#pro-plans', start:'top 80%', once:true,
+    onEnter(){
+      initFig('fig-free', makeFree, 0x7dd3fc);
+      initFig('fig-pro',  makePro,  0x34d399);
+    }
+  });
+
+})();
 </script>
 <!-- Cursor trail dots -->
 <div class="ct" id="ct0"></div><div class="ct" id="ct1"></div><div class="ct" id="ct2"></div>
