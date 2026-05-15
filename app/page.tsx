@@ -90,12 +90,6 @@ export default function Home() {
   const [lang, setLang] = useState<LangCode>("en");
   const [greeting, setGreeting] = useState<{ text: string; emoji: string } | null>(null);
 
-  // Fallback client-side guard (middleware handles this server-side first)
-  useEffect(() => {
-    if (!isLoading && isGuest) {
-      window.location.replace("/landing/");
-    }
-  }, [isLoading, isGuest]);
   const [discoverTab, setDiscoverTab] = useState<string>("play");
   const [showDiscover, setShowDiscover] = useState(false);
 
@@ -128,8 +122,7 @@ export default function Home() {
 
   const filteredFeatures = ALL_FEATURES.filter((f) => f.cat === discoverTab);
 
-  // Show nothing while auth resolves (middleware already blocked guests server-side)
-  if (isLoading || isGuest) return null;
+  if (isLoading) return null;
 
   return (
     <PullToRefresh>
