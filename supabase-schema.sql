@@ -234,3 +234,104 @@ create policy "Anyone can create shared topics"
 
 create index idx_shared_topics_code on public.shared_topics(share_code);
 create index idx_shared_topics_user on public.shared_topics(sharer_user_id);
+
+-- Friends / follows table
+create table public.follows (
+  id uuid primary key default gen_random_uuid(),
+  follower_id uuid not null references public.profiles(id) on delete cascade,
+  following_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique(follower_id, following_id),
+  check (follower_id <> following_id)
+);
+
+alter table public.follows enable row level security;
+
+create policy "Follows are viewable by everyone"
+  on public.follows for select using (true);
+
+create policy "Users can manage own follows"
+  on public.follows for insert with check (auth.uid() = follower_id);
+
+create policy "Users can unfollow"
+  on public.follows for delete using (auth.uid() = follower_id);
+
+create index idx_follows_follower on public.follows(follower_id);
+create index idx_follows_following on public.follows(following_id);
+
+-- Study rooms
+create table public.study_rooms (
+  id uuid primary key default gen_random_uuid(),
+  code varchar(6) not null unique,
+  topic_name text not null,
+  topic_slug text not null,
+  host_id uuid references public.profiles(id),
+  host_name text not null,
+  max_participants int not null default 4,
+  status text not null default 'waiting', -- waiting, active, completed
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '2 hours')
+);
+
+create table public.study_room_participants (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references public.study_rooms(id) on delete cascade,
+  user_id uuid references public.profiles(id),
+  display_name text not null,
+  current_level int not null default 0,
+  joined_at timestamptz not null default now(),
+  unique(room_id, user_id)
+);
+
+alter table public.study_rooms enable row level security;
+alter table public.study_room_participants enable row level security;
+
+create policy "Rooms are viewable by everyone" on public.study_rooms for select using (true);
+create policy "Auth users can create rooms" on public.study_rooms for insert with check (auth.uid() = host_id);
+create policy "Host can update room" on public.study_rooms for update using (auth.uid() = host_id);
+
+create policy "Participants viewable by everyone" on public.study_room_participants for select using (true);
+create policy "Auth users can join rooms" on public.study_room_participants for insert with check (auth.uid() = user_id);
+create policy "Users can update own progress" on public.study_room_participants for update using (auth.uid() = user_id);
+
+create index idx_study_rooms_code on public.study_rooms(code);
+create index idx_study_room_participants_room on public.study_room_participants(room_id);
+
+-- Synced pacing: host can push all participants to a level
+alter table public.study_rooms add column if not exists host_level int not null default 0;
+
+-- Chat messages
+create table if not exists public.room_messages (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references public.study_rooms(id) on delete cascade,
+  user_id uuid references public.profiles(id),
+  display_name text not null,
+  content text not null check (char_length(content) <= 500),
+  created_at timestamptz not null default now()
+);
+alter table public.room_messages enable row level security;
+create policy "Messages viewable by everyone" on public.room_messages for select using (true);
+create policy "Auth users can send messages" on public.room_messages for insert with check (auth.uid() = user_id);
+create index idx_room_messages_room on public.room_messages(room_id, created_at);
+
+-- Emoji reactions per level
+create table if not exists public.room_reactions (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references public.study_rooms(id) on delete cascade,
+  user_id uuid not null references public.profiles(id),
+  level int not null,
+  emoji text not null,
+  created_at timestamptz not null default now(),
+  unique(room_id, user_id, level, emoji)
+);
+alter table public.room_reactions enable row level security;
+create policy "Reactions viewable by everyone" on public.room_reactions for select using (true);
+create policy "Auth users can react" on public.room_reactions for insert with check (auth.uid() = user_id);
+create policy "Users can remove own reactions" on public.room_reactions for delete using (auth.uid() = user_id);
+create index idx_room_reactions_room_level on public.room_reactions(room_id, level);
+
+-- Enable realtime on study room tables (run in Supabase dashboard > Database > Replication)
+-- alter publication supabase_realtime add table public.study_rooms;
+-- alter publication supabase_realtime add table public.study_room_participants;
+-- alter publication supabase_realtime add table public.room_messages;
+-- alter publication supabase_realtime add table public.room_reactions;
