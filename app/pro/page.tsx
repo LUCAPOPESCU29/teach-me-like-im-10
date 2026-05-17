@@ -4,6 +4,32 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { isPro, getProDaysRemaining } from "@/lib/limits";
+import SparkyCanvas from "@/components/SparkyCanvas";
+
+/* ── Character-split text component ── */
+function SplitChars({ text, className, style, delay = 0, color }: {
+  text: string; className?: string; style?: React.CSSProperties; delay?: number; color?: string;
+}) {
+  return (
+    <span className={className} style={style} aria-label={text}>
+      {text.split("").map((ch, i) => (
+        <motion.span
+          key={i}
+          style={{ display: "inline-block", whiteSpace: ch === " " ? "pre" : undefined }}
+          initial={{ opacity: 0, y: 28, rotateX: 90, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
+          transition={{
+            duration: 0.55,
+            delay: delay + i * 0.038,
+            ease: [0.32, 0.72, 0, 1],
+          }}
+        >
+          {ch === " " ? " " : ch}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
 
 // ── Floating orb background ──────────────────────────────────────────────────
 function FloatingOrbs() {
@@ -768,108 +794,108 @@ export default function ProPage() {
           // ── Marketing page ─────────────────────────────────────────────────
           <>
           {/* ── HERO ── */}
-          <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center overflow-hidden">
-            {/* Animation 1: background glow scales slowly as you scroll */}
+          <section ref={heroRef} className="relative min-h-screen flex items-center px-4 overflow-hidden">
+            {/* Background glow — scales on scroll */}
             <motion.div className="absolute inset-0 pointer-events-none" style={{ scale: bgScale }}>
-              <div style={{ background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(52,211,153,0.11) 0%, transparent 65%)", position: "absolute", inset: 0 }} />
+              <div style={{ background: "radial-gradient(ellipse 70% 55% at 55% 50%, rgba(52,211,153,0.1) 0%, transparent 65%)", position: "absolute", inset: 0 }} />
             </motion.div>
 
-            {/* Subtle rotating ring behind heading */}
-            <motion.div
-              className="absolute pointer-events-none rounded-full"
-              style={{ width: 520, height: 520, top: "50%", left: "50%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.06)" }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="absolute pointer-events-none rounded-full"
-              style={{ width: 760, height: 760, top: "50%", left: "50%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.03)" }}
-              animate={{ rotate: -360 }}
-              transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-            />
+            {/* Slow orbit rings */}
+            <motion.div className="absolute pointer-events-none rounded-full" style={{ width: 560, height: 560, top: "50%", left: "52%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.05)" }} animate={{ rotate: 360 }} transition={{ duration: 34, repeat: Infinity, ease: "linear" }} />
+            <motion.div className="absolute pointer-events-none rounded-full" style={{ width: 800, height: 800, top: "50%", left: "52%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.025)" }} animate={{ rotate: -360 }} transition={{ duration: 56, repeat: Infinity, ease: "linear" }} />
 
-            {/* Content — parallax only, never fades out */}
-            <motion.div style={{ y: heroY }} className="relative z-10 max-w-4xl mx-auto">
+            {/* Two-column layout */}
+            <motion.div style={{ y: heroY }} className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-0">
 
-              {/* Animation 2: badge drops in with spring */}
-              <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-                style={{ background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)" }}
-                initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.05 }}>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                </span>
-                <span className="text-emerald-400 text-xs font-sans font-medium tracking-wide">Now available — Pro Plan</span>
-              </motion.div>
+              {/* ── LEFT: text ── */}
+              <div className="flex-1 text-left max-w-xl lg:pr-8">
 
-              {/* Animation 3: headline words stagger in with blur */}
-              <motion.h1 className="font-display text-6xl sm:text-8xl lg:text-[104px] mb-6 leading-[0.9] tracking-tight">
-                <motion.span
-                  className="inline-block text-white"
-                  initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  transition={{ duration: 0.75, delay: 0.15, ease: [0.32, 0.72, 0, 1] }}
-                >
-                  Learn without
-                </motion.span>
-                <br />
-                <motion.span
-                  className="inline-block"
-                  style={{ background: "linear-gradient(135deg, #34d399 0%, #6ee7b7 40%, #a7f3d0 70%, #34d399 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
-                  initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  transition={{ duration: 0.75, delay: 0.32, ease: [0.32, 0.72, 0, 1] }}
-                >
-                  limits.
-                </motion.span>
-              </motion.h1>
+                {/* Badge */}
+                <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
+                  style={{ background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)" }}
+                  initial={{ opacity: 0, y: -16, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 280, damping: 22 }}>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                  </span>
+                  <span className="text-emerald-400 text-xs font-sans font-medium tracking-wide">Now available — Pro Plan</span>
+                </motion.div>
 
-              {/* Subhead */}
-              <motion.p className="max-w-xl mx-auto text-xl text-white/40 font-sans leading-relaxed mb-10"
-                initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}>
-                Everything you love about TMI10 — fully unlocked. Unlimited depth, audio, exports, study rooms, and tools that turn curiosity into mastery.
-              </motion.p>
+                {/* Headline — char-split with 3D rotateX + blur */}
+                <h1 className="font-display text-6xl sm:text-7xl lg:text-[80px] mb-5 leading-[0.92] tracking-tight" style={{ perspective: "600px" }}>
+                  <div className="block text-white overflow-hidden">
+                    <SplitChars text="Learn without" delay={0.1} />
+                  </div>
+                  <div className="block overflow-hidden">
+                    <SplitChars
+                      text="limits."
+                      delay={0.38}
+                      style={{ background: "linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+                    />
+                  </div>
+                </h1>
 
-              {/* Animation 4: stats each slide up with stagger */}
-              <motion.div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
-                {[["7 Pro features","unlocked"],["∞ topics","per day"],["$3.33","per month"],["0 data","ever deleted"]].map(([val, label], i) => (
-                  <motion.div key={val} className="text-center"
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.55, delay: 0.55 + i * 0.08, ease: [0.32, 0.72, 0, 1] }}>
-                    <p className="font-display text-xl text-white">{val}</p>
-                    <p className="text-white/25 font-sans text-xs">{label}</p>
-                  </motion.div>
-                ))}
-              </motion.div>
+                {/* Subhead — word-by-word */}
+                <motion.p className="text-lg text-white/35 font-sans leading-relaxed mb-8 max-w-md"
+                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.65, delay: 0.85, ease: [0.32, 0.72, 0, 1] }}>
+                  Everything you love about TMI10 — fully unlocked. Unlimited depth, audio, exports, study rooms, and tools that turn curiosity into mastery.
+                </motion.p>
 
-              {/* CTAs */}
-              <motion.div className="flex flex-col sm:flex-row gap-3 justify-center"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.85, ease: [0.32, 0.72, 0, 1] }}>
-                <motion.button onClick={() => router.push("/checkout?plan=annual")}
-                  className="group relative px-8 py-4 rounded-xl font-sans font-semibold text-sm overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #34d399, #10b981)" }}
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.18 }}>
-                  <span className="relative z-10 text-black">Get Pro — from $3.33/mo</span>
-                  <motion.div className="absolute inset-0 pointer-events-none"
-                    style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)" }}
-                    animate={{ x: ["-100%", "200%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "linear", repeatDelay: 2 }} />
-                </motion.button>
-                <motion.button onClick={() => router.push("/")}
-                  className="px-8 py-4 rounded-xl border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 font-sans text-sm transition-all"
-                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  Keep Free Plan
-                </motion.button>
+                {/* Stats strip */}
+                <motion.div className="flex flex-wrap gap-5 mb-9 text-sm">
+                  {[["7 Pro features","unlocked"],["∞ topics","per day"],["$3.33","per month"],["0 data","ever deleted"]].map(([val, label], i) => (
+                    <motion.div key={val} className="text-left"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.9 + i * 0.07, ease: [0.32, 0.72, 0, 1] }}>
+                      <p className="font-display text-lg text-white">{val}</p>
+                      <p className="text-white/22 font-sans text-[11px]">{label}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* CTAs */}
+                <motion.div className="flex flex-col sm:flex-row gap-3"
+                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.1, ease: [0.32, 0.72, 0, 1] }}>
+                  <motion.button onClick={() => router.push("/checkout?plan=annual")}
+                    className="group relative px-8 py-4 rounded-xl font-sans font-semibold text-sm overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #34d399, #10b981)" }}
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.16 }}>
+                    <span className="relative z-10 text-black">Get Pro — from $3.33/mo</span>
+                    <motion.div className="absolute inset-0 pointer-events-none"
+                      style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)" }}
+                      animate={{ x: ["-100%", "200%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "linear", repeatDelay: 2 }} />
+                  </motion.button>
+                  <motion.button onClick={() => router.push("/")}
+                    className="px-8 py-4 rounded-xl border border-white/10 text-white/45 hover:text-white/75 hover:border-white/20 font-sans text-sm transition-all"
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    Keep Free Plan
+                  </motion.button>
+                </motion.div>
+              </div>
+
+              {/* ── RIGHT: Sparky 3D figurine ── */}
+              <motion.div
+                className="relative flex-shrink-0 w-[300px] h-[380px] sm:w-[340px] sm:h-[420px] lg:w-[380px] lg:h-[480px]"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.9, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              >
+                {/* Glow behind figurine */}
+                <div className="absolute inset-0 pointer-events-none rounded-full"
+                  style={{ background: "radial-gradient(ellipse 70% 60% at 50% 55%, rgba(52,211,153,0.18) 0%, transparent 70%)" }} />
+                <SparkyCanvas className="w-full h-full" />
               </motion.div>
             </motion.div>
 
             {/* Scroll cue */}
-            <motion.div className="absolute bottom-10 left-1/2 -translate-x-1/2" animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-              <div className="w-5 h-8 rounded-full border border-white/15 flex items-start justify-center pt-1.5">
-                <div className="w-1 h-2 rounded-full bg-white/30" />
+            <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2" animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+              <div className="w-5 h-8 rounded-full border border-white/12 flex items-start justify-center pt-1.5">
+                <div className="w-1 h-2 rounded-full bg-white/25" />
               </div>
             </motion.div>
           </section>
