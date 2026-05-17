@@ -3,6 +3,7 @@ import AuthProvider from "@/components/AuthProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { PostHogPageView } from "@/components/PostHogPageView";
 import PageTransition from "@/components/PageTransition";
+import LayoutTransition from "@/components/LayoutTransition";
 import BottomNav from "@/components/BottomNav";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -82,7 +83,7 @@ export default function RootLayout({
                         <SeasonalTheme>
                           <Navbar />
                           <ScrollProgress />
-                          <PageTransition>{children}</PageTransition>
+                          <LayoutTransition>{children}</LayoutTransition>
                           <Footer />
                           <ScrollToTop />
                           <BottomNav />

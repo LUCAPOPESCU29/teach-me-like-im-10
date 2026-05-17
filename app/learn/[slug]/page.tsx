@@ -364,6 +364,82 @@ export default function LearnPage() {
       />
 
       <main className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 lg:ml-52">
+
+        {/* ── Sticky depth-level strip ── */}
+        <AnimatePresence>
+          {currentLevel >= 1 && (
+            <motion.div
+              className="sticky top-[56px] z-20 mb-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5"
+              style={{
+                background: "rgba(5,10,16,0.82)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderBottom: "1px solid rgba(255,255,255,0.04)",
+              }}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            >
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                {[1, 2, 3, 4, 5].map((lvl) => {
+                  const COLORS = ["#4ade80", "#facc15", "#fb923c", "#f472b6", "#a78bfa"];
+                  const NAMES  = ["Kid", "Teen", "Adult", "Expert", "PhD"];
+                  const done   = levels.find((l) => l.level === lvl && l.complete);
+                  const active = streamingLevel === lvl;
+                  const loaded = lvl <= currentLevel;
+                  return (
+                    <button
+                      key={lvl}
+                      onClick={() =>
+                        document
+                          .getElementById(`level-${lvl}`)
+                          ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                      }
+                      disabled={!loaded}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all duration-200 disabled:pointer-events-none"
+                      style={{
+                        background: done
+                          ? "rgba(255,255,255,0.07)"
+                          : active
+                          ? "rgba(255,255,255,0.04)"
+                          : "transparent",
+                        color: loaded
+                          ? done
+                            ? "rgba(255,255,255,0.75)"
+                            : "rgba(255,255,255,0.35)"
+                          : "rgba(255,255,255,0.15)",
+                        border: done
+                          ? "1px solid rgba(255,255,255,0.08)"
+                          : "1px solid transparent",
+                      }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{
+                          backgroundColor: loaded ? COLORS[lvl - 1] : "rgba(255,255,255,0.08)",
+                          opacity: active ? 1 : done ? 0.9 : 0.5,
+                        }}
+                      />
+                      {NAMES[lvl - 1]}
+                      {active && (
+                        <motion.span
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                          className="text-[10px]"
+                        >
+                          ···
+                        </motion.span>
+                      )}
+                      {done && <span className="text-white/25 text-[10px]">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <motion.div
           className="mb-10"
@@ -413,17 +489,28 @@ export default function LearnPage() {
         {/* Level cards */}
         <div className="space-y-6">
           {levels.map((level) => (
-            <LevelCard
+            <motion.div
               key={level.level}
-              level={level.level}
-              content={level.content}
-              isStreaming={streamingLevel === level.level}
-              isLoading={
-                streamingLevel === level.level && level.content.length === 0
-              }
-              topic={topic}
-              lang={lang}
-            />
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{
+                duration: 0.5,
+                ease: [0.32, 0.72, 0, 1],
+                delay: level.level === 1 ? 0 : 0.05,
+              }}
+            >
+              <LevelCard
+                level={level.level}
+                content={level.content}
+                isStreaming={streamingLevel === level.level}
+                isLoading={
+                  streamingLevel === level.level && level.content.length === 0
+                }
+                topic={topic}
+                lang={lang}
+              />
+            </motion.div>
           ))}
         </div>
 

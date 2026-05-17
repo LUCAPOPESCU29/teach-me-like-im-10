@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import type { TopicHistoryItem } from "@/lib/data";
+import PageTransition from "@/components/PageTransition";
 
 type Tab = "bookmarks" | "history";
 
@@ -51,6 +52,7 @@ export default function LibraryPage() {
   const levelColors = ["#4ade80", "#facc15", "#fb923c", "#f472b6", "#a78bfa"];
 
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24">
       <motion.div
         className="mb-8"
@@ -97,25 +99,132 @@ export default function LibraryPage() {
       </div>
 
       {loading ? (
-        <div className="text-white/30 font-mono text-sm animate-pulse">Loading...</div>
+        <div className="flex items-center gap-2 text-white/20 font-mono text-sm py-8">
+          <motion.span
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ···
+          </motion.span>
+        </div>
       ) : isEmpty ? (
         <motion.div
-          className="text-center py-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="flex flex-col items-center py-20 text-center"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         >
-          <p className="text-4xl mb-4">{tab === "bookmarks" ? "💛" : "📖"}</p>
-          <p className="text-white/30 font-sans text-sm">
-            {tab === "bookmarks"
-              ? "No bookmarks yet. Click the heart on a topic to save it here."
-              : "No topics explored yet. Start learning something new!"}
+          {tab === "bookmarks" ? (
+            /* Bookmarks empty state — floating bookmark icon */
+            <div className="relative mb-8 w-28 h-28">
+              {/* Glow */}
+              <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 70%)" }} />
+              {/* Orbiting dots */}
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: ["#fbbf24","#34d399","#a78bfa"][i],
+                    transformOrigin: "0 0",
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 4 + i * 1.5,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: i * 0.8,
+                  }}
+                  initial={false}
+                >
+                  <div
+                    className="absolute"
+                    style={{
+                      top: -3,
+                      left: -(40 + i * 12),
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      backgroundColor: ["#fbbf24","#34d399","#a78bfa"][i],
+                      opacity: 0.7,
+                    }}
+                  />
+                </motion.div>
+              ))}
+              {/* Centre icon */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+              </motion.div>
+            </div>
+          ) : (
+            /* History empty state — open book / sparkle */
+            <div className="relative mb-8 w-28 h-28">
+              <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, rgba(52,211,153,0.16) 0%, transparent 70%)" }} />
+              {/* Sparkle dots */}
+              {[
+                { x: -32, y: -20, size: 6, color: "#34d399", delay: 0 },
+                { x: 32, y: -24, size: 4, color: "#6ee7b7", delay: 0.6 },
+                { x: 36, y: 20, size: 5, color: "#a7f3d0", delay: 1.2 },
+                { x: -36, y: 22, size: 4, color: "#34d399", delay: 1.8 },
+              ].map((dot, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute top-1/2 left-1/2 rounded-full"
+                  style={{
+                    width: dot.size,
+                    height: dot.size,
+                    backgroundColor: dot.color,
+                    marginLeft: dot.x - dot.size / 2,
+                    marginTop: dot.y - dot.size / 2,
+                  }}
+                  animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: dot.delay,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              </motion.div>
+            </div>
+          )}
+
+          <p className="text-white/60 font-sans text-base font-medium mb-2">
+            {tab === "bookmarks" ? "Nothing saved yet" : "No learning history yet"}
           </p>
-          <button
+          <p className="text-white/25 font-sans text-sm max-w-[260px] leading-relaxed mb-8">
+            {tab === "bookmarks"
+              ? "Tap the bookmark icon on any topic to save it here for later."
+              : "Start exploring topics and your history will show up here."}
+          </p>
+          <motion.button
             onClick={() => router.push("/")}
-            className="mt-4 px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white/50 text-sm font-sans hover:bg-white/10 transition-colors"
+            className="px-6 py-2.5 rounded-xl font-sans text-sm font-medium text-white/70 hover:text-white transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+            whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)" }}
+            whileTap={{ scale: 0.98 }}
           >
-            Explore topics
-          </button>
+            Explore topics →
+          </motion.button>
         </motion.div>
       ) : tab === "bookmarks" ? (
         <div className="space-y-2">
@@ -194,5 +303,6 @@ export default function LibraryPage() {
         </div>
       )}
     </main>
+  </PageTransition>
   );
 }
