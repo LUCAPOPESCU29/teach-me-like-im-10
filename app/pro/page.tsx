@@ -615,8 +615,9 @@ export default function ProPage() {
   const [annual, setAnnual] = useState(true);
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Subtle parallax only — no fade-out
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
   const proPrice = annual ? 40 : 60;
   const proMonthly = annual ? "3.33" : "5";
@@ -768,14 +769,34 @@ export default function ProPage() {
           <>
           {/* ── HERO ── */}
           <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(52,211,153,0.1) 0%, transparent 65%)" }} />
+            {/* Animation 1: background glow scales slowly as you scroll */}
+            <motion.div className="absolute inset-0 pointer-events-none" style={{ scale: bgScale }}>
+              <div style={{ background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(52,211,153,0.11) 0%, transparent 65%)", position: "absolute", inset: 0 }} />
+            </motion.div>
 
-            <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 max-w-4xl mx-auto">
-              {/* Live badge */}
+            {/* Subtle rotating ring behind heading */}
+            <motion.div
+              className="absolute pointer-events-none rounded-full"
+              style={{ width: 520, height: 520, top: "50%", left: "50%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.06)" }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute pointer-events-none rounded-full"
+              style={{ width: 760, height: 760, top: "50%", left: "50%", x: "-50%", y: "-50%", border: "1px solid rgba(52,211,153,0.03)" }}
+              animate={{ rotate: -360 }}
+              transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+            />
+
+            {/* Content — parallax only, never fades out */}
+            <motion.div style={{ y: heroY }} className="relative z-10 max-w-4xl mx-auto">
+
+              {/* Animation 2: badge drops in with spring */}
               <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
                 style={{ background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)" }}
-                initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.05 }}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -783,48 +804,65 @@ export default function ProPage() {
                 <span className="text-emerald-400 text-xs font-sans font-medium tracking-wide">Now available — Pro Plan</span>
               </motion.div>
 
-              {/* Headline */}
-              <motion.h1 className="font-display text-6xl sm:text-8xl lg:text-[104px] mb-6 leading-[0.9] tracking-tight"
-                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}>
-                <span className="text-white">Learn without</span>
+              {/* Animation 3: headline words stagger in with blur */}
+              <motion.h1 className="font-display text-6xl sm:text-8xl lg:text-[104px] mb-6 leading-[0.9] tracking-tight">
+                <motion.span
+                  className="inline-block text-white"
+                  initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.75, delay: 0.15, ease: [0.32, 0.72, 0, 1] }}
+                >
+                  Learn without
+                </motion.span>
                 <br />
-                <span style={{ background: "linear-gradient(135deg, #34d399 0%, #6ee7b7 40%, #a7f3d0 70%, #34d399 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                <motion.span
+                  className="inline-block"
+                  style={{ background: "linear-gradient(135deg, #34d399 0%, #6ee7b7 40%, #a7f3d0 70%, #34d399 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+                  initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.75, delay: 0.32, ease: [0.32, 0.72, 0, 1] }}
+                >
                   limits.
-                </span>
+                </motion.span>
               </motion.h1>
 
               {/* Subhead */}
               <motion.p className="max-w-xl mx-auto text-xl text-white/40 font-sans leading-relaxed mb-10"
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.25 }}>
+                initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}>
                 Everything you love about TMI10 — fully unlocked. Unlimited depth, audio, exports, study rooms, and tools that turn curiosity into mastery.
               </motion.p>
 
-              {/* Stats strip */}
-              <motion.div className="flex flex-wrap justify-center gap-6 mb-10 text-sm"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-                {[["7 Pro features","unlocked"],["∞ topics","per day"],["$3.33","per month"],["0 data","ever deleted"]].map(([val, label]) => (
-                  <div key={val} className="text-center">
+              {/* Animation 4: stats each slide up with stagger */}
+              <motion.div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
+                {[["7 Pro features","unlocked"],["∞ topics","per day"],["$3.33","per month"],["0 data","ever deleted"]].map(([val, label], i) => (
+                  <motion.div key={val} className="text-center"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.55, delay: 0.55 + i * 0.08, ease: [0.32, 0.72, 0, 1] }}>
                     <p className="font-display text-xl text-white">{val}</p>
                     <p className="text-white/25 font-sans text-xs">{label}</p>
-                  </div>
+                  </motion.div>
                 ))}
               </motion.div>
 
               {/* CTAs */}
               <motion.div className="flex flex-col sm:flex-row gap-3 justify-center"
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}>
-                <button onClick={() => router.push("/checkout?plan=annual")}
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.85, ease: [0.32, 0.72, 0, 1] }}>
+                <motion.button onClick={() => router.push("/checkout?plan=annual")}
                   className="group relative px-8 py-4 rounded-xl font-sans font-semibold text-sm overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #34d399, #10b981)" }}>
+                  style={{ background: "linear-gradient(135deg, #34d399, #10b981)" }}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.18 }}>
                   <span className="relative z-10 text-black">Get Pro — from $3.33/mo</span>
                   <motion.div className="absolute inset-0 pointer-events-none"
                     style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)" }}
                     animate={{ x: ["-100%", "200%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "linear", repeatDelay: 2 }} />
-                </button>
-                <button onClick={() => router.push("/")}
-                  className="px-8 py-4 rounded-xl border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 font-sans text-sm transition-all">
+                </motion.button>
+                <motion.button onClick={() => router.push("/")}
+                  className="px-8 py-4 rounded-xl border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 font-sans text-sm transition-all"
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   Keep Free Plan
-                </button>
+                </motion.button>
               </motion.div>
             </motion.div>
 
