@@ -42,6 +42,30 @@ const TEXT_SIZES = [
   { id: "xl", label: "A++", scale: 1.25 },
 ];
 
+/* ─── Pro: AI explanation styles ─── */
+const AI_STYLES = [
+  { id: "default",   label: "Default",   desc: "Clear and balanced",               emoji: "✦" },
+  { id: "socratic",  label: "Socratic",  desc: "Questions back at you",            emoji: "❓" },
+  { id: "narrative", label: "Narrative", desc: "Story-driven explanations",        emoji: "📖" },
+  { id: "technical", label: "Technical", desc: "Dense and precise, no fluff",      emoji: "⚙️" },
+  { id: "casual",    label: "Casual",    desc: "Like a friend explaining it",      emoji: "💬" },
+];
+
+/* ─── Pro: Explanation lengths ─── */
+const EXPLAIN_LENGTHS = [
+  { id: "short",  label: "Short",  desc: "2–3 paragraphs" },
+  { id: "normal", label: "Normal", desc: "Balanced depth" },
+  { id: "deep",   label: "Deep",   desc: "Exhaustive + examples" },
+];
+
+/* ─── Pro: Spaced repetition intervals ─── */
+const SPACED_REP_OPTIONS = [
+  { id: "0",  label: "Off"    },
+  { id: "3",  label: "3 days" },
+  { id: "7",  label: "7 days" },
+  { id: "14", label: "14 days"},
+];
+
 /* ─── Toggle component ─── */
 function Toggle({ enabled, onToggle, label, desc }: { enabled: boolean; onToggle: () => void; label: string; desc?: string }) {
   return (
@@ -142,6 +166,18 @@ export default function SettingsPage() {
   const [confirmCancelPro, setConfirmCancelPro] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // ── Free learning settings ──
+  const [defaultStartLevel, setDefaultStartLevel] = useState(1);
+  const [focusMode, setFocusMode] = useState(false);
+  const [dailyTopicGoal, setDailyTopicGoal] = useState(3);
+
+  // ── Pro settings ──
+  const [aiStyle, setAiStyle] = useState("default");
+  const [explainLength, setExplainLength] = useState("normal");
+  const [customContext, setCustomContext] = useState("");
+  const [spacedRep, setSpacedRep] = useState("0");
+  const [masteryThreshold, setMasteryThreshold] = useState(false);
+
   // Pro subscription state
   const [proStatus, setProStatus] = useState<{ active: boolean; daysRemaining: number; expiryDate: string | null }>({
     active: false, daysRemaining: 0, expiryDate: null,
@@ -183,6 +219,16 @@ export default function SettingsPage() {
     setTextSize(localStorage.getItem("tmi10_text_size") || "md");
     const savedLang = data.getLang() as LangCode;
     if (savedLang) setLang(savedLang);
+    // Free learning settings
+    setDefaultStartLevel(parseInt(localStorage.getItem("tmi10_default_level") || "1", 10));
+    setFocusMode(localStorage.getItem("tmi10_focus_mode") === "true");
+    setDailyTopicGoal(parseInt(localStorage.getItem("tmi10_daily_goal") || "3", 10));
+    // Pro settings
+    setAiStyle(localStorage.getItem("tmi10_pro_ai_style") || "default");
+    setExplainLength(localStorage.getItem("tmi10_pro_explain_length") || "normal");
+    setCustomContext(localStorage.getItem("tmi10_pro_context") || "");
+    setSpacedRep(localStorage.getItem("tmi10_pro_spaced_rep") || "0");
+    setMasteryThreshold(localStorage.getItem("tmi10_pro_mastery") === "true");
   }, [data]);
 
   // ── Apply font ──
@@ -214,10 +260,66 @@ export default function SettingsPage() {
     }
   }, [animationsEnabled]);
 
+  // ── Apply focus mode ──
+  useEffect(() => {
+    if (focusMode) {
+      document.documentElement.classList.add("focus-mode");
+      localStorage.setItem("tmi10_focus_mode", "true");
+    } else {
+      document.documentElement.classList.remove("focus-mode");
+      localStorage.removeItem("tmi10_focus_mode");
+    }
+  }, [focusMode]);
+
   const showSavedToast = useCallback(() => {
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   }, []);
+
+  // ── Free learning setting handlers ──
+  function handleDefaultLevel(lvl: number) {
+    setDefaultStartLevel(lvl);
+    localStorage.setItem("tmi10_default_level", String(lvl));
+    showSavedToast();
+  }
+
+  function handleDailyGoal(n: number) {
+    setDailyTopicGoal(n);
+    localStorage.setItem("tmi10_daily_goal", String(n));
+    showSavedToast();
+  }
+
+  // ── Pro setting handlers ──
+  function handleAiStyle(id: string) {
+    setAiStyle(id);
+    localStorage.setItem("tmi10_pro_ai_style", id);
+    showSavedToast();
+  }
+
+  function handleExplainLength(id: string) {
+    setExplainLength(id);
+    localStorage.setItem("tmi10_pro_explain_length", id);
+    showSavedToast();
+  }
+
+  function handleCustomContext(val: string) {
+    setCustomContext(val);
+    localStorage.setItem("tmi10_pro_context", val);
+  }
+
+  function handleSpacedRep(id: string) {
+    setSpacedRep(id);
+    localStorage.setItem("tmi10_pro_spaced_rep", id);
+    showSavedToast();
+  }
+
+  function toggleMastery() {
+    const next = !masteryThreshold;
+    setMasteryThreshold(next);
+    if (next) localStorage.setItem("tmi10_pro_mastery", "true");
+    else localStorage.removeItem("tmi10_pro_mastery");
+    showSavedToast();
+  }
 
   // ── Toggle handlers ──
   function toggleGhost() {
@@ -667,6 +769,69 @@ export default function SettingsPage() {
           <Toggle enabled={autoplayExplanations} onToggle={toggleAutoplay} label="Auto-scroll Explanations" desc="Automatically scroll as AI generates text" />
           <Toggle enabled={comboIndicator} onToggle={toggleCombo} label="Combo Indicator" desc="Show XP multiplier when learning multiple topics" />
           <Toggle enabled={seasonalEffects} onToggle={toggleSeasonal} label="Seasonal Events" desc="Holiday themes and special XP events" />
+
+          {/* Focus mode */}
+          <Toggle
+            enabled={focusMode}
+            onToggle={() => { setFocusMode((p) => !p); showSavedToast(); }}
+            label="Focus Mode"
+            desc="Hides the navbar and bottom nav while learning"
+          />
+
+          {/* Default start level */}
+          <div className="py-3">
+            <div className="flex items-center justify-between mb-2.5">
+              <div>
+                <span className="text-white/80 text-sm font-sans">Default Start Level</span>
+                <p className="text-white/25 text-xs font-sans mt-0.5">Skip to this depth when opening any topic</p>
+              </div>
+            </div>
+            <div className="flex gap-1.5">
+              {[1, 2, 3, 4, 5].map((lvl) => {
+                const COLORS = ["#4ade80", "#facc15", "#fb923c", "#f472b6", "#a78bfa"];
+                const active = defaultStartLevel === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    onClick={() => handleDefaultLevel(lvl)}
+                    className="flex-1 py-2 rounded-xl text-xs font-sans font-medium transition-all duration-200"
+                    style={{
+                      background: active ? `${COLORS[lvl - 1]}20` : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${active ? COLORS[lvl - 1] + "60" : "rgba(255,255,255,0.06)"}`,
+                      color: active ? COLORS[lvl - 1] : "rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    L{lvl}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Daily topic goal */}
+          <div className="py-3">
+            <div className="mb-2.5">
+              <span className="text-white/80 text-sm font-sans">Daily Topic Goal</span>
+              <p className="text-white/25 text-xs font-sans mt-0.5">How many topics count as a good day</p>
+            </div>
+            <div className="flex gap-1.5">
+              {[1, 3, 5, 10].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => handleDailyGoal(n)}
+                  className="flex-1 py-2 rounded-xl text-xs font-sans font-medium transition-all duration-200"
+                  style={{
+                    background: dailyTopicGoal === n ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${dailyTopicGoal === n ? "rgba(52,211,153,0.4)" : "rgba(255,255,255,0.06)"}`,
+                    color: dailyTopicGoal === n ? "#34d399" : "rgba(255,255,255,0.35)",
+                  }}
+                >
+                  {n}/day
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="py-3">
             <button
               onClick={() => router.push("/progress")}
@@ -682,6 +847,155 @@ export default function SettingsPage() {
             </button>
           </div>
         </Section>
+
+        {/* ── Pro Features ── */}
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Section header */}
+          <h3 className="flex items-center gap-2 text-[10px] font-sans font-medium tracking-widest uppercase mb-2 px-1"
+            style={{ color: "#34d399" }}
+          >
+            <span>✦</span> Pro Features
+          </h3>
+
+          <div className="rounded-2xl overflow-hidden relative"
+            style={{ border: "1px solid rgba(52,211,153,0.12)", background: "rgba(52,211,153,0.02)" }}
+          >
+            {/* Lock overlay for free users */}
+            {!proStatus.active && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl"
+                style={{ background: "rgba(5,10,16,0.82)", backdropFilter: "blur(8px)" }}
+              >
+                <div className="text-2xl mb-3">🔒</div>
+                <p className="text-white/60 text-sm font-sans font-medium mb-1">Pro only</p>
+                <p className="text-white/25 text-xs font-sans mb-4">Upgrade to unlock AI customisation</p>
+                <button
+                  onClick={() => router.push("/pro")}
+                  className="px-5 py-2 rounded-xl text-xs font-sans font-semibold text-black transition-all"
+                  style={{ background: "linear-gradient(135deg,#34d399,#10b981)" }}
+                >
+                  ✦ Upgrade to Pro
+                </button>
+              </div>
+            )}
+
+            <div className="px-4 divide-y divide-white/[0.04]" style={{ opacity: proStatus.active ? 1 : 0.3 }}>
+
+              {/* Explanation style */}
+              <div className="py-4">
+                <span className="text-white/80 text-sm font-sans block mb-1">Explanation Style</span>
+                <p className="text-white/25 text-xs font-sans mb-3">How Claude writes every explanation</p>
+                <div className="flex flex-col gap-2">
+                  {AI_STYLES.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => proStatus.active && handleAiStyle(s.id)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans text-left transition-all duration-200"
+                      style={{
+                        background: aiStyle === s.id ? "rgba(52,211,153,0.1)" : "rgba(255,255,255,0.02)",
+                        border: `1px solid ${aiStyle === s.id ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.05)"}`,
+                      }}
+                    >
+                      <span className="text-base w-6 text-center">{s.emoji}</span>
+                      <div className="flex-1">
+                        <span className={`text-sm font-sans font-medium ${aiStyle === s.id ? "text-white" : "text-white/50"}`}>{s.label}</span>
+                        <p className="text-white/25 text-xs font-sans">{s.desc}</p>
+                      </div>
+                      {aiStyle === s.id && (
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#34d399" }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Explanation length */}
+              <div className="py-4">
+                <span className="text-white/80 text-sm font-sans block mb-1">Explanation Length</span>
+                <p className="text-white/25 text-xs font-sans mb-3">How much detail each level contains</p>
+                <div className="flex gap-2">
+                  {EXPLAIN_LENGTHS.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => proStatus.active && handleExplainLength(l.id)}
+                      className="flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200"
+                      style={{
+                        background: explainLength === l.id ? "rgba(52,211,153,0.1)" : "rgba(255,255,255,0.02)",
+                        border: `1px solid ${explainLength === l.id ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.05)"}`,
+                      }}
+                    >
+                      <p className={`text-sm font-sans font-medium ${explainLength === l.id ? "text-white" : "text-white/50"}`}>{l.label}</p>
+                      <p className="text-white/25 text-[10px] font-sans mt-0.5">{l.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom context */}
+              <div className="py-4">
+                <span className="text-white/80 text-sm font-sans block mb-1">Personal Context</span>
+                <p className="text-white/25 text-xs font-sans mb-3">
+                  Added to every explanation — "I'm a nurse", "use football analogies", etc.
+                </p>
+                <textarea
+                  value={customContext}
+                  onChange={(e) => proStatus.active && handleCustomContext(e.target.value)}
+                  onBlur={showSavedToast}
+                  placeholder="e.g. I'm a software engineer, assume technical knowledge..."
+                  maxLength={300}
+                  rows={3}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm font-sans text-white/70 placeholder:text-white/15 resize-none focus:outline-none transition-colors"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}
+                  onFocus={(e) => { e.target.style.borderColor = "rgba(52,211,153,0.3)"; }}
+                  onBlurCapture={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.07)"; }}
+                />
+                <p className="text-white/15 text-[10px] font-sans mt-1 text-right">{customContext.length}/300</p>
+              </div>
+
+              {/* Spaced repetition */}
+              <div className="py-4">
+                <span className="text-white/80 text-sm font-sans block mb-1">Spaced Repetition</span>
+                <p className="text-white/25 text-xs font-sans mb-3">
+                  Surface topics you haven&apos;t revisited at the top of home
+                </p>
+                <div className="flex gap-2">
+                  {SPACED_REP_OPTIONS.map((o) => (
+                    <button
+                      key={o.id}
+                      onClick={() => proStatus.active && handleSpacedRep(o.id)}
+                      className="flex-1 py-2 rounded-xl text-xs font-sans font-medium transition-all duration-200"
+                      style={{
+                        background: spacedRep === o.id ? "rgba(52,211,153,0.1)" : "rgba(255,255,255,0.02)",
+                        border: `1px solid ${spacedRep === o.id ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.05)"}`,
+                        color: spacedRep === o.id ? "#34d399" : "rgba(255,255,255,0.35)",
+                      }}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mastery threshold */}
+              <div className="py-1">
+                <Toggle
+                  enabled={masteryThreshold}
+                  onToggle={() => proStatus.active && toggleMastery()}
+                  label="Mastery Threshold"
+                  desc="Only mark a topic mastered after scoring ≥ 80% on the quiz"
+                />
+              </div>
+
+            </div>
+          </div>
+        </motion.div>
 
         {/* ── Notifications ── */}
         <Section title="Notifications" icon="🔔">

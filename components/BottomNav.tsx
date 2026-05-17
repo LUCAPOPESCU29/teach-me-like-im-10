@@ -3,12 +3,13 @@
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCelebration } from "@/components/CelebrationProvider";
+import { NewDot } from "@/components/NewBadge";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", emoji: "\u{1F3E0}" },
-  { href: "/math", label: "Math", emoji: "\u{1F9EE}" },
-  { href: "/battle", label: "Battle", emoji: "\u2694\uFE0F" },
-  { href: "/code", label: "Code", emoji: "\u{1F4BB}" },
+  { href: "/explore", label: "Explore", emoji: "\u{1F9ED}" },
+  { href: "/playground", label: "Play", emoji: "\u{1F9EA}" },
+  { href: "/friends", label: "Friends", emoji: "\u{1F44B}" },
   { href: "/progress", label: "Progress", emoji: "\u{1FA90}" },
 ] as const;
 
@@ -23,11 +24,11 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[999] sm:hidden" data-bottomnav style={{ position: "fixed" }}>
       {/* Gradient fade above bar */}
-      <div className="h-6 bg-gradient-to-t from-[#070b14] to-transparent pointer-events-none" />
+      <div className="h-8 bg-gradient-to-t from-[#050910] to-transparent pointer-events-none" />
 
-      <div className="bg-[#070b14]/80 backdrop-blur-xl border-t border-white/[0.06] px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="bg-[#050910] border-t border-white/[0.08] px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-around h-14">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);
@@ -37,6 +38,7 @@ export default function BottomNav() {
                 onClick={() => { playSound("pop"); router.push(item.href); }}
                 className="relative flex flex-col items-center justify-center w-16 h-full gap-0.5 transition-colors"
               >
+                <NewDot path={item.href} size="sm" />
                 {active && (
                   <motion.div
                     className="absolute -top-px left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-emerald-400"

@@ -23,6 +23,14 @@
   scroll-behavior: auto !important;
 }
 
+/* Focus mode — hide nav chrome while learning */
+.focus-mode nav,
+.focus-mode [data-bottomnav] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease;
+}
+
 .text-accent {
   color: var(--accent);
 }
