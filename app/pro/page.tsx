@@ -7,24 +7,31 @@ import { isPro, getProDaysRemaining } from "@/lib/limits";
 import SparkyCanvas from "@/components/SparkyCanvas";
 
 /* ── Character-split text component ── */
-function SplitChars({ text, className, style, delay = 0, color }: {
-  text: string; className?: string; style?: React.CSSProperties; delay?: number; color?: string;
+function SplitChars({ text, className, delay = 0, gradient }: {
+  text: string; className?: string; delay?: number; gradient?: boolean;
 }) {
+  const gradStyle: React.CSSProperties = gradient ? {
+    background: "linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+  } : {};
+
   return (
-    <span className={className} style={style} aria-label={text}>
+    <span className={className} aria-label={text}>
       {text.split("").map((ch, i) => (
         <motion.span
           key={i}
-          style={{ display: "inline-block", whiteSpace: ch === " " ? "pre" : undefined }}
+          style={{
+            display: "inline-block",
+            whiteSpace: ch === " " ? "pre" : undefined,
+            ...gradStyle,
+          }}
           initial={{ opacity: 0, y: 28, rotateX: 90, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
-          transition={{
-            duration: 0.55,
-            delay: delay + i * 0.038,
-            ease: [0.32, 0.72, 0, 1],
-          }}
+          transition={{ duration: 0.55, delay: delay + i * 0.038, ease: [0.32, 0.72, 0, 1] }}
         >
-          {ch === " " ? " " : ch}
+          {ch === " " ? " " : ch}
         </motion.span>
       ))}
     </span>
@@ -829,11 +836,7 @@ export default function ProPage() {
                     <SplitChars text="Learn without" delay={0.1} />
                   </div>
                   <div className="block overflow-hidden">
-                    <SplitChars
-                      text="limits."
-                      delay={0.38}
-                      style={{ background: "linear-gradient(135deg,#34d399 0%,#6ee7b7 45%,#a7f3d0 75%,#34d399 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
-                    />
+                    <SplitChars text="limits." delay={0.38} gradient />
                   </div>
                 </h1>
 
