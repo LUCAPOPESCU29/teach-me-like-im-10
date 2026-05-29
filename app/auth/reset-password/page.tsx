@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import PageTransition from "@/components/PageTransition";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -184,6 +185,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
+    <PageTransition>
     <main className="min-h-screen flex items-center justify-center px-4">
       <Suspense
         fallback={
@@ -195,5 +197,6 @@ export default function ResetPasswordPage() {
         <ResetPasswordForm />
       </Suspense>
     </main>
+  </PageTransition>
   );
 }

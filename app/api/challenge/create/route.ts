@@ -15,8 +15,30 @@ export async function POST(request: Request) {
   try {
     const { topic, slug, questions, lang, creatorName, creatorScore, creatorTotal } = await request.json();
 
-    if (!topic || !questions || questions.length === 0) {
-      return Response.json({ error: "Missing topic or questions" }, { status: 400 });
+    if (!topic || typeof topic !== "string" || topic.length > 200) {
+      return Response.json({ error: "Missing or invalid topic" }, { status: 400 });
+    }
+
+    // Validate questions array structure
+    if (!Array.isArray(questions) || questions.length === 0 || questions.length > 20) {
+      return Response.json({ error: "Questions must be an array of 1–20 items" }, { status: 400 });
+    }
+    for (const q of questions) {
+      if (
+        typeof q.question !== "string" ||
+        !Array.isArray(q.options) ||
+        q.options.length < 2 ||
+        q.options.length > 6 ||
+        typeof q.answer !== "number" ||
+        q.answer < 0 ||
+        q.answer >= q.options.length
+      ) {
+        return Response.json({ error: "Invalid question format" }, { status: 400 });
+      }
+    }
+
+    if (typeof creatorScore === "number" && (creatorScore < 0 || creatorScore > questions.length)) {
+      return Response.json({ error: "Invalid creator score" }, { status: 400 });
     }
 
     const supabase = await createClient();

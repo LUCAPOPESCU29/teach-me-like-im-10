@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import StreakReminderEmail from "@/emails/StreakReminderEmail";
+import { generateUnsubToken } from "@/lib/unsubscribe-token";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -35,10 +36,11 @@ export async function GET(request: Request) {
     } = await admin.auth.admin.getUserById(profile.id);
     if (!user?.email) continue;
 
-    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=streak`;
+    const unsubToken = generateUnsubToken(profile.id, "streak");
+    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=streak&token=${unsubToken}`;
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: EMAIL_FROM,
         to: user.email,
         subject: `Don't lose your ${profile.streak_count}-day streak!`,

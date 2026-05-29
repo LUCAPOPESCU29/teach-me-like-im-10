@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .pfp-wrap { width: 400px; height: 400px; border-radius: 50%; overflow: hidden; position: relative; }
+</style>
+</head>
+<body>
+<div class="pfp-wrap">
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Film grain -->
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="blended"/>
+      <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <!-- Glow filter for the "10" -->
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Subtle inner glow -->
+    <filter id="softglow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Radial gradient for ambient bg light -->
+    <radialGradient id="ambientGreen" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambientPurple" cx="80%" cy="20%" r="35%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Clip to circle -->
+    <clipPath id="circle">
+      <circle cx="200" cy="200" r="200"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#circle)">
+    <!-- Base background -->
+    <rect width="400" height="400" fill="#030609"/>
+
+    <!-- Ambient light layers -->
+    <rect width="400" height="400" fill="url(#ambientGreen)"/>
+    <rect width="400" height="400" fill="url(#ambientPurple)"/>
+
+    <!-- Dot grid pattern -->
+    <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.8" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+    <rect width="400" height="400" fill="url(#dots)"/>
+
+    <!-- Large emerald glow blob behind text -->
+    <ellipse cx="200" cy="215" rx="110" ry="70" fill="#34d399" opacity="0.08" filter="url(#softglow)"/>
+
+    <!-- Main "10" text -->
+    <text
+      x="200" y="235"
+      font-family="'Instrument Serif', serif"
+      font-size="148"
+      font-weight="400"
+      fill="#34d399"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      filter="url(#glow)"
+      letter-spacing="-4"
+    >10</text>
+
+    <!-- Subtle label under -->
+    <text
+      x="200" y="305"
+      font-family="'Inter', sans-serif"
+      font-size="13"
+      font-weight="600"
+      fill="#34d399"
+      text-anchor="middle"
+      opacity="0.5"
+      letter-spacing="4"
+    >TEACH ME</text>
+
+    <!-- Top decorative line -->
+    <line x1="160" y1="135" x2="240" y2="135" stroke="#34d399" stroke-width="0.8" opacity="0.25"/>
+
+    <!-- Corner sparkles -->
+    <!-- Top-right spark -->
+    <g opacity="0.6">
+      <line x1="310" y1="90" x2="310" y2="102" stroke="#34d399" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="304" y1="96" x2="316" y2="96" stroke="#34d399" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+    <!-- Bottom-left spark -->
+    <g opacity="0.4">
+      <line x1="88" y1="295" x2="88" y2="304" stroke="#34d399" stroke-width="1" stroke-linecap="round"/>
+      <line x1="83.5" y1="299.5" x2="92.5" y2="299.5" stroke="#34d399" stroke-width="1" stroke-linecap="round"/>
+    </g>
+    <!-- Small dots -->
+    <circle cx="330" cy="140" r="1.5" fill="#34d399" opacity="0.35"/>
+    <circle cx="70" cy="260" r="1.2" fill="#34d399" opacity="0.25"/>
+    <circle cx="295" cy="305" r="1" fill="#a855f7" opacity="0.4"/>
+
+    <!-- Film grain overlay -->
+    <rect width="400" height="400" fill="white" opacity="0.032" filter="url(#grain)"/>
+
+    <!-- Subtle vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0.6"/>
+    </radialGradient>
+    <rect width="400" height="400" fill="url(#vignette)"/>
+  </g>
+</svg>
+</div>
+</body>
+</html>

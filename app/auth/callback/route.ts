@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import WelcomeEmail from "@/emails/WelcomeEmail";
 
 export async function GET(request: Request) {
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         if (createdAt > fiveMinutesAgo && session.user.email) {
           try {
-            await resend.emails.send({
+            await getResend().emails.send({
               from: EMAIL_FROM,
               to: session.user.email,
               subject: "Welcome to Teach Me Like I'm 10!",

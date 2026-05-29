@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import { LEARNING_PATHS } from "@/lib/paths";
+import PageTransition from "@/components/PageTransition";
 
 export default function PathDetailPage() {
   const { data: dataLayer } = useAuth();
@@ -117,6 +118,7 @@ export default function PathDetailPage() {
           const isStarted = maxLevel > 0;
 
           return (
+    <PageTransition>
             <motion.button
               key={topic.slug}
               onClick={() => router.push(`/learn/${topic.slug}`)}
@@ -162,7 +164,8 @@ export default function PathDetailPage() {
                 {isStarted ? "Continue →" : "Start →"}
               </span>
             </motion.button>
-          );
+          </PageTransition>
+  );
         })}
       </div>
     </main>

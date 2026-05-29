@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
+import PageTransition from "@/components/PageTransition";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -120,6 +121,7 @@ export default function LoginPage() {
       : "Join to save your learning journey";
 
   return (
+    <PageTransition>
     <main className="min-h-screen flex items-center justify-center px-4">
       <motion.div
         className="w-full max-w-sm"
@@ -317,5 +319,6 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </main>
+  </PageTransition>
   );
 }

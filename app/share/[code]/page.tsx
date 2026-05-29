@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { LEVEL_META } from "@/lib/utils";
 import StreamingText from "@/components/StreamingText";
+import PageTransition from "@/components/PageTransition";
 
 interface LevelData {
   level: number;
@@ -132,6 +133,7 @@ export default function SharedTopicPage() {
         {data.levels.map((level) => {
           const meta = LEVEL_META[level.level - 1];
           return (
+    <PageTransition>
             <motion.div
               key={level.level}
               className="relative rounded-2xl border bg-white/[0.02] overflow-hidden"
@@ -159,7 +161,8 @@ export default function SharedTopicPage() {
                 <StreamingText content={level.content} isStreaming={false} />
               </div>
             </motion.div>
-          );
+          </PageTransition>
+  );
         })}
       </div>
 

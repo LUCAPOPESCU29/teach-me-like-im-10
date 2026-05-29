@@ -27,16 +27,20 @@ export default function ExampleTopics() {
   }, []);
 
   return (
-    <div className="h-8 flex items-center justify-center text-white/15 text-sm font-sans">
-      <span className="mr-2">e.g.</span>
+    <div
+      className="flex items-center justify-center gap-1.5 text-white/15 text-sm font-sans"
+      style={{ height: "2rem", overflow: "hidden" }}
+    >
+      <span className="shrink-0">e.g.</span>
       <AnimatePresence mode="wait">
         <motion.span
           key={index}
-          initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
           className="text-white/30 italic font-serif"
+          style={{ display: "inline-block" }}
         >
           &ldquo;{examples[index]}&rdquo;
         </motion.span>

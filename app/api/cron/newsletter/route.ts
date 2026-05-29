@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import NewsletterEmail from "@/emails/NewsletterEmail";
+import { generateUnsubToken } from "@/lib/unsubscribe-token";
 import { DAILY_TOPICS } from "@/lib/daily-topics";
 
 export const dynamic = "force-dynamic";
@@ -40,10 +41,11 @@ export async function GET(request: Request) {
     } = await admin.auth.admin.getUserById(profile.id);
     if (!user?.email) continue;
 
-    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=newsletter`;
+    const unsubToken = generateUnsubToken(profile.id, "newsletter");
+    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=newsletter&token=${unsubToken}`;
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: EMAIL_FROM,
         to: user.email,
         subject: `This week: Learn about ${topicName}`,

@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import PasswordResetEmail from "@/emails/PasswordResetEmail";
 
 export async function POST(request: Request) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       .eq("id", data.user.id)
       .single();
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: EMAIL_FROM,
       to: email,
       subject: "Reset your password — Teach Me Like I'm 10",

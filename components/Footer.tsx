@@ -27,8 +27,8 @@ const FOOTER_LINKS = {
     { label: "Library", href: "/library" },
   ],
   Practice: [
-    { label: "Math Solver", href: "/math" },
-    { label: "Code", href: "/code" },
+    { label: "🔢 Math", href: "/math" },
+    { label: "💻 Code", href: "/code" },
     { label: "Quiz Battle", href: "/battle" },
     { label: "Daily Challenge", href: "/daily" },
   ],
@@ -36,6 +36,7 @@ const FOOTER_LINKS = {
     { label: "Progress", href: "/progress" },
     { label: "Leaderboard", href: "/leaderboard" },
     { label: "Sign In", href: "/auth/login" },
+    { label: "✦ Go Pro", href: "/pro" },
   ],
 };
 
@@ -127,6 +128,25 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Teach Me Like I&apos;m 10
           </p>
           <div className="flex items-center gap-5">
+            {/* Europa Temporis logo link */}
+            <a
+              href="https://europa-temporis.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Europa Temporis"
+              className="group relative"
+              title="Europa Temporis"
+            >
+              <img
+                src="/europa-logo.svg"
+                alt="Europa Temporis"
+                width={28}
+                height={28}
+                className="opacity-40 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(212,170,58,0.7)]"
+                style={{ filter: isDark ? "none" : "brightness(0.7)" }}
+              />
+            </a>
+
             <a
               href="https://github.com/LUCAPOPESCU29/teach-me-like-im-10"
               target="_blank"

@@ -18,6 +18,7 @@ import LearningTree from "@/components/LearningTree";
 import LearningTreeDetail from "@/components/LearningTreeDetail";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import PageTransition from "@/components/PageTransition";
 
 // Build set of all math topic slugs for filtering
 const MATH_SLUGS = new Set(
@@ -82,6 +83,7 @@ export default function MathMyTreePage() {
   }, [dataLayer, fetchTree]);
 
   return (
+    <PageTransition>
     <main className="min-h-screen flex flex-col items-center px-4 py-16 relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-500/[0.05] blur-[120px] pointer-events-none" />
@@ -232,5 +234,6 @@ export default function MathMyTreePage() {
         Back to Math Edition
       </motion.button>
     </main>
+  </PageTransition>
   );
 }

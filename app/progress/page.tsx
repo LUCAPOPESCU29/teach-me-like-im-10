@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -14,8 +13,11 @@ import type { ActivityDay, XPEvent, TopicHistoryItem } from "@/lib/data";
 import { XP_LEVELS } from "@/lib/xp";
 import SolarSystem from "@/components/SolarSystem";
 import ConceptMap from "@/components/ConceptMap";
+import StreakFreezeShop from "@/components/StreakFreezeShop";
+import DailyLoginReward from "@/components/DailyLoginReward";
+import DailySpinWheel from "@/components/DailySpinWheel";
+import PageTransition from "@/components/PageTransition";
 
-const Galaxy = dynamic(() => import("@/components/Galaxy"), { ssr: false });
 
 export default function ProgressPage() {
   const { data: dataLayer, isGuest } = useAuth();
@@ -67,41 +69,23 @@ export default function ProgressPage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="fixed inset-0 -z-10">
-          <Galaxy
-            density={0.8}
-            speed={0.3}
-            saturation={0}
-            hueShift={200}
-            glowIntensity={0.2}
-            twinkleIntensity={0.4}
-            rotationSpeed={0.02}
-            mouseRepulsion={false}
-            mouseInteraction={false}
-          />
-        </div>
+        <div className="fixed inset-0 -z-10 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
         <div className="text-white/30 font-mono text-sm animate-pulse">Loading progress...</div>
       </main>
     );
   }
 
   return (
+    <PageTransition>
     <main className="relative min-h-screen max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
-      {/* Galaxy WebGL background */}
-      <div className="fixed inset-0 -z-10">
-        <Galaxy
-          density={0.8}
-          speed={0.3}
-          saturation={0}
-          hueShift={200}
-          glowIntensity={0.2}
-          twinkleIntensity={0.4}
-          rotationSpeed={0.02}
-          mouseRepulsion
-          mouseInteraction
-          repulsionStrength={1.5}
-        />
-      </div>
+      {/* Lightweight static gradient background (was a heavy WebGL Galaxy w/ mouse repulsion) */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse at 20% 0%, rgba(56,189,248,0.06), transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(168,85,247,0.05), transparent 50%), linear-gradient(to bottom, #020617, #0f172a)",
+        }}
+      />
       {/* Header */}
       <motion.div
         className="mb-8"
@@ -166,6 +150,20 @@ export default function ProgressPage() {
             transition={{ duration: 0.8, delay: 0.3 }}
           />
         </div>
+      </motion.div>
+
+      {/* Daily Rewards */}
+      <motion.div
+        id="freeze-shop"
+        className="mb-8 space-y-3 scroll-mt-20"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.17 }}
+      >
+        <h2 className="text-white font-display text-lg mb-2">Daily Rewards</h2>
+        <DailyLoginReward />
+        <DailySpinWheel />
+        <StreakFreezeShop />
       </motion.div>
 
       {/* Topic Constellation */}
@@ -274,5 +272,6 @@ export default function ProgressPage() {
         </motion.div>
       )}
     </main>
+  </PageTransition>
   );
 }

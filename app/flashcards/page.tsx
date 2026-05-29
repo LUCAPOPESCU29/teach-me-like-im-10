@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import FlashcardDeck from "@/components/FlashcardDeck";
 import { createClient } from "@/lib/supabase/client";
+import PageTransition from "@/components/PageTransition";
 
 interface FlashcardRow {
   id: string;
@@ -70,6 +71,7 @@ export default function FlashcardsPage() {
   }
 
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-24">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -157,5 +159,6 @@ export default function FlashcardsPage() {
         )}
       </motion.div>
     </main>
+  </PageTransition>
   );
 }

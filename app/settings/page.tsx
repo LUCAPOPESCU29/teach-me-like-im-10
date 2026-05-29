@@ -183,6 +183,11 @@ export default function SettingsPage() {
     active: false, daysRemaining: 0, expiryDate: null,
   });
 
+  // Ko-fi email linking (for users whose Ko-fi email differs from their account email)
+  const [kofiEmail, setKofiEmail] = useState("");
+  const [kofiLinking, setKofiLinking] = useState(false);
+  const [kofiLinkResult, setKofiLinkResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
   // ── Load Pro status ──
   useEffect(() => {
     const active = isPro();
@@ -203,6 +208,38 @@ export default function SettingsPage() {
     setProStatus({ active: false, daysRemaining: 0, expiryDate: null });
     setConfirmCancelPro(false);
     showSavedToast();
+  }
+
+  async function handleLinkKofiEmail() {
+    if (!kofiEmail.trim()) return;
+    setKofiLinking(true);
+    setKofiLinkResult(null);
+    try {
+      const res = await fetch("/api/pro-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kofiEmail: kofiEmail.trim() }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        // Sync the newly found expiry into localStorage
+        if (json.expiresAt) {
+          localStorage.setItem("tmi10_pro_expiry", String(json.expiresAt));
+        }
+        setKofiLinkResult({ ok: true, msg: "Ko-fi account linked! Pro is now active." });
+        // Refresh pro status display
+        const days = Math.max(0, Math.ceil((json.expiresAt - Date.now()) / 86_400_000));
+        const expiryDate = new Date(json.expiresAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+        setProStatus({ active: true, daysRemaining: days, expiryDate });
+        setKofiEmail("");
+      } else {
+        setKofiLinkResult({ ok: false, msg: json.error ?? "No Pro record found for that email." });
+      }
+    } catch {
+      setKofiLinkResult({ ok: false, msg: "Something went wrong. Please try again." });
+    } finally {
+      setKofiLinking(false);
+    }
   }
 
   // ── Load all settings ──
@@ -632,6 +669,46 @@ export default function SettingsPage() {
               >
                 ✦ Upgrade to Pro
               </button>
+            </div>
+          )}
+
+          {/* Ko-fi email linking — shown when not pro and signed in */}
+          {!proStatus.active && !isGuest && (
+            <div className="py-3 border-t border-white/[0.05]">
+              <p className="text-white/35 text-xs font-sans mb-3">
+                Already paid on Ko-fi with a different email? Link it here.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={kofiEmail}
+                  onChange={(e) => { setKofiEmail(e.target.value); setKofiLinkResult(null); }}
+                  onKeyDown={(e) => e.key === "Enter" && handleLinkKofiEmail()}
+                  placeholder="your@kofi-email.com"
+                  className="flex-1 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs font-sans placeholder:text-white/20 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                />
+                <button
+                  onClick={handleLinkKofiEmail}
+                  disabled={kofiLinking || !kofiEmail.trim()}
+                  className="px-4 py-2 rounded-xl text-xs font-sans font-semibold transition-all disabled:opacity-40 text-black"
+                  style={{ background: "linear-gradient(135deg,#34d399,#10b981)" }}
+                >
+                  {kofiLinking ? "…" : "Link"}
+                </button>
+              </div>
+              <AnimatePresence>
+                {kofiLinkResult && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-xs font-sans mt-2"
+                    style={{ color: kofiLinkResult.ok ? "#34d399" : "#f87171" }}
+                  >
+                    {kofiLinkResult.ok ? "✓ " : "✕ "}{kofiLinkResult.msg}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </Section>

@@ -17,6 +17,7 @@ import LearningTree from "@/components/LearningTree";
 import LearningTreeDetail from "@/components/LearningTreeDetail";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import PageTransition from "@/components/PageTransition";
 
 export default function ProgressTreePage() {
   const router = useRouter();
@@ -69,6 +70,7 @@ export default function ProgressTreePage() {
   }, [dataLayer, fetchTree]);
 
   return (
+    <PageTransition>
     <main className="min-h-screen flex flex-col items-center px-4 py-16 relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.05] blur-[120px] pointer-events-none" />
@@ -213,5 +215,6 @@ export default function ProgressTreePage() {
         Back to Progress
       </motion.button>
     </main>
+  </PageTransition>
   );
 }

@@ -7,6 +7,7 @@ import QuizMode from "@/components/QuizMode";
 import Podium from "@/components/Podium";
 import { createClient } from "@/lib/supabase/client";
 import type { QuizQuestion } from "@/components/QuizMode";
+import PageTransition from "@/components/PageTransition";
 
 interface Participant {
   id: string;
@@ -514,6 +515,7 @@ export default function ChallengePage() {
 
   // Podium view
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-lg mx-auto px-4 py-8 pb-24">
       {/* New player toast */}
       <AnimatePresence>
@@ -585,5 +587,6 @@ export default function ChallengePage() {
         </button>
       </motion.div>
     </main>
+  </PageTransition>
   );
 }

@@ -4,6 +4,7 @@ export const LANGUAGES = [
   { code: "fr", label: "Français", flag: "🇫🇷" },
   { code: "es", label: "Español", flag: "🇪🇸" },
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "pt", label: "Português", flag: "🇧🇷" },
 ] as const;
 
 export type LangCode = (typeof LANGUAGES)[number]["code"];

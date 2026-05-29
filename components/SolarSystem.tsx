@@ -305,7 +305,7 @@ export default function SolarSystem({
             const isPulsing = topic.slug === mostRecent;
             const glowOpacity = 0.04 + planet.orbitIndex * 0.03;
             const arcRadius = planetSize + 3;
-            const bobDuration = 3 + (hashSlug(topic.slug) % 20) / 10;
+            void hashSlug;
 
             return (
               <motion.g
@@ -343,11 +343,8 @@ export default function SolarSystem({
                     : {})}
                 />
 
-                {/* Floating bob */}
-                <motion.g
-                  animate={{ y: [0, -2.5, 0] }}
-                  transition={{ duration: bobDuration, repeat: Infinity, ease: "easeInOut" }}
-                >
+                {/* Static planet group (bob animation removed for perf) */}
+                <g>
                   {/* Planet body */}
                   <circle
                     cx={px}
@@ -408,7 +405,7 @@ export default function SolarSystem({
                   >
                     {truncate(topic.topicName, 16)}
                   </text>
-                </motion.g>
+                </g>
               </motion.g>
             );
           })}

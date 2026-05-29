@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import QuizMode from "@/components/QuizMode";
 import StreamingText from "@/components/StreamingText";
 import type { QuizQuestion } from "@/components/QuizMode";
+import PageTransition from "@/components/PageTransition";
 
 interface DailyChallenge {
   date: string;
@@ -111,6 +112,7 @@ export default function DailyPage() {
   }
 
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-24">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <button
@@ -185,5 +187,6 @@ export default function DailyPage() {
         )}
       </motion.div>
     </main>
+  </PageTransition>
   );
 }

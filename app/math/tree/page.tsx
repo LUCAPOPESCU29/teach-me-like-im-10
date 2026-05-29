@@ -10,6 +10,7 @@ import MathAncestryTree from "@/components/MathAncestryTree";
 import TreeNodeDetail from "@/components/TreeNodeDetail";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import PageTransition from "@/components/PageTransition";
 
 const edges = buildEdges(MATH_TREE_NODES);
 
@@ -85,6 +86,7 @@ export default function MathTreePage() {
             : id === "statistics" ? "#fbbf24"
             : "#f472b6";
           return (
+    <PageTransition>
             <div key={id} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full"
@@ -92,7 +94,8 @@ export default function MathTreePage() {
               />
               <span className="text-white/30 text-[10px] font-sans">{label}</span>
             </div>
-          );
+          </PageTransition>
+  );
         })}
       </motion.div>
 

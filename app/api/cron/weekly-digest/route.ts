@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import WeeklyDigestEmail from "@/emails/WeeklyDigestEmail";
+import { generateUnsubToken } from "@/lib/unsubscribe-token";
 import { XP_LEVELS } from "@/lib/xp";
 import { DAILY_TOPICS } from "@/lib/daily-topics";
 
@@ -71,10 +72,11 @@ export async function GET(request: Request) {
     const shuffled = [...DAILY_TOPICS].sort(() => Math.random() - 0.5);
     const suggestedTopics = shuffled.slice(0, 3);
 
-    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=digest`;
+    const unsubToken = generateUnsubToken(profile.id, "digest");
+    const unsubscribeUrl = `https://teachmelikeim10.xyz/api/email/unsubscribe?userId=${profile.id}&type=digest&token=${unsubToken}`;
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: EMAIL_FROM,
         to: user.email,
         subject: `Your week in review: ${xpEarned} XP earned!`,

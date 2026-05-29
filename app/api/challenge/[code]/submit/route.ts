@@ -10,9 +10,15 @@ export async function POST(
     const { code } = await params;
     const { participantId, score, total } = await request.json();
 
-    if (!participantId) {
+    if (!participantId || typeof participantId !== "string") {
       return Response.json({ error: "Missing participantId" }, { status: 400 });
     }
+
+    // Validate score and total to prevent score manipulation
+    const validTotal = typeof total === "number" && total > 0 && total <= 20 ? Math.floor(total) : 5;
+    const validScore = typeof score === "number" && score >= 0 && score <= validTotal
+      ? Math.floor(score)
+      : 0;
 
     const supabase = await createClient();
 
@@ -27,12 +33,12 @@ export async function POST(
       return Response.json({ error: "Challenge not found" }, { status: 404 });
     }
 
-    // Update participant score
+    // Update participant score (use validated values, never raw client input)
     const { error: updateError } = await supabase
       .from("challenge_participants")
       .update({
-        score,
-        total: total || 5,
+        score: validScore,
+        total: validTotal,
         completed_at: new Date().toISOString(),
       })
       .eq("id", participantId)

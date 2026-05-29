@@ -7,7 +7,7 @@ export const FREE_LIMITS = {
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 const TOPICS_KEY    = "tmi10_topics_log";    // rolling window log
-const PRO_KEY       = "tmi10_is_pro";        // legacy boolean
+const LEGACY_PRO_KEY = "tmi10_is_pro";       // legacy boolean — never trusted, only cleaned up
 const PRO_EXPIRY_KEY = "tmi10_pro_expiry";   // Unix ms timestamp
 
 interface TopicEntry { slug: string; ts: number }
@@ -48,22 +48,23 @@ function getUniqueSlugsInWindow(): Set<string> {
 export function isPro(): boolean {
   if (typeof window === "undefined") return false;
   try {
+    // Clean up legacy flag — it granted permanent Pro and must not be trusted
+    localStorage.removeItem(LEGACY_PRO_KEY);
+
     const expiry = localStorage.getItem(PRO_EXPIRY_KEY);
     if (expiry) {
       const expiryMs = parseInt(expiry, 10);
       if (Date.now() < expiryMs) return true;
       localStorage.removeItem(PRO_EXPIRY_KEY);
     }
-    if (localStorage.getItem(PRO_KEY) === "1") return true;
     return false;
   } catch { return false; }
 }
 
-/** Returns how many days of Pro remain (or Infinity for legacy pro) */
+/** Returns how many days of Pro remain */
 export function getProDaysRemaining(): number {
   if (typeof window === "undefined") return 0;
   try {
-    if (localStorage.getItem(PRO_KEY) === "1") return Infinity;
     const expiry = localStorage.getItem(PRO_EXPIRY_KEY);
     if (!expiry) return 0;
     const ms = parseInt(expiry, 10) - Date.now();
@@ -80,7 +81,7 @@ export function daysFromAmount(amount: number): number {
 export function activateProWithExpiry(expiresAt: number) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PRO_EXPIRY_KEY, String(expiresAt));
-  localStorage.removeItem(PRO_KEY);
+  localStorage.removeItem(LEGACY_PRO_KEY); // clean up legacy flag
 }
 
 // ── Topic counting ─────────────────────────────────────────────────────────────

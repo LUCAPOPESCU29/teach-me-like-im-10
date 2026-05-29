@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resend, EMAIL_FROM } from "@/lib/resend";
+import { getResend, EMAIL_FROM } from "@/lib/resend";
 import ConfirmationEmail from "@/emails/ConfirmationEmail";
 
 export async function POST(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: EMAIL_FROM,
       to: email,
       subject: "Confirm your email — Teach Me Like I'm 10",

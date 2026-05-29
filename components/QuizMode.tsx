@@ -8,6 +8,7 @@ import { getQuizXP } from "@/lib/data";
 import ChallengeCreateModal from "@/components/ChallengeCreateModal";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/utils";
+import XPWager, { WagerResult, addWagerHistory } from "@/components/XPWager";
 
 export interface QuizQuestion {
   question: string;
@@ -27,7 +28,7 @@ interface QuizModeProps {
   bonusLabel?: string;
 }
 
-type QuizState = "loading" | "intro" | "question" | "result" | "complete";
+type QuizState = "loading" | "intro" | "wager" | "question" | "result" | "complete";
 
 export default function QuizMode({ topic, levels, lang, onClose, preloadedQuestions, onComplete, bonusLabel }: QuizModeProps) {
   const { data: dataLayer } = useAuth();
@@ -45,6 +46,8 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
   const [showChallenge, setShowChallenge] = useState(false);
   const [relatedTopics, setRelatedTopics] = useState<string[]>([]);
   const quizRouter = useRouter();
+  const [wagerAmount, setWagerAmount] = useState(0);
+  const [wagerResult, setWagerResult] = useState<{ won: boolean; amount: number } | null>(null);
 
   // Generate quiz questions — use preloaded if provided, else locally for English, via API for other languages
   useEffect(() => {
@@ -162,22 +165,54 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
         onComplete(finalScore, questions.length, questions);
       } else {
         const xpAmount = getQuizXP(finalScore, questions.length);
-        dataLayer.addXP(xpAmount).then((result) => {
-          setXpEarned(result.xpGained);
+        const percentage = (finalScore / questions.length) * 100;
+        const wagerWon = percentage >= 80;
+
+        // Calculate total XP change including wager
+        let totalXPChange = xpAmount;
+        if (wagerAmount > 0) {
+          if (wagerWon) {
+            totalXPChange += wagerAmount; // Win: earn quiz XP + wager bonus
+          } else {
+            totalXPChange -= wagerAmount; // Lose: earn quiz XP but lose wager
+          }
+          setWagerResult({ won: wagerWon, amount: wagerAmount });
+          addWagerHistory({
+            date: new Date().toISOString(),
+            amount: wagerAmount,
+            won: wagerWon,
+            quizTopic: topic,
+          });
+        }
+
+        dataLayer.addXP(totalXPChange).then((result) => {
+          setXpEarned(xpAmount); // Show base quiz XP separately
           celebrate({
             xp: result.xpGained,
-            confetti: true,
+            confetti: wagerWon || !wagerAmount,
             sound: "complete",
           });
         });
       }
       playBeep(1200, 0.5);
     }
-  }, [currentQ, questions.length, playBeep, score, selected, onComplete, dataLayer]);
+  }, [currentQ, questions.length, playBeep, score, selected, onComplete, dataLayer, wagerAmount, topic, celebrate]);
 
   const startQuiz = useCallback(() => {
-    setQuizState("question");
+    setQuizState("wager");
     playBeep(700, 0.15);
+  }, [playBeep]);
+
+  const handleWagerConfirm = useCallback((amount: number) => {
+    setWagerAmount(amount);
+    setQuizState("question");
+    playBeep(800, 0.2);
+  }, [playBeep]);
+
+  const handleWagerSkip = useCallback(() => {
+    setWagerAmount(0);
+    setQuizState("question");
+    playBeep(500, 0.1);
   }, [playBeep]);
 
   // Fetch related topics when quiz completes
@@ -204,6 +239,10 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
         startQuiz();
         return;
       }
+      if (quizState === "wager" && e.key === "Escape") {
+        handleWagerSkip();
+        return;
+      }
       if (quizState !== "question") return;
       if (e.key >= "1" && e.key <= "4") {
         handleSelect(parseInt(e.key) - 1);
@@ -220,7 +259,7 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [quizState, revealed, selected, handleSelect, handleConfirm, handleNext, startQuiz, onClose]);
+  }, [quizState, revealed, selected, handleSelect, handleConfirm, handleNext, startQuiz, handleWagerSkip, onClose]);
 
   if (error) {
     return (
@@ -313,6 +352,14 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
               PRESS ENTER TO BEGIN
             </p>
           </motion.div>
+        )}
+
+        {quizState === "wager" && (
+          <XPWager
+            topic={topic}
+            onConfirm={handleWagerConfirm}
+            onSkip={handleWagerSkip}
+          />
         )}
 
         {quizState === "question" && questions[currentQ] && (
@@ -477,6 +524,11 @@ export default function QuizMode({ topic, levels, lang, onClose, preloadedQuesti
             className="text-center max-w-lg mx-auto"
           >
             <ScoreDisplay score={score} total={questions.length} />
+
+            {/* Wager result */}
+            {wagerResult && (
+              <WagerResult won={wagerResult.won} amount={wagerResult.amount} />
+            )}
 
             {/* Question breakdown */}
             <div className="mt-8 space-y-2">

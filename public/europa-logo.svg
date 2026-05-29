@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f5e9b8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#f5e9b8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="crownGrad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#f5d77a"/>
+      <stop offset="50%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#9a7510"/>
+    </radialGradient>
+    <radialGradient id="orbGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fffbe0"/>
+      <stop offset="40%" stop-color="#f5d777"/>
+      <stop offset="100%" stop-color="#c9a227"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="orbGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Compass rose circle -->
+  <circle cx="100" cy="100" r="88" stroke="#d4aa3a" stroke-opacity="0.35" stroke-width="1.2" fill="url(#bgGlow)"/>
+
+  <!-- Compass rose lines -->
+  <g stroke="#c9a227" stroke-opacity="0.25" stroke-width="1">
+    <line x1="100" y1="14" x2="100" y2="186"/>
+    <line x1="14" y1="100" x2="186" y2="100"/>
+    <line x1="38" y1="38" x2="162" y2="162"/>
+    <line x1="162" y1="38" x2="38" y2="162"/>
+  </g>
+
+  <!-- Compass rose points -->
+  <g fill="#c9a227" fill-opacity="0.3">
+    <!-- N -->
+    <polygon points="100,16 94,36 100,30 106,36"/>
+    <!-- S -->
+    <polygon points="100,184 94,164 100,170 106,164"/>
+    <!-- E -->
+    <polygon points="184,100 164,94 170,100 164,106"/>
+    <!-- W -->
+    <polygon points="16,100 36,94 30,100 36,106"/>
+  </g>
+
+  <!-- Crown base -->
+  <rect x="58" y="118" width="84" height="28" rx="6" fill="url(#crownGrad)" filter="url(#glow)"/>
+
+  <!-- Crown left pillar -->
+  <rect x="62" y="88" width="22" height="36" rx="5" fill="url(#crownGrad)"/>
+  <!-- Crown center pillar -->
+  <rect x="89" y="78" width="22" height="46" rx="5" fill="url(#crownGrad)"/>
+  <!-- Crown right pillar -->
+  <rect x="116" y="88" width="22" height="36" rx="5" fill="url(#crownGrad)"/>
+
+  <!-- Orb left -->
+  <circle cx="73" cy="83" r="9" fill="url(#orbGrad)" filter="url(#orbGlow)"/>
+  <circle cx="71" cy="81" r="3.5" fill="white" fill-opacity="0.8"/>
+
+  <!-- Orb center -->
+  <circle cx="100" cy="72" r="10" fill="url(#orbGrad)" filter="url(#orbGlow)"/>
+  <circle cx="98" cy="70" r="4" fill="white" fill-opacity="0.8"/>
+
+  <!-- Orb right -->
+  <circle cx="127" cy="83" r="9" fill="url(#orbGrad)" filter="url(#orbGlow)"/>
+  <circle cx="125" cy="81" r="3.5" fill="white" fill-opacity="0.8"/>
+</svg>

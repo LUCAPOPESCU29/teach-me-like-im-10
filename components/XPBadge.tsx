@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { XP_LEVELS, FREEZE_COST, MAX_FREEZES } from "@/lib/xp";
 import type { XPState } from "@/lib/xp";
 import { useAuth } from "@/components/AuthProvider";
 import { useCelebration } from "@/components/CelebrationProvider";
+import { hasPerk, PERK } from "@/lib/perks";
 
 interface XPBadgeProps {
   xpGain?: number | null;
@@ -14,6 +16,7 @@ interface XPBadgeProps {
 export default function XPBadge({ xpGain }: XPBadgeProps) {
   const { data: dataLayer } = useAuth();
   const { muted, toggleMute } = useCelebration();
+  const router = useRouter();
   const [xpState, setXpState] = useState<XPState>({
     totalXP: 0, level: 1, title: "Curious Mind", nextLevelXP: 100, streak: 0, freezes: 0,
   });
@@ -67,7 +70,19 @@ export default function XPBadge({ xpGain }: XPBadgeProps) {
       {/* Badge pill */}
       <motion.button
         onClick={() => setExpanded((e) => !e)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-200 text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+        style={
+          hasPerk(PERK.PRESTIGE)
+            ? {
+                background: "linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08))",
+                border: "1px solid rgba(251,191,36,0.3)",
+                boxShadow: "0 0 12px rgba(251,191,36,0.1)",
+              }
+            : {
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }
+        }
         whileTap={{ scale: 0.97 }}
       >
         {xpState.streak > 0 && (
@@ -75,11 +90,11 @@ export default function XPBadge({ xpGain }: XPBadgeProps) {
             🔥{xpState.streak}
           </span>
         )}
-        <span className="text-emerald-400 font-mono text-xs">
+        <span className={`font-mono text-xs ${hasPerk(PERK.PRESTIGE) ? "text-amber-400" : "text-emerald-400"}`}>
           ⭐{xpState.totalXP}
         </span>
-        <span className="text-white/40 text-xs font-sans hidden sm:inline">
-          {xpState.title}
+        <span className={`text-xs font-sans hidden sm:inline ${hasPerk(PERK.PRESTIGE) ? "text-amber-300/60" : "text-white/40"}`}>
+          {hasPerk(PERK.PRESTIGE) ? `✨ ${xpState.title}` : xpState.title}
         </span>
       </motion.button>
 
@@ -93,8 +108,8 @@ export default function XPBadge({ xpGain }: XPBadgeProps) {
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="text-white/80 font-sans text-sm font-medium mb-1">
-              {xpState.title}
+            <div className={`font-sans text-sm font-medium mb-1 ${hasPerk(PERK.PRESTIGE) ? "text-amber-400" : "text-white/80"}`}>
+              {hasPerk(PERK.PRESTIGE) ? `✨ ${xpState.title} ✨` : xpState.title}
             </div>
             <div className="text-white/40 font-mono text-xs mb-3">
               Level {xpState.level} · {xpState.totalXP} XP
@@ -157,6 +172,30 @@ export default function XPBadge({ xpGain }: XPBadgeProps) {
                   : xpState.freezes >= MAX_FREEZES
                     ? "MAX FREEZES"
                     : `BUY FREEZE · ${FREEZE_COST} XP`}
+              </button>
+            </div>
+
+            {/* XP Shop + Pro links */}
+            <div className="mt-3 pt-3 border-t border-white/5 flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded(false);
+                  router.push("/shop");
+                }}
+                className="flex-1 px-2 py-1.5 rounded-lg border border-amber-500/20 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/10 font-mono text-[10px] tracking-wider transition-all flex items-center justify-center gap-1"
+              >
+                🛒 SHOP
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded(false);
+                  router.push("/pro");
+                }}
+                className="flex-1 px-2 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 font-mono text-[10px] tracking-wider transition-all flex items-center justify-center gap-1"
+              >
+                ✦ PRO
               </button>
             </div>
 

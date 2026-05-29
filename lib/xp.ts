@@ -1,9 +1,18 @@
+import { hasPerk, PERK } from "./perks";
+
 const XP_KEY = "tmi10_xp";
 const STREAK_KEY = "tmi10_streak";
 const FREEZE_KEY = "tmi10_freezes";
 
 export const FREEZE_COST = 100;
 export const MAX_FREEZES = 3;
+
+/** Apply Golden Touch perk (+50% XP) to positive amounts */
+function applyGoldenTouch(amount: number): number {
+  if (amount <= 0) return amount;
+  if (hasPerk(PERK.GOLDEN_TOUCH)) return Math.floor(amount * 1.5);
+  return amount;
+}
 
 export const XP_LEVELS = [
   { xp: 0, title: "Curious Mind" },
@@ -76,6 +85,7 @@ function setGuestFreezes(count: number) {
 }
 
 export function buyGuestFreeze(): boolean {
+  if (hasPerk(PERK.FROST_TITAN)) return true; // unlimited
   const freezes = getGuestFreezes();
   if (freezes >= MAX_FREEZES) return false;
   const xp = parseInt(localStorage.getItem(XP_KEY) || "0", 10);
@@ -86,6 +96,7 @@ export function buyGuestFreeze(): boolean {
 }
 
 function consumeGuestFreeze(): boolean {
+  if (hasPerk(PERK.FROST_TITAN)) return true; // unlimited
   const freezes = getGuestFreezes();
   if (freezes <= 0) return false;
   setGuestFreezes(freezes - 1);
@@ -116,6 +127,23 @@ function updateStreak(): number {
     return streak.count;
   }
 
+  // Streak Shield perk: auto-freeze once per week
+  if (streak.count > 0 && hasPerk(PERK.STREAK_SHIELD)) {
+    const SHIELD_KEY = "tmi10_streak_shield_used";
+    try {
+      const lastUsed = localStorage.getItem(SHIELD_KEY) || "";
+      const lastUsedDate = lastUsed ? new Date(lastUsed) : new Date(0);
+      const now = new Date();
+      // Check if 7 days have passed since last use
+      const daysSince = Math.floor((now.getTime() - lastUsedDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSince >= 7) {
+        localStorage.setItem(SHIELD_KEY, today);
+        localStorage.setItem(STREAK_KEY, JSON.stringify({ lastDate: today, count: streak.count }));
+        return streak.count;
+      }
+    } catch {}
+  }
+
   // No freeze — reset streak
   localStorage.setItem(STREAK_KEY, JSON.stringify({ lastDate: today, count: 1 }));
   return 1;
@@ -138,14 +166,15 @@ export function getXP(): XPState {
   const validStreak =
     streak.lastDate === today || streak.lastDate === yesterdayStr ? streak.count : 0;
 
-  return { totalXP, level, title, nextLevelXP, streak: validStreak, freezes };
+  return { totalXP, level, title, nextLevelXP, streak: validStreak, freezes: hasPerk(PERK.FROST_TITAN) ? 99 : freezes };
 }
 
 export function addXP(amount: number): AddXPResult {
   const oldXP = parseInt(localStorage.getItem(XP_KEY) || "0", 10);
   const oldLevel = getLevel(oldXP);
 
-  const newXP = oldXP + amount;
+  const boosted = applyGoldenTouch(amount);
+  const newXP = oldXP + boosted;
   localStorage.setItem(XP_KEY, String(newXP));
 
   const newLevel = getLevel(newXP);
@@ -154,7 +183,7 @@ export function addXP(amount: number): AddXPResult {
 
   return {
     totalXP: newXP,
-    xpGained: amount,
+    xpGained: boosted,
     streak,
     levelUp,
     newTitle: newLevel.title,
@@ -163,13 +192,17 @@ export function addXP(amount: number): AddXPResult {
 
 export function getQuizXP(score: number, total: number): number {
   const pct = (score / total) * 100;
-  if (pct >= 80) return 50;
-  if (pct >= 60) return 30;
-  return 15;
+  let base = 15;
+  if (pct >= 80) base = 50;
+  else if (pct >= 60) base = 30;
+  if (hasPerk(PERK.QUIZ_SCHOLAR)) base = Math.floor(base * 1.25);
+  return base;
 }
 
 export function getTeachBackXP(score: number): number {
-  if (score >= 80) return 75;
-  if (score >= 60) return 40;
-  return 15;
+  let base = 15;
+  if (score >= 80) base = 75;
+  else if (score >= 60) base = 40;
+  if (hasPerk(PERK.QUIZ_SCHOLAR)) base = Math.floor(base * 1.25);
+  return base;
 }

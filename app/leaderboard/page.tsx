@@ -6,11 +6,15 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import LeaderboardTable from "@/components/LeaderboardTable";
 import { createClient } from "@/lib/supabase/client";
+import PageTransition from "@/components/PageTransition";
 
 interface LeaderboardEntry {
+  id: string;
   display_name: string;
+  xp: number;
   total_xp: number;
   streak_count: number;
+  rank: number;
 }
 
 export default function LeaderboardPage() {
@@ -28,31 +32,35 @@ export default function LeaderboardPage() {
       // Fetch top 50
       const { data: top } = await supabase
         .from("profiles")
-        .select("display_name, total_xp, streak_count")
+        .select("id, display_name, total_xp, streak_count")
         .order("total_xp", { ascending: false })
         .limit(50);
 
       if (top) {
-        setEntries(top);
+        setEntries(top.map((e: { id: string; display_name: string; total_xp: number; streak_count: number }, i: number) => ({
+          ...e,
+          xp: e.total_xp,
+          rank: i + 1,
+        })));
       }
 
       // Fetch current user rank
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("display_name, total_xp, streak_count")
+          .select("id, display_name, total_xp, streak_count")
           .eq("id", user.id)
           .single();
 
         if (profile) {
-          setUserEntry(profile);
-
           const { count } = await supabase
             .from("profiles")
             .select("id", { count: "exact", head: true })
             .gt("total_xp", profile.total_xp);
 
-          setUserRank((count ?? 0) + 1);
+          const rank = (count ?? 0) + 1;
+          setUserRank(rank);
+          setUserEntry({ ...profile, xp: profile.total_xp, rank });
         }
       }
 
@@ -63,6 +71,7 @@ export default function LeaderboardPage() {
   }, [user]);
 
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-24">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -123,5 +132,6 @@ export default function LeaderboardPage() {
         )}
       </motion.div>
     </main>
+  </PageTransition>
   );
 }

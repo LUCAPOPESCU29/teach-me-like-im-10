@@ -12,6 +12,12 @@ import { type ReactNode } from "react";
 export default function LayoutTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
+  // Admin panel has its own nested server layout — skip the page transition
+  // to avoid AnimatePresence mode="wait" racing with RSC streaming.
+  if (pathname.startsWith("/admin")) {
+    return <>{children}</>;
+  }
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div

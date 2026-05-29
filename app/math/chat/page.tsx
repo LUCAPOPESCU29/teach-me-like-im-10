@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import MathChat from "@/components/MathChat";
 import XPBadge from "@/components/XPBadge";
 import UserMenu from "@/components/UserMenu";
+import PageTransition from "@/components/PageTransition";
 
 export default function MathChatPage() {
   const router = useRouter();
 
   return (
+    <PageTransition>
     <div className="h-screen flex flex-col relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-indigo-500/[0.04] blur-[120px] pointer-events-none" />
@@ -43,5 +45,6 @@ export default function MathChatPage() {
         <MathChat />
       </div>
     </div>
+  </PageTransition>
   );
 }

@@ -49,29 +49,50 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<DataLayer>(guestData);
   const [supabase] = useState(() => createClient());
 
+  const syncProStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/pro-status");
+      const { isPro, expiresAt } = await res.json();
+      if (isPro && expiresAt) {
+        localStorage.setItem("tmi10_pro_expiry", String(expiresAt));
+      } else {
+        localStorage.removeItem("tmi10_pro_expiry");
+        localStorage.removeItem("tmi10_is_pro");
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       if (user) {
         setData(createAuthDataLayer(supabase, user.id));
+        syncProStatus();
       }
       setIsLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Skip INITIAL_SESSION — getUser() above already handles the initial sync,
+      // so this prevents a redundant double-fetch race condition on first load.
+      if (event === "INITIAL_SESSION") return;
+
       const newUser = session?.user ?? null;
       setUser(newUser);
       if (newUser) {
         setData(createAuthDataLayer(supabase, newUser.id));
+        syncProStatus();
       } else {
         setData(guestData);
+        localStorage.removeItem("tmi10_pro_expiry");
+        localStorage.removeItem("tmi10_is_pro");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, [supabase, syncProStatus]);
 
   const signIn = useCallback(
     async (email: string, password: string) => {
@@ -85,25 +106,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     [supabase]
   );
 
-  const signUp = useCallback(
-    async (email: string, password: string, displayName: string) => {
-      const { error, data: authData } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { display_name: displayName } },
-      });
-      if (error) return { error: error.message };
-
-      // Migrate guest data to the new account
-      if (authData.user) {
-        await migrateGuestData(authData.user.id);
-      }
-
-      return {};
-    },
-    [supabase]
-  );
-
+  // Defined before signUp so it's in scope for the dependency array
   const migrateGuestData = useCallback(
     async (userId: string) => {
       if (typeof window === "undefined") return;
@@ -189,6 +192,25 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("tmi10_lang");
     },
     [supabase]
+  );
+
+  const signUp = useCallback(
+    async (email: string, password: string, displayName: string) => {
+      const { error, data: authData } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: displayName } },
+      });
+      if (error) return { error: error.message };
+
+      // Migrate guest data to the new account
+      if (authData.user) {
+        await migrateGuestData(authData.user.id);
+      }
+
+      return {};
+    },
+    [supabase, migrateGuestData]
   );
 
   const signOut = useCallback(async () => {

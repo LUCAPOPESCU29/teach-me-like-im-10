@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 400px; height: 400px; overflow: hidden; background: #030609; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Deep star glow -->
+    <filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="32" result="big"/>
+      <feGaussianBlur stdDeviation="10" in="SourceGraphic" result="mid"/>
+      <feMerge>
+        <feMergeNode in="big"/>
+        <feMergeNode in="big"/>
+        <feMergeNode in="mid"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Text glow -->
+    <filter id="textGlow" x="-30%" y="-60%" width="160%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Subtle ambient green radial -->
+    <radialGradient id="ambG" cx="50%" cy="42%" r="42%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <!-- Vignette -->
+    <radialGradient id="vig" cx="50%" cy="50%" r="50%">
+      <stop offset="55%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0.8"/>
+    </radialGradient>
+
+    <!-- Star gradient — slightly lighter at top -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base fill -->
+  <rect width="400" height="400" fill="#030609"/>
+
+  <!-- Dot grid -->
+  <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+    <circle cx="0.5" cy="0.5" r="0.6" fill="rgba(255,255,255,0.045)"/>
+  </pattern>
+  <rect width="400" height="400" fill="url(#dots)"/>
+
+  <!-- Ambient green blob -->
+  <rect width="400" height="400" fill="url(#ambG)"/>
+
+  <!-- Thin accent ring behind star -->
+  <circle cx="200" cy="172" r="98" fill="none" stroke="#34d399" stroke-width="0.7" stroke-opacity="0.13"/>
+
+  <!-- ✦ Four-pointed star — tips at 200,84 / 200,260 / 112,172 / 288,172 -->
+  <!-- Pinch control points at ±18px from center -->
+  <path
+    d="M 200,84
+       Q 183,154  112,172
+       Q 183,190  200,260
+       Q 217,190  288,172
+       Q 217,154  200,84 Z"
+    fill="url(#starGrad)"
+    filter="url(#starGlow)"
+  />
+
+  <!-- Separator line -->
+  <line x1="152" y1="294" x2="248" y2="294" stroke="rgba(255,255,255,0.1)" stroke-width="0.6"/>
+
+  <!-- TM10 wordmark -->
+  <text
+    x="200" y="284"
+    font-family="'Syne', sans-serif"
+    font-size="52"
+    font-weight="800"
+    fill="white"
+    fill-opacity="0.93"
+    text-anchor="middle"
+    letter-spacing="-2"
+    filter="url(#textGlow)"
+  >TM10</text>
+
+  <!-- Tagline -->
+  <text
+    x="200" y="325"
+    font-family="'Syne', sans-serif"
+    font-size="9.5"
+    font-weight="700"
+    fill="white"
+    fill-opacity="0.22"
+    text-anchor="middle"
+    letter-spacing="3.8"
+  >TEACH ME LIKE I'M 10</text>
+
+  <!-- Vignette overlay -->
+  <rect width="400" height="400" fill="url(#vig)"/>
+</svg>
+</body>
+</html>

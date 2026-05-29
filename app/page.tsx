@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import TopicInput from "@/components/TopicInput";
@@ -37,7 +37,10 @@ function getGreeting(): { text: string; emoji: string } {
 
 const ALL_FEATURES = [
   { href: "/battle", label: "Battle", desc: "Quiz battles", icon: "⚔️", cat: "play" },
-  { href: "/speedrun", label: "Speed Run", desc: "Race to Level 5", icon: "⚡", cat: "play" },
+  { href: "/flash", label: "Flash", desc: "Learn in 10 min", icon: "⚡", cat: "play" },
+  { href: "/flash/math", label: "Math Flash", desc: "Worked examples", icon: "📐", cat: "play" },
+  { href: "/flash/upgrade", label: "Flash Pro", desc: "25/day · $3.50/mo", icon: "✦", cat: "play" },
+  { href: "/speedrun", label: "Speed Run", desc: "Race to Level 5", icon: "🏎️", cat: "play" },
   { href: "/wrong-on-purpose", label: "Spot Errors", desc: "Find mistakes", icon: "🔍", cat: "play" },
   { href: "/debate", label: "Debates", desc: "Argue & learn", icon: "🗣️", cat: "play" },
   { href: "/time-machine", label: "Time Machine", desc: "Explain to the past", icon: "🕰️", cat: "play" },
@@ -72,6 +75,188 @@ const DISCOVER_TABS = [
   { id: "social", label: "Social", icon: "👥" },
 ] as const;
 
+// ─── Flash Suite promo card ───────────────────────────────────────────────────
+const FLASH_HOOKS = [
+  "A single teaspoon of a neutron star weighs about a billion tons.",
+  "Your brain uses roughly the same power as a 20-watt light bulb.",
+  "Sharks are older than trees — they've been around for 450 million years.",
+  "There are more possible chess games than atoms in the observable universe.",
+  "The internet weighs about 50 grams — just the electrons in motion.",
+];
+
+function FlashPromoCard() {
+  const router = useRouter();
+  const [hookIdx, setHookIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [hoveredMode, setHoveredMode] = useState<"flash" | "math" | "upgrade" | null>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setHookIdx((i) => (i + 1) % FLASH_HOOKS.length);
+        setVisible(true);
+      }, 320);
+    }, 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.65, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="w-full max-w-xl mt-6"
+    >
+      {/* Suite header */}
+      <div className="flex items-center gap-2 mb-2.5 px-1">
+        <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Flash Suite</span>
+        <div className="flex-1 h-px bg-white/[0.05]" />
+        <span className="text-[9px] font-sans font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>
+          NEW
+        </span>
+      </div>
+
+      <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+
+        {/* ── General Flash row ── */}
+        <div
+          className="relative overflow-hidden p-4 cursor-pointer transition-all duration-200"
+          style={{ backgroundColor: hoveredMode === "flash" ? "rgba(245,158,11,0.07)" : "transparent" }}
+          onClick={() => router.push("/flash")}
+          onMouseEnter={() => setHoveredMode("flash")}
+          onMouseLeave={() => setHoveredMode(null)}
+        >
+          {/* Ambient glow */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", opacity: hoveredMode === "flash" ? 1 : 0, transition: "opacity 0.3s" }} />
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform duration-200"
+              style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.22)", transform: hoveredMode === "flash" ? "scale(1.06)" : "scale(1)" }}>
+              ⚡
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-sm font-sans font-bold" style={{ color: "#f59e0b" }}>Flash</span>
+                <span className="text-white/25 text-[11px] font-sans">Any topic · 10 minutes</span>
+              </div>
+              {/* Rotating hook */}
+              <div className="h-5 overflow-hidden">
+                <motion.p key={hookIdx}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : -6 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="text-[12px] font-sans text-white/40 truncate">
+                  {FLASH_HOOKS[hookIdx]}
+                </motion.p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {["Black holes", "CRISPR"].map((t) => (
+                <span key={t} className="hidden sm:inline text-[10px] font-sans text-white/25 px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {t}
+                </span>
+              ))}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: "#f59e0b", opacity: hoveredMode === "flash" ? 1 : 0.4, transition: "opacity 0.2s, transform 0.2s", transform: hoveredMode === "flash" ? "translateX(2px)" : "translateX(0)" }}>
+                <path d="M3 7h8M7.5 4L10.5 7l-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px mx-4" style={{ backgroundColor: "rgba(255,255,255,0.05)" }} />
+
+        {/* ── Math Flash row ── */}
+        <div
+          className="relative overflow-hidden p-4 cursor-pointer transition-all duration-200"
+          style={{ backgroundColor: hoveredMode === "math" ? "rgba(129,140,248,0.07)" : "transparent" }}
+          onClick={() => router.push("/flash/math")}
+          onMouseEnter={() => setHoveredMode("math")}
+          onMouseLeave={() => setHoveredMode(null)}
+        >
+          {/* Ambient glow */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(129,140,248,0.1) 0%, transparent 70%)", opacity: hoveredMode === "math" ? 1 : 0, transition: "opacity 0.3s" }} />
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform duration-200"
+              style={{ backgroundColor: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.22)", transform: hoveredMode === "math" ? "scale(1.06)" : "scale(1)" }}>
+              📐
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-sm font-sans font-bold" style={{ color: "#818cf8" }}>Math Flash</span>
+                <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}>NEW</span>
+              </div>
+              <p className="text-[12px] font-sans text-white/40 truncate">
+                Worked examples · practice notebook · step-by-step
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {["Derivatives", "Logarithms"].map((t) => (
+                <span key={t} className="hidden sm:inline text-[10px] font-sans text-white/25 px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {t}
+                </span>
+              ))}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: "#818cf8", opacity: hoveredMode === "math" ? 1 : 0.4, transition: "opacity 0.2s, transform 0.2s", transform: hoveredMode === "math" ? "translateX(2px)" : "translateX(0)" }}>
+                <path d="M3 7h8M7.5 4L10.5 7l-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px mx-4" style={{ backgroundColor: "rgba(255,255,255,0.05)" }} />
+
+        {/* ── Pro upgrade row ── */}
+        <div
+          className="relative overflow-hidden p-4 cursor-pointer transition-all duration-200 group"
+          style={{ backgroundColor: hoveredMode === "upgrade" ? "rgba(245,158,11,0.06)" : "transparent" }}
+          onClick={() => router.push("/flash/upgrade")}
+          onMouseEnter={() => setHoveredMode("upgrade")}
+          onMouseLeave={() => setHoveredMode(null)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base shrink-0"
+              style={{ background: "linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,146,60,0.1))", border: "1px solid rgba(245,158,11,0.2)" }}>
+              ✦
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[11px] font-sans font-bold" style={{ color: "#f59e0b" }}>Flash Pro</span>
+                <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>$3.50/mo</span>
+                <span className="text-white/20 text-[9px]">·</span>
+                <span className="text-[11px] font-sans font-bold" style={{ color: "#818cf8" }}>Executive</span>
+                <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}>$12/mo</span>
+              </div>
+              <p className="text-[11px] font-sans text-white/30">25/day · Science · History · Code · Flash history</p>
+            </div>
+            <span className="text-[11px] font-sans font-semibold shrink-0 transition-all duration-200 group-hover:translate-x-0.5"
+              style={{ color: "rgba(245,158,11,0.6)" }}>
+              Upgrade →
+            </span>
+          </div>
+        </div>
+
+        {/* Footer strip */}
+        <div className="px-4 py-2 flex items-center justify-between"
+          style={{ backgroundColor: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <span className="text-[11px] font-sans text-white/20">7 animated cards · pure signal · no fluff</span>
+          <span className="text-[11px] font-sans text-white/25">3 free / hour</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function hasTimeData(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -92,6 +277,7 @@ export default function Home() {
 
   const [discoverTab, setDiscoverTab] = useState<string>("play");
   const [showDiscover, setShowDiscover] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     setGreeting(getGreeting());
@@ -119,6 +305,14 @@ export default function Home() {
     const saved = data.getLang() as LangCode;
     if (saved) setLang(saved);
   }, [data]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 80) setScrolled(true);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const filteredFeatures = ALL_FEATURES.filter((f) => f.cat === discoverTab);
 
@@ -298,6 +492,9 @@ export default function Home() {
         <ExampleTopics />
       </motion.div>
 
+      {/* Flash promo */}
+      <FlashPromoCard />
+
       {/* Continue learning (only shows if you have history) */}
       <RecentTopics />
 
@@ -415,6 +612,9 @@ export default function Home() {
           <div className="flex gap-2 flex-wrap">
             {[
               { href: "/battle", icon: "⚔️", label: "Battle" },
+              { href: "/flash", icon: "⚡", label: "Flash" },
+              { href: "/flash/math", icon: "📐", label: "Math Flash" },
+              { href: "/flash/upgrade", icon: "✦", label: "Flash Pro" },
               { href: "/explore", icon: "🧭", label: "Explore" },
               { href: "/math", icon: "🔢", label: "Math" },
               { href: "/code", icon: "💻", label: "Code" },
@@ -452,6 +652,29 @@ export default function Home() {
       </motion.div>
 
       <OnboardingTour />
+
+      {/* Scroll hint — fades out once user scrolls */}
+      <AnimatePresence>
+        {!scrolled && (
+          <motion.div
+            className="fixed bottom-[72px] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1.5 pointer-events-none"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4, transition: { duration: 0.25 } }}
+            transition={{ delay: 1.4, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <span className="text-white/20 text-[10px] font-sans tracking-[0.14em] uppercase">scroll</span>
+            <motion.div
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 6L8 11L13 6" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Minimal footer */}
       <footer className="w-full py-6 sm:py-4 text-center pb-24 sm:pb-8 mt-10">

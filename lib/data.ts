@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unslugify } from "./utils";
 import type { XPState, AddXPResult } from "./xp";
 import {
   getXP as guestGetXP,
@@ -11,6 +12,7 @@ import {
   buyGuestFreeze,
   getGuestFreezes,
 } from "./xp";
+import { hasPerk, PERK } from "./perks";
 
 export { getQuizXP, getTeachBackXP };
 
@@ -40,6 +42,24 @@ export interface ActivityDay {
   count: number;
 }
 
+export interface WeeklyGoal {
+  weekStart: string;
+  topicsGoal: number;
+  topicsCompleted: number;
+  xpGoal: number;
+  xpEarned: number;
+  quizzesGoal: number;
+  quizzesCompleted: number;
+}
+
+function getCurrentWeekMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(now.getFullYear(), now.getMonth(), diff);
+  return monday.toISOString().slice(0, 10);
+}
+
 export interface DataLayer {
   getXP(): Promise<XPState>;
   addXP(amount: number, source?: string, topicSlug?: string): Promise<AddXPResult>;
@@ -56,6 +76,9 @@ export interface DataLayer {
   getBookmarks(): Promise<{ slug: string; topicName: string; lang: string; createdAt: string }[]>;
   isBookmarked(slug: string): Promise<boolean>;
   buyFreeze(): Promise<boolean>;
+  getWeeklyGoal(): Promise<WeeklyGoal | null>;
+  setWeeklyGoal(goals: { topicsGoal: number; xpGoal: number; quizzesGoal: number }): Promise<void>;
+  hasActivityToday(): Promise<boolean>;
   getBadgeData(): Promise<{
     totalXP: number;
     streakCount: number;
@@ -80,15 +103,40 @@ function cacheKey(slug: string, lang: string): string {
     : `${STORAGE_PREFIX}${lang}_${slug}`;
 }
 
-const EXCLUDED_KEYS = new Set(["tmi10_xp", "tmi10_streak", "tmi10_lang", "tmi10_bookmarks", "tmi10_badges"]);
+const EXCLUDED_KEYS = new Set([
+  "tmi10_xp", "tmi10_streak", "tmi10_lang", "tmi10_bookmarks", "tmi10_badges",
+  "tmi10_weekly_goal", "tmi10_weekly_goal_auth", "tmi10_visited_features",
+  "tmi10_accent_color", "tmi10_ghost_mode", "tmi10_font", "tmi10_text_size",
+  "tmi10_animations_disabled", "tmi10_streak_reminders_off", "tmi10_goal_reminders_off",
+  "tmi10_combo_hidden", "tmi10_seasonal_off", "tmi10_autoplay", "tmi10_xp_toasts_off",
+  "tmi10_onboarding_done", "tmi10_study_stats", "tmi10_learning_time",
+  "tmi10_combo_session", "tmi10_active_title", "tmi10_follows", "tmi10_wager_history",
+  "tmi10_speedruns", "tmi10_explorations", "tmi10_wop_stats", "tmi10_xp_history",
+  "tmi10_sound_muted", "tmi10_profile_custom", "tmi10_daily_reward",
+  "tmi10_daily_spin", "tmi10_streak_freezes", "tmi10_session_summary",
+  "tmi10_debate_history", "tmi10_notes", "tmi10_flashcards", "tmi10_journal",
+  "tmi10_dna", "tmi10_compare_history",
+  "tmi10_shop_purchases", "tmi10_active_effect", "tmi10_xp_boost",
+  "tmi10_freezes", "tmi10_title_data", "tmi10_blackjack_stats",
+  "tmi10_active_perks", "tmi10_xp_gen_last", "tmi10_streak_shield_used", "tmi10_daily_topics", "tmi10_is_pro",
+]);
 
 function getGuestTopicKeys(): string[] {
   const keys: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith(STORAGE_PREFIX) && !EXCLUDED_KEYS.has(key)) {
-      keys.push(key);
-    }
+    if (!key || !key.startsWith(STORAGE_PREFIX) || EXCLUDED_KEYS.has(key)) continue;
+    // Skip keys that contain underscores after the prefix (likely settings, not topics)
+    // Topic keys are like tmi10_quantum-physics or tmi10_es_quantum-physics
+    const afterPrefix = key.slice(STORAGE_PREFIX.length);
+    // Allow lang prefix pattern: 2-letter-code underscore then slug (e.g. es_topic)
+    const langMatch = afterPrefix.match(/^[a-z]{2}_(.+)$/);
+    const slug = langMatch ? langMatch[1] : afterPrefix;
+    // Skip if slug contains underscores (non-topic keys we missed)
+    if (slug.includes("_")) continue;
+    // Skip very short slugs (likely not real topics)
+    if (slug.length < 3) continue;
+    keys.push(key);
   }
   return keys;
 }
@@ -136,23 +184,46 @@ export function createGuestDataLayer(): DataLayer {
     async getTopicHistory() {
       if (typeof window === "undefined") return [];
       const items: TopicHistoryItem[] = [];
+      const seen = new Set<string>();
       const keys = getGuestTopicKeys();
       for (const key of keys) {
         try {
           const raw = localStorage.getItem(key);
           if (!raw) continue;
-          const levels = JSON.parse(raw) as LevelData[];
+          const parsed = JSON.parse(raw);
+          // Validate it's actually a LevelData array (not some other JSON object)
+          if (!Array.isArray(parsed)) continue;
+          if (parsed.length === 0) continue;
+          // Must have at least one item with a "level" and "content" field
+          if (typeof parsed[0].level !== "number" || typeof parsed[0].content !== "string") continue;
+          const levels = parsed as LevelData[];
           const slug = key.replace(STORAGE_PREFIX, "").replace(/^[a-z]{2}_/, "");
+          // Skip very short slugs that are likely not real topics
+          if (slug.length < 2) continue;
           const langMatch = key.match(new RegExp(`^${STORAGE_PREFIX}([a-z]{2})_`));
           const lang = langMatch ? langMatch[1] : "en";
+          // Deduplicate by normalized slug (lowercase, trimmed)
+          const normalizedSlug = slug.toLowerCase().trim();
+          if (seen.has(normalizedSlug)) continue;
+          seen.add(normalizedSlug);
           const maxLevel = Math.max(...levels.filter(l => l.complete).map(l => l.level), 0);
-          items.push({ slug, topicName: slug.replace(/-/g, " "), lang, maxLevel, updatedAt: new Date().toISOString() });
+          const topicName = unslugify(slug);
+          items.push({ slug, topicName, lang, maxLevel, updatedAt: new Date().toISOString() });
         } catch {}
       }
       return items;
     },
     async getXPHistory() { return []; },
     async getActivityMap() { return []; },
+    async hasActivityToday() {
+      if (typeof window === "undefined") return false;
+      try {
+        const raw = localStorage.getItem("tmi10_streak");
+        if (!raw) return false;
+        const streak = JSON.parse(raw) as { lastDate: string; count: number };
+        return streak.lastDate === new Date().toISOString().slice(0, 10);
+      } catch { return false; }
+    },
     async addBookmark(slug: string, topicName: string, lang: string) {
       try {
         const raw = localStorage.getItem(GUEST_BOOKMARKS_KEY);
@@ -182,6 +253,43 @@ export function createGuestDataLayer(): DataLayer {
         const bookmarks = raw ? JSON.parse(raw) : [];
         return bookmarks.some((b: { slug: string }) => b.slug === slug);
       } catch { return false; }
+    },
+    async getWeeklyGoal() {
+      if (typeof window === "undefined") return null;
+      try {
+        const raw = localStorage.getItem("tmi10_weekly_goal");
+        if (!raw) return null;
+        const stored = JSON.parse(raw);
+        const currentMonday = getCurrentWeekMonday();
+        if (stored.weekStart !== currentMonday) return null;
+        // Compute progress dynamically
+        const topicKeys = getGuestTopicKeys();
+        const topicsCompleted = Math.max(topicKeys.length - (stored.topicsAtStart || 0), 0);
+        const xpState = guestGetXP();
+        const xpEarned = Math.max(xpState.totalXP - (stored.xpAtStart || 0), 0);
+        return {
+          weekStart: stored.weekStart,
+          topicsGoal: stored.topicsGoal,
+          topicsCompleted,
+          xpGoal: stored.xpGoal,
+          xpEarned,
+          quizzesGoal: stored.quizzesGoal,
+          quizzesCompleted: 0,
+        };
+      } catch { return null; }
+    },
+    async setWeeklyGoal(goals: { topicsGoal: number; xpGoal: number; quizzesGoal: number }) {
+      const topicKeys = getGuestTopicKeys();
+      const xpState = guestGetXP();
+      const stored = {
+        weekStart: getCurrentWeekMonday(),
+        topicsGoal: goals.topicsGoal,
+        xpGoal: goals.xpGoal,
+        quizzesGoal: goals.quizzesGoal,
+        topicsAtStart: topicKeys.length,
+        xpAtStart: xpState.totalXP,
+      };
+      localStorage.setItem("tmi10_weekly_goal", JSON.stringify(stored));
     },
     async buyFreeze() {
       return buyGuestFreeze();
@@ -282,7 +390,10 @@ export function createAuthDataLayer(
 
       const oldXP = profile?.total_xp || 0;
       const oldLevel = getLevel(oldXP);
-      const newXP = oldXP + amount;
+      // Apply Golden Touch perk (+50% XP) — same logic as guest addXP in xp.ts
+      const boosted =
+        amount > 0 && hasPerk(PERK.GOLDEN_TOUCH) ? Math.floor(amount * 1.5) : amount;
+      const newXP = oldXP + boosted;
       const newLevel = getLevel(newXP);
 
       const today = todayStr();
@@ -323,7 +434,7 @@ export function createAuthDataLayer(
 
       return {
         totalXP: newXP,
-        xpGained: amount,
+        xpGained: boosted,
         streak: newStreak,
         levelUp: newLevel.level > oldLevel.level,
         newTitle: newLevel.title,
@@ -351,6 +462,72 @@ export function createAuthDataLayer(
         .eq("id", userId);
 
       return true;
+    },
+
+    async getWeeklyGoal() {
+      if (typeof window === "undefined") return null;
+      try {
+        const raw = localStorage.getItem("tmi10_weekly_goal_auth");
+        if (!raw) return null;
+        const stored = JSON.parse(raw);
+        const currentMonday = getCurrentWeekMonday();
+        if (stored.weekStart !== currentMonday) return null;
+
+        // Compute progress from Supabase
+        const mondayISO = `${currentMonday}T00:00:00.000Z`;
+
+        const [topicsRes, xpRes, quizRes] = await Promise.all([
+          supabase
+            .from("topic_progress")
+            .select("slug", { count: "exact" })
+            .eq("user_id", userId)
+            .gte("updated_at", mondayISO),
+          supabase
+            .from("xp_events")
+            .select("amount")
+            .eq("user_id", userId)
+            .gte("created_at", mondayISO),
+          supabase
+            .from("xp_events")
+            .select("id", { count: "exact" })
+            .eq("user_id", userId)
+            .like("source", "quiz%")
+            .gte("created_at", mondayISO),
+        ]);
+
+        const topicsCompleted = topicsRes.count || 0;
+        const xpEarned = (xpRes.data || []).reduce((sum, e) => sum + e.amount, 0);
+        const quizzesCompleted = quizRes.count || 0;
+
+        return {
+          weekStart: stored.weekStart,
+          topicsGoal: stored.topicsGoal,
+          topicsCompleted,
+          xpGoal: stored.xpGoal,
+          xpEarned,
+          quizzesGoal: stored.quizzesGoal,
+          quizzesCompleted,
+        };
+      } catch { return null; }
+    },
+
+    async setWeeklyGoal(goals: { topicsGoal: number; xpGoal: number; quizzesGoal: number }) {
+      const stored = {
+        weekStart: getCurrentWeekMonday(),
+        topicsGoal: goals.topicsGoal,
+        xpGoal: goals.xpGoal,
+        quizzesGoal: goals.quizzesGoal,
+      };
+      localStorage.setItem("tmi10_weekly_goal_auth", JSON.stringify(stored));
+    },
+
+    async hasActivityToday() {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("streak_last_date")
+        .eq("id", userId)
+        .single();
+      return profile?.streak_last_date === todayStr();
     },
 
     async getTopicLevels(slug: string, lang: string) {

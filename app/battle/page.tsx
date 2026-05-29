@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useCelebration } from "@/components/CelebrationProvider";
 import type { LangCode } from "@/lib/utils";
+import PageTransition from "@/components/PageTransition";
 
 interface Question {
   question: string;
@@ -105,6 +106,7 @@ export default function BattlePage() {
   }
 
   return (
+    <PageTransition>
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12 pb-24 relative">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-rose-500/[0.04] blur-[120px] pointer-events-none" />
 
@@ -302,5 +304,6 @@ export default function BattlePage() {
         </AnimatePresence>
       </div>
     </main>
+  </PageTransition>
   );
 }

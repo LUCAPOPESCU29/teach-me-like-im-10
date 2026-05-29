@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import PathCard from "@/components/PathCard";
 import { LEARNING_PATHS } from "@/lib/paths";
+import PageTransition from "@/components/PageTransition";
 
 export default function PathsPage() {
   const { data: dataLayer } = useAuth();
@@ -41,6 +42,7 @@ export default function PathsPage() {
   }, [fetchProgress]);
 
   return (
+    <PageTransition>
     <main className="min-h-screen max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24">
       <motion.div
         className="mb-8"
@@ -70,5 +72,6 @@ export default function PathsPage() {
         ))}
       </div>
     </main>
+  </PageTransition>
   );
 }

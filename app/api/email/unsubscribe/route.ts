@@ -1,12 +1,19 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { verifyUnsubToken } from "@/lib/unsubscribe-token";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
   const type = searchParams.get("type");
+  const token = searchParams.get("token");
 
   if (!userId || !type || !["streak", "digest", "newsletter"].includes(type)) {
     return new Response("Invalid unsubscribe link", { status: 400 });
+  }
+
+  // Verify the HMAC token to prevent IDOR (anyone changing userId to unsubscribe others)
+  if (!token || !verifyUnsubToken(userId, type, token)) {
+    return new Response("Invalid or expired unsubscribe link", { status: 403 });
   }
 
   const admin = createAdminClient();

@@ -795,6 +795,62 @@ export default function ProPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ── Flash Plans (also shown to Pro subscribers) ── */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="mt-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px flex-1 bg-white/[0.05]" />
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Flash add-ons</span>
+                <div className="h-px flex-1 bg-white/[0.05]" />
+              </div>
+              <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(245,158,11,0.12)", backgroundColor: "rgba(245,158,11,0.03)" }}>
+                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+                      style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.2)" }}>⚡</div>
+                    <div>
+                      <p className="text-sm font-sans font-bold text-white">Flash Plans</p>
+                      <p className="text-[11px] font-sans text-white/35">Separate from TM10 Pro · power up Flash specifically</p>
+                    </div>
+                  </div>
+                </div>
+                {[
+                  { label: "Flash Pro", limit: "25 / day", price: "$3.50/mo", color: "#f59e0b", rgb: "245,158,11", features: ["Science, History & Code Flash", "Flash history saved", "No hourly caps"] },
+                  { label: "Flash Executive", limit: "190 / 12h", price: "$12/mo", color: "#818cf8", rgb: "129,140,248", features: ["Everything in Flash Pro", "Extreme volume access", "Power-user tier"] },
+                ].map((tier, i) => (
+                  <div key={tier.label} className={i > 0 ? "border-t" : ""} style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                    <div className="px-5 py-4 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.label}</span>
+                          <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
+                            {tier.limit}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                          {tier.features.map(f => (
+                            <span key={f} className="text-[11px] font-sans text-white/35">· {f}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.price}</span>
+                        <button onClick={() => { window.location.href = "/flash/upgrade"; }}
+                          className="px-3.5 py-1.5 rounded-lg text-[11px] font-sans font-bold transition-all duration-200 hover:scale-105"
+                          style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
+                          Get →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="px-5 py-3 flex items-center gap-2"
+                  style={{ backgroundColor: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span className="text-[11px] font-sans text-white/25">Independent of TM10 Pro · cancel anytime · 7-day refund</span>
+                </div>
+              </div>
+            </motion.div>
           </motion.section>
 
         ) : (
@@ -1125,6 +1181,71 @@ export default function ProPage() {
           </section>
 
           <div className="h-24" />
+
+          {/* ── Flash Plans section ── */}
+          <section className="max-w-2xl mx-auto px-4 pb-20">
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px flex-1 bg-white/[0.05]" />
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Also available</span>
+                <div className="h-px flex-1 bg-white/[0.05]" />
+              </div>
+
+              <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(245,158,11,0.12)", backgroundColor: "rgba(245,158,11,0.03)" }}>
+                {/* Header */}
+                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+                      style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.2)" }}>⚡</div>
+                    <div>
+                      <p className="text-sm font-sans font-bold text-white">Flash Plans</p>
+                      <p className="text-[11px] font-sans text-white/35">Separate from TM10 Pro — power up Flash specifically</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Two tier rows */}
+                {[
+                  { label: "Flash Pro", limit: "25 / day", price: "$3.50/mo", color: "#f59e0b", rgb: "245,158,11", features: ["Science, History & Code Flash", "Flash history saved", "No hourly caps"] },
+                  { label: "Flash Executive", limit: "190 / 12h", price: "$12/mo", color: "#818cf8", rgb: "129,140,248", features: ["Everything in Pro", "Extreme volume access", "Power-user tier"] },
+                ].map((tier, i) => (
+                  <div key={tier.label} className={i > 0 ? "border-t" : ""} style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                    <div className="px-5 py-4 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.label}</span>
+                          <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
+                            {tier.limit}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                          {tier.features.map(f => (
+                            <span key={f} className="text-[11px] font-sans text-white/35">· {f}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.price}</span>
+                        <button onClick={() => window.location.href = "/flash/upgrade"}
+                          className="px-3.5 py-1.5 rounded-lg text-[11px] font-sans font-bold transition-all duration-200 hover:scale-105"
+                          style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
+                          Get →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Footer */}
+                <div className="px-5 py-3 flex items-center gap-2"
+                  style={{ backgroundColor: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span className="text-[11px] font-sans text-white/25">Independent of TM10 Pro · cancel anytime · 7-day refund</span>
+                </div>
+              </div>
+            </motion.div>
+          </section>
           </>
         )}
       </AnimatePresence>

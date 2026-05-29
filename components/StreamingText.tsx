@@ -113,7 +113,7 @@ export default function StreamingText({
 
   return (
     <motion.div
-      className="text-white/80 font-serif text-base sm:text-[17px]"
+      className="text-white/80 font-serif text-base sm:text-[17px] reading-content"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

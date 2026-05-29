@@ -18,6 +18,11 @@ const NAV_ITEMS = [
       <path d="M14.5 6.5L18 3h3v3l-3.5 3.5"/><path d="M5 14l4 4"/><path d="M7 17l-3 3"/>
     </svg>
   )},
+  { href: "/flash", label: "Flash", color: "#f59e0b", icon: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2L4.09 12.97A1 1 0 005 14.5h6.5L10 22l9.91-9.97A1 1 0 0019 10.5H12.5L13 2z"/>
+    </svg>
+  )},
   { href: "/speedrun", label: "Speed Run", color: "#fbbf24", icon: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -47,6 +52,8 @@ const NAV_ITEMS = [
 
 // Extra items only shown in the mobile hamburger "More" section
 const MOBILE_EXTRA_ITEMS = [
+  { href: "/flash/math", label: "Math Flash", color: "#818cf8", icon: "📐" },
+  { href: "/flash/upgrade", label: "Flash Pro", color: "#f59e0b", icon: "✦" },
   { href: "/debate", label: "Debates", color: "#f43f5e", icon: "🗣️" },
   { href: "/time-machine", label: "Time Machine", color: "#67e8f9", icon: "🕰️" },
   { href: "/wrong-on-purpose", label: "Spot Errors", color: "#f59e0b", icon: "🔍" },
@@ -70,7 +77,7 @@ const MOBILE_EXTRA_ITEMS = [
 ];
 
 export default function Navbar() {
-  const { data } = useAuth();
+  const { data, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -83,6 +90,7 @@ export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const isAdmin = user?.email === "xpking@teachmelikeim10.xyz";
 
   useEffect(() => {
     const saved = data.getLang() as LangCode;
@@ -421,6 +429,43 @@ export default function Navbar() {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Admin */}
+          {isAdmin && (
+            <div className="relative">
+              <motion.button
+                onClick={() => router.push("/admin")}
+                onMouseEnter={() => setHoveredItem("__admin")}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200"
+                style={{
+                  color: pathname.startsWith("/admin") ? "#34d399" : "rgba(52,211,153,0.45)",
+                  backgroundColor: pathname.startsWith("/admin") ? "rgba(52,211,153,0.12)" : "transparent",
+                }}
+                whileHover={{ backgroundColor: "rgba(52,211,153,0.1)", color: "#34d399" }}
+                whileTap={{ scale: 0.93 }}
+                aria-label="Admin"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </motion.button>
+              <AnimatePresence>
+                {hoveredItem === "__admin" && (
+                  <motion.div
+                    className="absolute top-full left-1/2 mt-1.5 px-2 py-0.5 rounded-md text-[9px] font-sans whitespace-nowrap pointer-events-none"
+                    style={{ backgroundColor: "rgba(52,211,153,0.12)", color: "#34d399", border: "1px solid rgba(52,211,153,0.2)", x: "-50%" }}
+                    initial={{ opacity: 0, y: -3, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -3, scale: 0.95 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    Admin
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           <div className="hidden sm:block">
             <LanguagePicker value={lang} onChange={handleLangChange} />

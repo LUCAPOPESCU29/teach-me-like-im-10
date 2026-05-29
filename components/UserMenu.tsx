@@ -1,14 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./AuthProvider";
+
+export function useGhostMode() {
+  const [ghostMode, setGhostMode] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("tmi10_ghost_mode");
+    if (stored === "true") setGhostMode(true);
+  }, []);
+
+  const toggleGhostMode = () => {
+    setGhostMode((prev) => {
+      const next = !prev;
+      localStorage.setItem("tmi10_ghost_mode", String(next));
+      window.dispatchEvent(new Event("ghost-mode-change"));
+      return next;
+    });
+  };
+
+  return { ghostMode, toggleGhostMode };
+}
 
 export default function UserMenu() {
   const { user, isGuest, signOut } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { ghostMode, toggleGhostMode } = useGhostMode();
 
   if (isGuest) {
     return (
@@ -34,6 +55,7 @@ export default function UserMenu() {
           {displayName[0].toUpperCase()}
         </div>
         <span className="text-white/50 text-xs font-sans">{displayName}</span>
+        {ghostMode && <span className="text-xs opacity-60">{"\uD83D\uDC7B"}</span>}
       </button>
 
       <AnimatePresence>
@@ -101,6 +123,29 @@ export default function UserMenu() {
             >
               Leaderboard
             </button>
+            <div className="border-t border-white/5 mt-1 pt-1">
+              <button
+                onClick={toggleGhostMode}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
+              >
+                <span className="text-white/50 text-sm font-sans group-hover:text-white/70 flex items-center gap-1.5">
+                  <span className="text-base">{"\uD83D\uDC7B"}</span> Ghost Mode
+                </span>
+                <div
+                  className={`relative w-8 h-[18px] rounded-full transition-colors duration-200 ${
+                    ghostMode ? "bg-purple-500/40" : "bg-white/10"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full transition-all duration-200 ${
+                      ghostMode
+                        ? "left-[16px] bg-purple-400"
+                        : "left-[2px] bg-white/30"
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
             <div className="border-t border-white/5 mt-1 pt-1">
               <button
                 onClick={async () => {

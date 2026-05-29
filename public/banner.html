@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; width: 100%; }
+  svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1500 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <filter id="glow" x="-20%" y="-30%" width="140%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="leftGlow" cx="22%" cy="58%" r="40%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rightGlow" cx="85%" cy="20%" r="30%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <linearGradient id="leftEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#030609" stop-opacity="0.6"/>
+      <stop offset="18%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="rightEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="82%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#030609" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="500" fill="#030609"/>
+  <rect width="1500" height="500" fill="url(#leftGlow)"/>
+  <rect width="1500" height="500" fill="url(#rightGlow)"/>
+
+  <!-- Dot grid -->
+  <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="0.65" fill="rgba(255,255,255,0.038)"/>
+  </pattern>
+  <rect width="1500" height="500" fill="url(#dots)"/>
+
+  <!-- Badge -->
+  <rect x="100" y="60" width="230" height="30" rx="15" fill="#34d399" fill-opacity="0.08" stroke="#34d399" stroke-opacity="0.35" stroke-width="0.8"/>
+  <circle cx="118" cy="75" r="4" fill="#34d399"/>
+  <text x="132" y="80" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#34d399" fill-opacity="0.9" letter-spacing="2.5">AI-POWERED LEARNING</text>
+
+  <!-- "Teach Me" — white, Syne 800 -->
+  <text
+    x="96" y="260"
+    font-family="'Syne', sans-serif"
+    font-size="172"
+    font-weight="800"
+    fill="white"
+    fill-opacity="0.9"
+    letter-spacing="-5"
+  >Teach Me</text>
+
+  <!-- "Like I'm 10" — emerald, Syne 800 with glow -->
+  <text
+    x="96" y="452"
+    font-family="'Syne', sans-serif"
+    font-size="172"
+    font-weight="800"
+    fill="#34d399"
+    letter-spacing="-5"
+    filter="url(#glow)"
+  >Like I'm 10</text>
+
+  <!-- Subtle URL tag bottom right -->
+  <text x="1400" y="478" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="white" fill-opacity="0.15" text-anchor="end" letter-spacing="2">TMLIKE10.COM</text>
+
+  <!-- Edge vignettes -->
+  <rect width="1500" height="500" fill="url(#leftEdge)"/>
+  <rect width="1500" height="500" fill="url(#rightEdge)"/>
+</svg>
+</body>
+</html>

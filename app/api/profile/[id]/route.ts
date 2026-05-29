@@ -13,7 +13,7 @@ export async function GET(
     // Fetch profile
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, display_name, total_xp, streak_count, created_at")
+      .select("id, display_name, total_xp, streak_count, avatar_url, created_at")
       .eq("id", id)
       .single();
 
@@ -21,16 +21,20 @@ export async function GET(
       return Response.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Fetch topics explored
+    // Fetch all topics explored
     const { data: topics } = await supabase
       .from("topic_progress")
       .select("slug, topic_name, max_level, lang, updated_at")
       .eq("user_id", id)
       .order("updated_at", { ascending: false })
-      .limit(20);
+      .limit(50);
 
-    // Fetch badge data
+    // Top topics — ordered by max_level desc, limit 6
     const topicList = topics || [];
+    const topTopics = [...topicList]
+      .sort((a, b) => b.max_level - a.max_level)
+      .slice(0, 6);
+
     const topicsExplored = topicList.length;
     const maxLevelReached = Math.max(0, ...topicList.map((t) => t.max_level));
     const allFiveLevels = topicList.some((t) => t.max_level >= 5);
@@ -51,25 +55,38 @@ export async function GET(
       .eq("source", "teachback_pass")
       .limit(1);
 
-    // Check topics in one day
+    // Check topics in one day + build activity data for heatmap
     const { data: xpEvents } = await supabase
       .from("xp_events")
-      .select("topic_slug, created_at")
+      .select("topic_slug, amount, created_at")
       .eq("user_id", id)
-      .eq("source", "level");
+      .order("created_at", { ascending: false });
 
     let topicsInOneDay = 0;
+    const activityMap = new Map<string, number>();
+
     if (xpEvents) {
       const dayMap = new Map<string, Set<string>>();
       for (const ev of xpEvents) {
-        if (!ev.topic_slug) continue;
         const day = ev.created_at.slice(0, 10);
+
+        // Activity heatmap: count events per day
+        activityMap.set(day, (activityMap.get(day) || 0) + 1);
+
+        // Topics in one day
+        if (!ev.topic_slug) continue;
         if (!dayMap.has(day)) dayMap.set(day, new Set());
         dayMap.get(day)!.add(ev.topic_slug);
       }
       for (const slugs of dayMap.values()) {
         topicsInOneDay = Math.max(topicsInOneDay, slugs.size);
       }
+    }
+
+    // Convert activity map to array for the heatmap
+    const activity: { date: string; count: number }[] = [];
+    for (const [date, count] of activityMap) {
+      activity.push({ date, count });
     }
 
     // Get rank
@@ -101,12 +118,26 @@ export async function GET(
       }
     }
 
+    // Badge data
+    const badgeData = {
+      totalXP: profile.total_xp,
+      streakCount: profile.streak_count,
+      topicsExplored,
+      maxLevelReached,
+      quizAced: (quizAceData?.length || 0) > 0,
+      teachBackPassed: (teachBackData?.length || 0) > 0,
+      languagesUsed,
+      topicsInOneDay,
+      allFiveLevels,
+    };
+
     return Response.json({
       profile: {
         id: profile.id,
         displayName: profile.display_name,
         totalXP: profile.total_xp,
         streakCount: profile.streak_count,
+        avatarUrl: profile.avatar_url,
         level,
         title,
         rank,
@@ -118,16 +149,19 @@ export async function GET(
         maxLevel: t.max_level,
         lang: t.lang,
       })),
-      badgeData: {
+      topTopics: topTopics.map((t) => ({
+        slug: t.slug,
+        name: t.topic_name,
+        maxLevel: t.max_level,
+        lang: t.lang,
+      })),
+      badgeData,
+      activity,
+      stats: {
         totalXP: profile.total_xp,
-        streakCount: profile.streak_count,
-        topicsExplored,
-        maxLevelReached,
-        quizAced: (quizAceData?.length || 0) > 0,
-        teachBackPassed: (teachBackData?.length || 0) > 0,
-        languagesUsed,
-        topicsInOneDay,
-        allFiveLevels,
+        streak: profile.streak_count,
+        topicsCount: topicsExplored,
+        badgesCount: 0, // Will be computed client-side from badgeData
       },
     });
   } catch (error) {

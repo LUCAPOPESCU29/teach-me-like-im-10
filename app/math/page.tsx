@@ -11,6 +11,7 @@ import UserMenu from "@/components/UserMenu";
 import MathSolver from "@/components/MathSolver";
 import PullToRefresh from "@/components/PullToRefresh";
 import StarBorder from "@/components/StarBorder";
+import PageTransition from "@/components/PageTransition";
 
 export default function MathPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function MathPage() {
   }
 
   return (
-    <PullToRefresh onRefresh={refreshData}>
+    <PullToRefresh>
     <main className="min-h-screen flex flex-col items-center px-4 py-16 pb-24 relative overflow-hidden">
       {/* Ambient glow — indigo/violet */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-500/[0.05] blur-[120px] pointer-events-none" />
@@ -312,6 +313,7 @@ export default function MathPage() {
                   const topicSlug = slugify(topicName);
                   const isCompleted = completedSlugs.has(topicSlug);
                   return (
+    <PageTransition>
                     <button
                       key={topicName}
                       onClick={() => goToTopic(topicName)}
@@ -325,7 +327,8 @@ export default function MathPage() {
                       {isCompleted && <span className="mr-1 opacity-60">{"\u2713"}</span>}
                       {topicName}
                     </button>
-                  );
+                  </PageTransition>
+  );
                 })}
               </div>
             </motion.div>
