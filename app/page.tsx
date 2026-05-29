@@ -110,15 +110,15 @@ function FlashPromoCard() {
     >
       {/* Suite header */}
       <div className="flex items-center gap-2 mb-2.5 px-1">
-        <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Flash Suite</span>
+        <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/30">⚡ Flash Suite</span>
         <div className="flex-1 h-px bg-white/[0.05]" />
         <span className="text-[9px] font-sans font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>
+          style={{ backgroundColor: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.25)" }}>
           NEW
         </span>
       </div>
 
-      <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+      <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
 
         {/* ── General Flash row ── */}
         <div
@@ -128,10 +128,8 @@ function FlashPromoCard() {
           onMouseEnter={() => setHoveredMode("flash")}
           onMouseLeave={() => setHoveredMode(null)}
         >
-          {/* Ambient glow */}
           <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", opacity: hoveredMode === "flash" ? 1 : 0, transition: "opacity 0.3s" }} />
-
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform duration-200"
               style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.22)", transform: hoveredMode === "flash" ? "scale(1.06)" : "scale(1)" }}>
@@ -142,7 +140,6 @@ function FlashPromoCard() {
                 <span className="text-sm font-sans font-bold" style={{ color: "#f59e0b" }}>Flash</span>
                 <span className="text-white/25 text-[11px] font-sans">Any topic · 10 minutes</span>
               </div>
-              {/* Rotating hook */}
               <div className="h-5 overflow-hidden">
                 <motion.p key={hookIdx}
                   initial={{ opacity: 0, y: 6 }}
@@ -178,10 +175,8 @@ function FlashPromoCard() {
           onMouseEnter={() => setHoveredMode("math")}
           onMouseLeave={() => setHoveredMode(null)}
         >
-          {/* Ambient glow */}
           <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(129,140,248,0.1) 0%, transparent 70%)", opacity: hoveredMode === "math" ? 1 : 0, transition: "opacity 0.3s" }} />
-
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform duration-200"
               style={{ backgroundColor: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.22)", transform: hoveredMode === "math" ? "scale(1.06)" : "scale(1)" }}>
@@ -211,39 +206,63 @@ function FlashPromoCard() {
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="h-px mx-4" style={{ backgroundColor: "rgba(255,255,255,0.05)" }} />
+        {/* ── Flash Plans upgrade block — prominent CTA ── */}
+        <div className="p-3">
+          <motion.div
+            className="relative overflow-hidden rounded-xl cursor-pointer"
+            style={{
+              background: hoveredMode === "upgrade"
+                ? "linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(251,146,60,0.1) 50%, rgba(129,140,248,0.12) 100%)"
+                : "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(251,146,60,0.06) 50%, rgba(129,140,248,0.08) 100%)",
+              border: hoveredMode === "upgrade" ? "1px solid rgba(245,158,11,0.35)" : "1px solid rgba(245,158,11,0.2)",
+              transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
+            }}
+            onClick={() => router.push("/flash/upgrade")}
+            onMouseEnter={() => setHoveredMode("upgrade")}
+            onMouseLeave={() => setHoveredMode(null)}
+            whileTap={{ scale: 0.98 }}
+          >
+            {/* Shimmer sweep */}
+            <motion.div className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.06) 50%, transparent 65%)" }}
+              animate={{ x: ["-100%", "200%"] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 2.5 }} />
 
-        {/* ── Pro upgrade row ── */}
-        <div
-          className="relative overflow-hidden p-4 cursor-pointer transition-all duration-200 group"
-          style={{ backgroundColor: hoveredMode === "upgrade" ? "rgba(245,158,11,0.06)" : "transparent" }}
-          onClick={() => router.push("/flash/upgrade")}
-          onMouseEnter={() => setHoveredMode("upgrade")}
-          onMouseLeave={() => setHoveredMode(null)}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base shrink-0"
-              style={{ background: "linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,146,60,0.1))", border: "1px solid rgba(245,158,11,0.2)" }}>
-              ✦
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[11px] font-sans font-bold" style={{ color: "#f59e0b" }}>Flash Pro</span>
-                <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>$3.50/mo</span>
-                <span className="text-white/20 text-[9px]">·</span>
-                <span className="text-[11px] font-sans font-bold" style={{ color: "#818cf8" }}>Executive</span>
-                <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}>$12/mo</span>
+            <div className="relative p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
+                    style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.25), rgba(251,146,60,0.15))", border: "1px solid rgba(245,158,11,0.3)" }}>
+                    ✦
+                  </div>
+                  <div>
+                    <p className="text-sm font-sans font-bold text-white">Flash Pro & Executive</p>
+                    <p className="text-[11px] font-sans text-white/40">Science · History · Code · history saved</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-sans text-xs font-bold shrink-0 transition-all duration-200"
+                  style={{
+                    background: "linear-gradient(135deg, #f59e0b, #fb923c)",
+                    color: "#000",
+                    boxShadow: hoveredMode === "upgrade" ? "0 4px 16px rgba(245,158,11,0.4)" : "0 2px 8px rgba(245,158,11,0.2)",
+                    transform: hoveredMode === "upgrade" ? "scale(1.04)" : "scale(1)",
+                    transition: "all 0.2s ease",
+                  }}>
+                  Upgrade →
+                </div>
               </div>
-              <p className="text-[11px] font-sans text-white/30">25/day · Science · History · Code · Flash history</p>
+              <div className="flex gap-2">
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-sans font-semibold"
+                  style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.22)" }}>
+                  Flash Pro <span className="font-bold">$3.50/mo</span> · 25/day
+                </span>
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-sans font-semibold"
+                  style={{ backgroundColor: "rgba(129,140,248,0.1)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}>
+                  Executive <span className="font-bold">$12/mo</span> · 190/12h
+                </span>
+              </div>
             </div>
-            <span className="text-[11px] font-sans font-semibold shrink-0 transition-all duration-200 group-hover:translate-x-0.5"
-              style={{ color: "rgba(245,158,11,0.6)" }}>
-              Upgrade →
-            </span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Footer strip */}

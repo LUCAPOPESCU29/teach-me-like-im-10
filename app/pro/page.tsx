@@ -797,57 +797,65 @@ export default function ProPage() {
             </AnimatePresence>
 
             {/* ── Flash Plans (also shown to Pro subscribers) ── */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="mt-8">
-              <div className="flex items-center gap-3 mb-4">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="mt-10">
+              <div className="flex items-center gap-3 mb-5">
                 <div className="h-px flex-1 bg-white/[0.05]" />
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Flash add-ons</span>
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/30">⚡ Flash add-ons</span>
                 <div className="h-px flex-1 bg-white/[0.05]" />
               </div>
-              <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(245,158,11,0.12)", backgroundColor: "rgba(245,158,11,0.03)" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+
+              <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(245,158,11,0.2)", background: "linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(0,0,0,0) 60%)" }}>
+                {/* Header */}
+                <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
-                      style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.2)" }}>⚡</div>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                      style={{ background: "linear-gradient(135deg,rgba(245,158,11,0.2),rgba(251,146,60,0.1))", border: "1px solid rgba(245,158,11,0.28)" }}>⚡</div>
                     <div>
                       <p className="text-sm font-sans font-bold text-white">Flash Plans</p>
-                      <p className="text-[11px] font-sans text-white/35">Separate from TM10 Pro · power up Flash specifically</p>
+                      <p className="text-[11px] font-sans text-white/35">Independent of TM10 Pro · power up Flash specifically</p>
                     </div>
                   </div>
+                  <button onClick={() => { window.location.href = "/flash/upgrade"; }}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-bold transition-all duration-200 hover:scale-105"
+                    style={{ background: "linear-gradient(135deg,rgba(245,158,11,0.25),rgba(251,146,60,0.15))", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+                    View plans →
+                  </button>
                 </div>
+
+                {/* Two tier rows */}
                 {[
                   { label: "Flash Pro", limit: "25 / day", price: "$3.50/mo", color: "#f59e0b", rgb: "245,158,11", features: ["Science, History & Code Flash", "Flash history saved", "No hourly caps"] },
-                  { label: "Flash Executive", limit: "190 / 12h", price: "$12/mo", color: "#818cf8", rgb: "129,140,248", features: ["Everything in Flash Pro", "Extreme volume access", "Power-user tier"] },
+                  { label: "Flash Executive", limit: "190 / 12h", price: "$12/mo", color: "#818cf8", rgb: "129,140,248", features: ["Everything in Flash Pro", "Extreme volume", "Power-user tier"] },
                 ].map((tier, i) => (
                   <div key={tier.label} className={i > 0 ? "border-t" : ""} style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <div className="px-5 py-4 flex items-center gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.label}</span>
+                          <span className="font-sans font-bold text-sm" style={{ color: tier.color }}>{tier.label}</span>
                           <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
-                            style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
+                            style={{ backgroundColor: `rgba(${tier.rgb},0.14)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.24)` }}>
                             {tier.limit}
                           </span>
+                          <span className="font-sans font-bold text-sm" style={{ color: tier.color }}>{tier.price}</span>
                         </div>
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5">
                           {tier.features.map(f => (
-                            <span key={f} className="text-[11px] font-sans text-white/35">· {f}</span>
+                            <span key={f} className="text-[11px] font-sans text-white/40">· {f}</span>
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.price}</span>
-                        <button onClick={() => { window.location.href = "/flash/upgrade"; }}
-                          className="px-3.5 py-1.5 rounded-lg text-[11px] font-sans font-bold transition-all duration-200 hover:scale-105"
-                          style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
-                          Get →
-                        </button>
-                      </div>
+                      <button onClick={() => { window.location.href = "/flash/upgrade"; }}
+                        className="px-4 py-2 rounded-xl text-xs font-sans font-bold transition-all duration-200 hover:scale-105 shrink-0"
+                        style={{ backgroundColor: `rgba(${tier.rgb},0.14)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.24)` }}>
+                        Get →
+                      </button>
                     </div>
                   </div>
                 ))}
-                <div className="px-5 py-3 flex items-center gap-2"
-                  style={{ backgroundColor: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                  <span className="text-[11px] font-sans text-white/25">Independent of TM10 Pro · cancel anytime · 7-day refund</span>
+
+                {/* Footer */}
+                <div className="px-5 py-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                  <span className="text-[11px] font-sans text-white/25">cancel anytime · 7-day refund · separate billing</span>
                 </div>
               </div>
             </motion.div>
@@ -1076,6 +1084,98 @@ export default function ProPage() {
             </div>
           </section>
 
+          {/* ── FLASH PLANS ── */}
+          <section className="py-16 px-4">
+            <div className="max-w-4xl mx-auto">
+              <motion.div className="text-center mb-10"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                <p className="font-mono text-[10px] tracking-[0.3em] text-amber-400/60 uppercase mb-3">Add-on · Independent of TM10 Pro</p>
+                <h2 className="font-display text-3xl sm:text-4xl text-white mb-3">Power up Flash</h2>
+                <p className="text-white/35 font-sans text-base max-w-md mx-auto">Unlock more Flash modes, higher limits, and saved history — separate from your TM10 Pro plan.</p>
+              </motion.div>
+
+              <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                {[
+                  {
+                    label: "Flash Pro",
+                    price: "$3.50",
+                    limit: "25 / day",
+                    color: "#f59e0b",
+                    rgb: "245,158,11",
+                    gradient: "linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(251,146,60,0.08) 100%)",
+                    border: "rgba(245,158,11,0.3)",
+                    features: ["25 flashes per calendar day", "Science, History & Code modes", "Flash history saved (20 entries)", "No hourly caps"],
+                    cta: "Get Flash Pro",
+                  },
+                  {
+                    label: "Flash Executive",
+                    price: "$12",
+                    limit: "190 / 12h",
+                    color: "#818cf8",
+                    rgb: "129,140,248",
+                    gradient: "linear-gradient(135deg, rgba(129,140,248,0.15) 0%, rgba(167,139,250,0.06) 100%)",
+                    border: "rgba(129,140,248,0.28)",
+                    features: ["190 flashes per 12 hours", "Everything in Flash Pro", "Extreme volume access", "Power-user tier"],
+                    cta: "Get Executive",
+                  },
+                ].map((plan, i) => (
+                  <motion.div key={plan.label}
+                    initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
+                    className="relative rounded-2xl overflow-hidden p-6 flex flex-col gap-5"
+                    style={{ background: plan.gradient, border: `1px solid ${plan.border}` }}>
+                    {/* Shimmer */}
+                    <motion.div className="absolute inset-0 pointer-events-none"
+                      style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.05) 50%, transparent 65%)" }}
+                      animate={{ x: ["-100%", "200%"] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 3 + i }} />
+
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-sans font-bold" style={{ color: plan.color }}>{plan.label}</span>
+                        <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `rgba(${plan.rgb},0.15)`, color: plan.color, border: `1px solid rgba(${plan.rgb},0.25)` }}>
+                          {plan.limit}
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-1">
+                        <span className="font-display text-4xl text-white">{plan.price}</span>
+                        <span className="text-white/35 font-sans text-sm mb-1">/mo</span>
+                      </div>
+                    </div>
+
+                    <ul className="relative space-y-2 flex-1">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-center gap-2.5 text-sm font-sans text-white/65">
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: `rgba(${plan.rgb},0.15)`, border: `1px solid rgba(${plan.rgb},0.28)` }}>
+                            <svg width="7" height="7" viewBox="0 0 7 7" fill="none">
+                              <path d="M1 3.5l1.8 1.8L6 1.5" stroke={plan.color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <motion.button
+                      className="relative w-full py-3 rounded-xl font-sans font-semibold text-sm overflow-hidden"
+                      style={{ background: `linear-gradient(135deg, rgba(${plan.rgb},0.9), rgba(${plan.rgb},0.7))`, color: "#fff" }}
+                      onClick={() => router.push("/flash/upgrade")}
+                      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                      {plan.cta} →
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+                className="text-center text-[11px] font-sans text-white/20 mt-5">
+                Independent of TM10 Pro · cancel anytime · 7-day refund
+              </motion.p>
+            </div>
+          </section>
+
           {/* ── FEATURE COMPARISON ── */}
           <section className="py-16 px-4">
             <div className="max-w-3xl mx-auto">
@@ -1181,71 +1281,6 @@ export default function ProPage() {
           </section>
 
           <div className="h-24" />
-
-          {/* ── Flash Plans section ── */}
-          <section className="max-w-2xl mx-auto px-4 pb-20">
-            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-px flex-1 bg-white/[0.05]" />
-                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.18em] text-white/25">Also available</span>
-                <div className="h-px flex-1 bg-white/[0.05]" />
-              </div>
-
-              <div className="rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(245,158,11,0.12)", backgroundColor: "rgba(245,158,11,0.03)" }}>
-                {/* Header */}
-                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
-                      style={{ backgroundColor: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.2)" }}>⚡</div>
-                    <div>
-                      <p className="text-sm font-sans font-bold text-white">Flash Plans</p>
-                      <p className="text-[11px] font-sans text-white/35">Separate from TM10 Pro — power up Flash specifically</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Two tier rows */}
-                {[
-                  { label: "Flash Pro", limit: "25 / day", price: "$3.50/mo", color: "#f59e0b", rgb: "245,158,11", features: ["Science, History & Code Flash", "Flash history saved", "No hourly caps"] },
-                  { label: "Flash Executive", limit: "190 / 12h", price: "$12/mo", color: "#818cf8", rgb: "129,140,248", features: ["Everything in Pro", "Extreme volume access", "Power-user tier"] },
-                ].map((tier, i) => (
-                  <div key={tier.label} className={i > 0 ? "border-t" : ""} style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                    <div className="px-5 py-4 flex items-center gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.label}</span>
-                          <span className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full"
-                            style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
-                            {tier.limit}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                          {tier.features.map(f => (
-                            <span key={f} className="text-[11px] font-sans text-white/35">· {f}</span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-sm font-sans font-bold" style={{ color: tier.color }}>{tier.price}</span>
-                        <button onClick={() => window.location.href = "/flash/upgrade"}
-                          className="px-3.5 py-1.5 rounded-lg text-[11px] font-sans font-bold transition-all duration-200 hover:scale-105"
-                          style={{ backgroundColor: `rgba(${tier.rgb},0.12)`, color: tier.color, border: `1px solid rgba(${tier.rgb},0.2)` }}>
-                          Get →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Footer */}
-                <div className="px-5 py-3 flex items-center gap-2"
-                  style={{ backgroundColor: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                  <span className="text-[11px] font-sans text-white/25">Independent of TM10 Pro · cancel anytime · 7-day refund</span>
-                </div>
-              </div>
-            </motion.div>
-          </section>
           </>
         )}
       </AnimatePresence>
