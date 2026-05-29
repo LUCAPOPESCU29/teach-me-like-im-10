@@ -25,7 +25,9 @@ const NAV_ITEMS = [
   )},
   { href: "/speedrun", label: "Speed Run", color: "#fbbf24", icon: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      <path d="M5.636 18.364A9 9 0 1 1 18.364 18.364"/>
+      <path d="M12 12 8.5 8"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
     </svg>
   )},
   { href: "/explore", label: "Explore", color: "#c084fc", icon: (
